@@ -1,5 +1,5 @@
 import 'package:asr_project/models/diary.dart';
-import 'package:asr_project/widgets/diary_list_view_horizontal.dart';
+import 'package:asr_project/widgets/diary_list/diary_list_view_horizontal.dart';
 import 'package:flutter/material.dart';
 
 class DashboardScreen extends StatefulWidget {

@@ -2,59 +2,17 @@ import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/screens/diary_detail_screen.dart';
 import 'package:flutter/material.dart';
 
-class DiaryListViewHorizontal extends StatelessWidget {
-  final String title;
-  final String? subtitle;
-  final List diaryList;
-
-  const DiaryListViewHorizontal({
-    super.key,
-    required this.title,
-    required this.diaryList,
-    this.subtitle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          spacing: 10,
-          children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            if (subtitle != null)
-              Text(
-                subtitle!,
-                style: Theme.of(context).textTheme.labelLarge,
-              ),
-          ],
-        ),
-        SizedBox(
-          height: 200,
-          child: Scrollbar(
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: diaryList.length,
-              itemBuilder: (context, index) {
-                Diary diary = diaryList[index];
-                return DiaryCard(diary: diary);
-              },
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class DiaryCard extends StatelessWidget {
   final Diary diary;
+  final double width;
+  final double height;
 
-  const DiaryCard({super.key, required this.diary});
+  const DiaryCard({
+    super.key,
+    required this.diary,
+    required this.width,
+    required this.height,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +26,8 @@ class DiaryCard extends StatelessWidget {
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         child: Container(
-          width: 300,
+          height: height,
+          width: width,
           padding: EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -83,8 +42,8 @@ class DiaryCard extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   Wrap(
-                    spacing: 8, // Space between tags
-                    runSpacing: 4, // Space between rows of tags (if wrapping)
+                    spacing: 8,
+                    runSpacing: 4,
                     children: diary.tags.map((tag) {
                       return Container(
                         padding:
