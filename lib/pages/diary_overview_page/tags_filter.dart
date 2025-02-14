@@ -2,21 +2,59 @@ import 'package:asr_project/providers/search_and_filter_query_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class TagFillterModalWidget extends StatefulWidget {
+class TagsFilter extends ConsumerStatefulWidget {
+  const TagsFilter({super.key});
+
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _TagsFilterState();
+}
+
+class _TagsFilterState extends ConsumerState<TagsFilter> {
+  final Set<String> items = {"text", "asr", "flutter", "dart"};
+  //TODO
+  void _showMultiSelectOptions() {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return TagFillterModal(
+              items: items, activeItems: ref.read(selectedTagsProvider));
+        });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      onPressed: () => _showMultiSelectOptions(),
+      child: Wrap(
+        spacing: 5,
+        children: [
+          Icon(Icons.tag_outlined),
+          Text(
+            "Tags: ${ref.read(selectedTagsProvider).join(', ')}",
+          ),
+          Icon(Icons.keyboard_arrow_down_outlined)
+        ],
+      ),
+    );
+  }
+}
+
+class TagFillterModal extends StatefulWidget {
   final Set<String> items;
   final Set<String> activeItems;
 
-  const TagFillterModalWidget({
+  const TagFillterModal({
     super.key,
     required this.items,
     required this.activeItems,
   });
 
   @override
-  State<TagFillterModalWidget> createState() => _TagFillterModalWidgetState();
+  State<TagFillterModal> createState() => _TagFillterModalState();
 }
 
-class _TagFillterModalWidgetState extends State<TagFillterModalWidget> {
+class _TagFillterModalState extends State<TagFillterModal> {
   late Set<String> _activeItems;
 
   @override

@@ -15,7 +15,9 @@ class _DiaryToolbarState extends State<DiaryToolbar> {
   void _showAsrDialog() {
     showDialog(
       context: context,
-      builder: (context) => AsrChooseDialog(controller: widget.controller,),
+      builder: (context) => ASRDialog(
+        controller: widget.controller,
+      ),
     );
   }
 

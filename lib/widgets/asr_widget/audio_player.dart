@@ -3,18 +3,18 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart' as audioplayers;
 import 'package:flutter/material.dart';
 
-class AudioPlayerWidget extends StatefulWidget {
+class AudioPlayer extends StatefulWidget {
   final String audioUrl;
-  const AudioPlayerWidget({
+  const AudioPlayer({
     super.key,
     required this.audioUrl,
   });
 
   @override
-  State<AudioPlayerWidget> createState() => _AudioPlayerWidgetState();
+  State<AudioPlayer> createState() => _AudioPlayerState();
 }
 
-class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
+class _AudioPlayerState extends State<AudioPlayer> {
   late audioplayers.AudioPlayer _audioPlayer;
   late StreamSubscription _playerStateSubscription;
   late StreamSubscription _durationSubscription;

@@ -1,8 +1,7 @@
 import 'package:asr_project/models/diary.dart';
-import 'package:asr_project/screens/diary_detail_screen.dart';
 import 'package:flutter/material.dart';
 
-class DiaryCard extends StatelessWidget {
+class DiaryCard extends StatefulWidget {
   final Diary diary;
   final double width;
   final double height;
@@ -15,19 +14,20 @@ class DiaryCard extends StatelessWidget {
   });
 
   @override
+  State<DiaryCard> createState() => _DiaryCardState();
+}
+
+class _DiaryCardState extends State<DiaryCard> {
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => DiaryDetailScreen(diary: diary),
-        ),
-      ),
+      onTap: () => Navigator.pushNamed(context, "/diary/detail",
+          arguments: widget.diary),
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         child: Container(
-          height: height,
-          width: width,
+          height: widget.height,
+          width: widget.width,
           padding: EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -38,13 +38,13 @@ class DiaryCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    diary.title,
+                    widget.diary.title,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   Wrap(
                     spacing: 8,
                     runSpacing: 4,
-                    children: diary.tags.map((tag) {
+                    children: widget.diary.tags.map((tag) {
                       return Container(
                         padding:
                             EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -62,7 +62,7 @@ class DiaryCard extends StatelessWidget {
                 ],
               ),
               Text(
-                diary.getFormatDate(),
+                widget.diary.getFormatDate(),
                 style: Theme.of(context).textTheme.bodySmall,
               )
             ],

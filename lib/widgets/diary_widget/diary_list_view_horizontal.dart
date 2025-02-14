@@ -1,5 +1,5 @@
 import 'package:asr_project/models/diary.dart';
-import 'package:asr_project/widgets/diary_list/diary_card.dart';
+import 'package:asr_project/widgets/diary_widget/diary_card.dart';
 import 'package:flutter/material.dart';
 
 class DiaryListViewHorizontal extends StatelessWidget {
@@ -35,19 +35,17 @@ class DiaryListViewHorizontal extends StatelessWidget {
         ),
         SizedBox(
           height: 200,
-          child: Scrollbar(
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: diaryList.length,
-              itemBuilder: (context, index) {
-                Diary diary = diaryList[index];
-                return DiaryCard(
-                  diary: diary,
-                  width: 300,
-                  height: 150,
-                );
-              },
-            ),
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: diaryList.length,
+            itemBuilder: (context, index) {
+              Diary diary = diaryList[index];
+              return DiaryCard(
+                diary: diary,
+                width: 300,
+                height: 150,
+              );
+            },
           ),
         ),
       ],

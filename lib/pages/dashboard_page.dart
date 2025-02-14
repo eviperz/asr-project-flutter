@@ -1,37 +1,20 @@
 import 'package:asr_project/models/diary.dart';
-import 'package:asr_project/widgets/diary_list/diary_list_view_horizontal.dart';
+import 'package:asr_project/providers/diary_list_provider.dart';
+import 'package:asr_project/widgets/diary_widget/diary_list_view_horizontal.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
-  @override
-  State<DashboardScreen> createState() => _DashboardState();
-}
+class DashboardPage extends ConsumerWidget {
+  const DashboardPage({
+    super.key,
+  });
 
-class _DashboardState extends State<DashboardScreen> {
-  List<Diary> diaryList = [
-    Diary(
-      title: "Diary 1",
-      content: "Content of Diary 1",
-      tags: ["text", "asr"],
-      dateTime: DateTime.now(),
-    ),
-    Diary(
-      title: "Diary 2",
-      content: "Content of Diary 2",
-      tags: [],
-      dateTime: DateTime.now(),
-    ),
-    Diary(
-      title: "Diary 3",
-      content: "Content of Diary 3",
-      tags: [],
-      dateTime: DateTime.now(),
-    ),
-  ];
+  // bool isLoading = true;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    List<Diary> diaryList = ref.watch(diaryListProvider);
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(

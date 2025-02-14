@@ -2,10 +2,10 @@ import 'package:asr_project/editor/embeds/audio_block_embed.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 
-class AsrChooseDialog extends StatelessWidget {
+class ASRDialog extends StatelessWidget {
   final quill.QuillController controller;
 
-  const AsrChooseDialog({super.key, required this.controller});
+  const ASRDialog({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {

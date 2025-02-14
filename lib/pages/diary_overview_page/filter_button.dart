@@ -2,8 +2,8 @@ import 'package:asr_project/providers/search_and_filter_query_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class FilterWidget extends ConsumerWidget {
-  const FilterWidget({super.key});
+class FilterButton extends ConsumerWidget {
+  const FilterButton({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
