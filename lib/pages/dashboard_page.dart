@@ -31,14 +31,14 @@ class DashboardPage extends ConsumerWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Container(
-            padding: EdgeInsets.all(20.0),
+            padding: EdgeInsets.all(10.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(
                   height: 180,
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
+                    padding: const EdgeInsets.fromLTRB(10, 25, 10, 10),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,

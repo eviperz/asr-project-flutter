@@ -38,7 +38,12 @@ class _DiaryDetail extends ConsumerState<DiaryDetailScreen> {
   @override
   Widget build(BuildContext context) {
     ref.watch(diaryListProvider);
-    _diary = ref.read(diaryListProvider.notifier).get(widget.id);
+    try {
+      _diary = ref.read(diaryListProvider.notifier).get(widget.id);
+    } on StateError catch (_) {
+      return Container();
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(_diary.title),
@@ -60,9 +65,11 @@ class _DiaryDetail extends ConsumerState<DiaryDetailScreen> {
                     content: "Are you confirm for delete?",
                     onConfirm: () async {
                       try {
-                        // await diaryDatabase.removeDiary(_diary);
-
                         if (!context.mounted) return;
+
+                        ref
+                            .read(diaryListProvider.notifier)
+                            .removeDiary(_diary.id);
 
                         Navigator.of(context)
                           ..pop()

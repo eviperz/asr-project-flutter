@@ -19,34 +19,55 @@ class DiaryListViewHorizontal extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          spacing: 10,
-          children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            if (subtitle != null)
+        Padding(
+          padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
+          child: Row(
+            spacing: 10,
+            children: [
               Text(
-                subtitle!,
-                style: Theme.of(context).textTheme.labelLarge,
+                title,
+                style: Theme.of(context).textTheme.headlineMedium,
               ),
-          ],
+              if (subtitle != null)
+                Text(
+                  subtitle!,
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+            ],
+          ),
         ),
         SizedBox(
           height: 200,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: diaryList.length,
-            itemBuilder: (context, index) {
-              Diary diary = diaryList[index];
-              return DiaryCard(
-                diary: diary,
-                width: 300,
-                height: 150,
-              );
-            },
-          ),
+          child: diaryList.isEmpty
+              ? Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.white12,
+                        width: 2.0,
+                      ),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: Center(
+                      child: Text(
+                        "No Diaries",
+                      ),
+                    ),
+                  ),
+                )
+              : ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: diaryList.length,
+                  itemBuilder: (context, index) {
+                    Diary diary = diaryList[index];
+                    return DiaryCard(
+                      diary: diary,
+                      width: 300,
+                      height: 150,
+                    );
+                  },
+                ),
         ),
       ],
     );
