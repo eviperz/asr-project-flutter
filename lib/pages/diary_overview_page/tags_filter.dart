@@ -1,24 +1,31 @@
-import 'package:asr_project/providers/search_and_filter_query_provider.dart';
+import 'package:asr_project/providers/diary_list_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TagsFilter extends ConsumerStatefulWidget {
-  const TagsFilter({super.key});
+  final Function(Set<String>) onSelectTags;
+  final Set<String> selectedTags;
+
+  const TagsFilter({
+    super.key,
+    required this.onSelectTags,
+    required this.selectedTags,
+  });
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() =>
-      _TagsFilterState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _TagsFilterState();
 }
 
 class _TagsFilterState extends ConsumerState<TagsFilter> {
-  final Set<String> items = {"text", "asr", "flutter", "dart"};
-  //TODO
   void _showMultiSelectOptions() {
     showModalBottomSheet(
         context: context,
         builder: (BuildContext context) {
           return TagFillterModal(
-              items: items, activeItems: ref.read(selectedTagsProvider));
+            items: ref.read(diaryListProvider.notifier).tags,
+            activeItems: widget.selectedTags,
+            onSelectTag: widget.onSelectTags,
+          );
         });
   }
 
@@ -31,7 +38,7 @@ class _TagsFilterState extends ConsumerState<TagsFilter> {
         children: [
           Icon(Icons.tag_outlined),
           Text(
-            "Tags: ${ref.read(selectedTagsProvider).join(', ')}",
+            "Tags: ${widget.selectedTags.join(', ')}",
           ),
           Icon(Icons.keyboard_arrow_down_outlined)
         ],
@@ -43,11 +50,13 @@ class _TagsFilterState extends ConsumerState<TagsFilter> {
 class TagFillterModal extends StatefulWidget {
   final Set<String> items;
   final Set<String> activeItems;
+  final Function(Set<String>) onSelectTag;
 
   const TagFillterModal({
     super.key,
     required this.items,
     required this.activeItems,
+    required this.onSelectTag,
   });
 
   @override
@@ -55,18 +64,9 @@ class TagFillterModal extends StatefulWidget {
 }
 
 class _TagFillterModalState extends State<TagFillterModal> {
-  late Set<String> _activeItems;
-
-  @override
-  void initState() {
-    _activeItems = Set.from(widget.activeItems);
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer(builder: (context, ref, child) {
-      final notifier = ref.read(selectedTagsProvider.notifier);
       return Container(
         padding: EdgeInsets.all(16.0),
         height: 300,
@@ -77,7 +77,7 @@ class _TagFillterModalState extends State<TagFillterModal> {
                 width: 100,
                 child: TextButton(
                   onPressed: () {
-                    notifier.clear();
+                    widget.onSelectTag({});
                     Navigator.pop(context);
                   },
                   child: Text("Clear"),
@@ -87,7 +87,7 @@ class _TagFillterModalState extends State<TagFillterModal> {
               actions: [
                 TextButton(
                   onPressed: () {
-                    notifier.setTags(_activeItems);
+                    widget.onSelectTag(widget.activeItems);
                     Navigator.pop(context);
                   },
                   child: Text("Done"),
@@ -100,15 +100,15 @@ class _TagFillterModalState extends State<TagFillterModal> {
                 children: widget.items.map((tag) {
                   return CheckboxListTile.adaptive(
                     title: Text(tag),
-                    value: _activeItems.contains(tag),
+                    value: widget.activeItems.contains(tag),
                     onChanged: (bool? value) {
                       if (value == true) {
                         setState(() {
-                          _activeItems.add(tag);
+                          widget.activeItems.add(tag);
                         });
                       } else {
                         setState(() {
-                          _activeItems.remove(tag);
+                          widget.activeItems.remove(tag);
                         });
                       }
                     },

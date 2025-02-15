@@ -1,4 +1,5 @@
 import 'package:asr_project/models/diary.dart';
+import 'package:asr_project/providers/diary_favorite_provider.dart';
 import 'package:asr_project/providers/diary_list_provider.dart';
 import 'package:asr_project/widgets/diary_widget/diary_list_view_horizontal.dart';
 import 'package:flutter/material.dart';
@@ -9,11 +10,22 @@ class DashboardPage extends ConsumerWidget {
     super.key,
   });
 
-  // bool isLoading = true;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     List<Diary> diaryList = ref.watch(diaryListProvider);
+    Set<String> favoriteIds = ref.watch(diaryFavoriteProvider);
+
+    // Recently Diaries
+    final now = DateTime.now();
+    final sevenDaysAgo = now.subtract(Duration(days: 7));
+
+    final recentDiaries = diaryList.where((e) {
+      return e.dateTime.isAfter(sevenDaysAgo) && e.dateTime.isBefore(now);
+    }).toList();
+
+    // Favorite Diaries
+    final favoriteDiaries =
+        diaryList.where((e) => favoriteIds.contains(e.id)).toList();
 
     return Scaffold(
       body: SafeArea(
@@ -51,11 +63,11 @@ class DashboardPage extends ConsumerWidget {
                     DiaryListViewHorizontal(
                       title: "Recently",
                       subtitle: "Before 7 days ~ now",
-                      diaryList: diaryList,
+                      diaryList: recentDiaries,
                     ),
                     DiaryListViewHorizontal(
                       title: "Favorite",
-                      diaryList: diaryList,
+                      diaryList: favoriteDiaries,
                     ),
                   ],
                 ),

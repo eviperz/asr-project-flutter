@@ -22,7 +22,7 @@ class _DiaryCardState extends State<DiaryCard> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => Navigator.pushNamed(context, "/diary/detail",
-          arguments: widget.diary),
+          arguments: widget.diary.id),
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         child: Container(
@@ -62,7 +62,7 @@ class _DiaryCardState extends State<DiaryCard> {
                 ],
               ),
               Text(
-                widget.diary.getFormatDate(),
+                widget.diary.formatDate,
                 style: Theme.of(context).textTheme.bodySmall,
               )
             ],

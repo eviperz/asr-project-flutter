@@ -30,7 +30,7 @@ class _DiaryTagListState extends State<DiaryTagList> {
   @override
   Widget build(BuildContext context) {
     return Wrap(
-      alignment: WrapAlignment.center,
+      alignment: WrapAlignment.start,
       crossAxisAlignment: WrapCrossAlignment.center,
       spacing: 8.0,
       runSpacing: 8.0,

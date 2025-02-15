@@ -1,36 +1,62 @@
 import 'package:asr_project/models/diary.dart';
+import 'package:asr_project/providers/diary_favorite_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final diaryListProvider = StateNotifierProvider<DiaryListNotifier, List<Diary>>(
-  (ref) => DiaryListNotifier(),
+  (ref) => DiaryListNotifier(ref),
 );
 
 class DiaryListNotifier extends StateNotifier<List<Diary>> {
-  DiaryListNotifier() : super(List.unmodifiable([]));
+  Ref ref;
 
-  void addDiaries(Iterable<Diary> diaryList) {
-    state = [...state, ...diaryList];
+  DiaryListNotifier(this.ref) : super([]) {
+    _fetchDiaries();
   }
 
-  void addDiary(Diary diary) {
-    state = [...state, diary];
+  Future<void> _fetchDiaries() async {
+    // TODO store and fetch from DB
+    // final fetchedDiaries = await fetch()
+    // state = List.unmodifiable(fetchedDiaries);
   }
 
-  void removeDiary(int index) {
-    state = List.from(state)..removeAt(index);
+  Future<void> addDiaries(Iterable<Diary> diaryList) async {
+    if (diaryList.isEmpty) return;
+    state = List.unmodifiable([...state, ...diaryList]);
   }
 
-  void removeDiaries(Iterable<String> ids) {
-    state = [...state.where((i) => !ids.contains(i.id))];
+  Future<void> addDiary(Diary diary) async {
+    state = List.unmodifiable([...state, diary]);
   }
 
-  void updateDiary(DiaryDetail detail) {
-    Diary diary;
-    try {
-      diary = state.firstWhere((i) => i.id == detail.id);
-    } on StateError catch (_) {
-      diary = Diary.fromDetail(detail);
+  Future<void> removeDiary(String id) async {
+    state = List.unmodifiable(state.where((i) => i.id != id));
+    ref.read(diaryFavoriteProvider.notifier).removeFavorite(id);
+  }
+
+  Future<void> removeDiaries(Iterable<String> ids) async {
+    state = List.unmodifiable(state.where((i) => !ids.contains(i.id)));
+    ref.read(diaryFavoriteProvider.notifier).removeFavorites(ids);
+  }
+
+  Future<void> updateDiary(DiaryDetail detail) async {
+    if (!isExist(detail.id)) {
+      addDiary(Diary.fromDetail(detail));
+      return;
     }
-    state = [...state.where((i) => i.id != detail.id), diary.copyWith(detail)];
+    state = List.unmodifiable(state.map((diary) {
+      return diary.id == detail.id ? diary.copyWith(detail) : diary;
+    }).toList());
+  }
+
+  Diary get(String id) {
+    return state.firstWhere((e) => e.id == id);
+  }
+
+  bool isExist(String id) {
+    return state.any((e) => e.id == id);
+  }
+
+  Set<String> get tags {
+    return Set.from(state.expand((e) => e.tags));
   }
 }

@@ -1,36 +1,28 @@
-import 'package:asr_project/providers/search_and_filter_query_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SortFilterWidget extends StatefulWidget {
+class SortFilterWidget extends StatelessWidget {
+  final Function(bool) onSort;
+  final bool isAscending;
+
   const SortFilterWidget({
     super.key,
+    required this.onSort,
+    required this.isAscending,
   });
 
   @override
-  State<SortFilterWidget> createState() => _SortFilterWidgetState();
-}
-
-class _SortFilterWidgetState extends State<SortFilterWidget> {
-  @override
   Widget build(BuildContext context) {
-    return Consumer(
-      builder: (context, ref, _) {
-        final isDescending = ref.watch(sortByDateTimeFilterQueryProvider);
-
-        return OutlinedButton(
-          onPressed: () {
-            ref.read(sortByDateTimeFilterQueryProvider.notifier).toggleSort();
-          },
-          child: Wrap(
-            spacing: 5,
-            children: [
-              Icon(isDescending ? Icons.arrow_downward : Icons.arrow_upward),
-              Text("Sort by: Date time"),
-            ],
-          ),
-        );
+    return OutlinedButton(
+      onPressed: () {
+        onSort(!isAscending);
       },
+      child: Wrap(
+        spacing: 5,
+        children: [
+          Icon(isAscending ? Icons.arrow_upward : Icons.arrow_downward),
+          Text("Sort by: Date time"),
+        ],
+      ),
     );
   }
 }

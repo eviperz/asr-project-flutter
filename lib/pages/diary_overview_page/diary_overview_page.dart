@@ -1,114 +1,137 @@
-// import 'package:asr_project/providers/search_and_filter_query_provider.dart';
-// import 'package:asr_project/models/diary.dart';
-// import 'package:asr_project/services/diary_database.dart';
-// import 'package:asr_project/widgets/diary_widget/diary_card.dart';
-// import 'package:asr_project/widgets/filter_widget/filter_menu_widget.dart';
-// import 'package:asr_project/widgets/filter_widget/filter_widget.dart';
-// import 'package:flutter/material.dart';
-// import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:asr_project/pages/diary_overview_page/filter_button.dart';
+import 'package:asr_project/pages/diary_overview_page/filter_menu.dart';
+import 'package:asr_project/providers/diary_list_provider.dart';
+import 'package:asr_project/widgets/diary_widget/diary_card.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// class DiaryOverviewScreen extends ConsumerWidget {
-//   const DiaryOverviewScreen({super.key});
+class DiaryOverviewPage extends ConsumerStatefulWidget {
+  const DiaryOverviewPage({super.key});
 
-//   Future<List<Diary>> _fetchDiaries() async {
-//     final DiaryDatabase diaryDatabase = DiaryDatabase();
-//     return await diaryDatabase.getDiaries(); // Fetch diaries asynchronously
-//   }
+  @override
+  ConsumerState<DiaryOverviewPage> createState() => _DiaryOverviewPageState();
+}
 
-//   @override
-//   Widget build(BuildContext context, WidgetRef ref) {
-//     final searchQuery = ref.watch(searchQueryProvider);
-//     final filterQuery = ref.watch(filterQueryProvider);
-//     final selectedTags = ref.watch(selectedTagsProvider);
-//     final isSortByDateDescending = ref.watch(sortByDateTimeFilterQueryProvider);
+class _DiaryOverviewPageState extends ConsumerState<DiaryOverviewPage> {
+  String _searchQuery = '';
+  bool _isFiltering = false;
+  Set<String> _selectedTags = {};
+  bool _isAscending = true;
 
-//     return Scaffold(
-//       body: SafeArea(
-//         child: Padding(
-//           padding: const EdgeInsets.all(20.0),
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             spacing: 10,
-//             children: [
-//               Row(
-//                 spacing: 10,
-//                 children: [
-//                   Expanded(
-//                     child: TextField(
-//                       onChanged: (value) =>
-//                           ref.read(searchQueryProvider.notifier).state = value,
-//                       decoration: const InputDecoration(
-//                         hintText: "Search by title",
-//                         hintStyle: TextStyle(color: Colors.grey),
-//                         prefixIcon: Icon(Icons.search, color: Colors.grey),
-//                       ),
-//                     ),
-//                   ),
-//                   FilterWidget(),
-//                 ],
-//               ),
-//               if (filterQuery == true) FilterMenuWidget(),
-//               FutureBuilder<List<Diary>>(
-//                 future: _fetchDiaries(), // Fetch diaries asynchronously
-//                 builder: (context, snapshot) {
-//                   if (snapshot.connectionState == ConnectionState.waiting) {
-//                     return const Center(child: CircularProgressIndicator());
-//                   } else if (snapshot.hasError) {
-//                     return Center(child: Text('Error: ${snapshot.error}'));
-//                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-//                     return Expanded(
-//                       child: const Center(
-//                         child: Text(
-//                           "No results found",
-//                           style: TextStyle(fontSize: 16, color: Colors.grey),
-//                         ),
-//                       ),
-//                     );
-//                   } else {
-//                     final List<Diary> diaries = snapshot.data!;
+  void _onFilter(bool value) {
+    setState(() {
+      _isFiltering = value;
+    });
+  }
 
-//                     // Apply search and filter logic here
-//                     final filteredDiaries = diaries.where((diary) {
-//                       bool matchesSearch = searchQuery.isEmpty ||
-//                           diary.title
-//                               .toLowerCase()
-//                               .contains(searchQuery.toLowerCase().trim());
+  void _onSelectTags(Set<String> value) {
+    setState(() {
+      _selectedTags = value;
+    });
+  }
 
-//                       bool matchesTags = selectedTags.isEmpty ||
-//                           diary.tags.any((tag) => selectedTags.contains(tag));
+  void _onSort(bool value) {
+    setState(() {
+      _isAscending = value;
+    });
+  }
 
-//                       return matchesSearch && matchesTags;
-//                     }).toList();
+  @override
+  Widget build(BuildContext context) {
+    final diaries = ref.watch(diaryListProvider);
 
-//                     // Sort the filtered diaries
-//                     filteredDiaries.sort((a, b) {
-//                       return isSortByDateDescending
-//                           ? b.dateTime.compareTo(a.dateTime)
-//                           : a.dateTime.compareTo(b.dateTime);
-//                     });
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 10,
+            children: [
+              Row(
+                spacing: 10,
+                children: [
+                  Expanded(
+                    child: TextField(
+                      onChanged: (value) {
+                        setState(() {
+                          _searchQuery = value;
+                        });
+                      },
+                      decoration: const InputDecoration(
+                        hintText: "Search by title",
+                        hintStyle: TextStyle(color: Colors.grey),
+                        prefixIcon: Icon(Icons.search, color: Colors.grey),
+                      ),
+                    ),
+                  ),
+                  FilterButton(
+                    onFilter: _onFilter,
+                    isFiltering: _isFiltering,
+                  ),
+                ],
+              ),
+              if (_isFiltering == true)
+                FilterMenu(
+                  onSort: _onSort,
+                  isAscending: _isAscending,
+                  onSelectTags: _onSelectTags,
+                  selectedTags: _selectedTags,
+                ),
+              Builder(
+                builder: (context) {
+                  if (diaries.isEmpty) {
+                    return Expanded(
+                      child: const Center(
+                        child: Text(
+                          "No results found",
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                      ),
+                    );
+                  } else {
+                    // Apply search and filter logic here
+                    final filteredDiaries = diaries.where((diary) {
+                      bool matchesSearch = _searchQuery.isEmpty ||
+                          diary.title
+                              .toLowerCase()
+                              .contains(_searchQuery.toLowerCase().trim());
 
-//                     return Expanded(
-//                       child: ListView.builder(
-//                         itemCount: filteredDiaries.length,
-//                         itemBuilder: (context, index) {
-//                           return Padding(
-//                             padding: const EdgeInsets.symmetric(vertical: 1.0),
-//                             child: DiaryCard(
-//                               diary: filteredDiaries[index],
-//                               width: double.infinity,
-//                               height: 200,
-//                             ),
-//                           );
-//                         },
-//                       ),
-//                     );
-//                   }
-//                 },
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
+                      bool matchesTags = _selectedTags.isEmpty ||
+                          diary.tags.any((tag) => _selectedTags.contains(tag));
+
+                      return matchesSearch && matchesTags;
+                    }).toList();
+
+                    // Sort the filtered diaries
+                    filteredDiaries.sort((a, b) {
+                      return _isAscending
+                          ? a.dateTime.compareTo(b.dateTime)
+                          : b.dateTime.compareTo(a.dateTime);
+                    });
+
+                    return Expanded(
+                      child: ListView.builder(
+                        itemCount: filteredDiaries.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 1.0),
+                            child: DiaryCard(
+                              diary: filteredDiaries[index],
+                              width: double.infinity,
+                              height: 200,
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

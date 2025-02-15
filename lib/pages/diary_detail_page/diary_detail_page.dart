@@ -1,32 +1,34 @@
 import 'package:asr_project/models/diary.dart';
+import 'package:asr_project/providers/diary_favorite_provider.dart';
+import 'package:asr_project/providers/diary_list_provider.dart';
 import 'package:asr_project/widgets/custom_dialog.dart';
 import 'package:asr_project/pages/diary_detail_page/date_box.dart';
 import 'package:asr_project/pages/diary_detail_page/diary_content.dart';
 import 'package:asr_project/widgets/diary_widget/diary_tag_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-class DiaryDetailScreen extends StatefulWidget {
-  final Diary diary;
+class DiaryDetailScreen extends ConsumerStatefulWidget {
+  final String id;
 
-  const DiaryDetailScreen({super.key, required this.diary});
+  const DiaryDetailScreen({super.key, required this.id});
 
   @override
-  State<StatefulWidget> createState() => _DiaryDetail();
+  ConsumerState<ConsumerStatefulWidget> createState() => _DiaryDetail();
 }
 
-class _DiaryDetail extends State<DiaryDetailScreen> {
+class _DiaryDetail extends ConsumerState<DiaryDetailScreen> {
   // final DiaryDatabase diaryDatabase = DiaryDatabase();
-  late QuillController _controller;
+  late final QuillController _controller;
   late Diary _diary;
 
   @override
   void initState() {
-    _diary = widget.diary;
-
+    _diary = ref.read(diaryListProvider.notifier).get(widget.id);
     _controller = QuillController(
-      document: Document.fromDelta(widget.diary.content),
+      document: Document.fromDelta(_diary.content),
       selection: const TextSelection.collapsed(offset: 0),
     );
 
@@ -35,9 +37,11 @@ class _DiaryDetail extends State<DiaryDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(diaryListProvider);
+    _diary = ref.read(diaryListProvider.notifier).get(widget.id);
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.diary.title),
+        title: Text(_diary.title),
         actions: [
           PopupMenuButton<String>(
             position: PopupMenuPosition.under,
@@ -46,7 +50,7 @@ class _DiaryDetail extends State<DiaryDetailScreen> {
                 Navigator.pushNamed(
                   context,
                   "/diary/edit",
-                  arguments: widget.diary,
+                  arguments: _diary.id,
                 );
               } else if (value == 'delete') {
                 showDialog(
@@ -110,16 +114,28 @@ class _DiaryDetail extends State<DiaryDetailScreen> {
                     children: [
                       SizedBox(height: 30),
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
                             child: DiaryTagList(
                               tags: _diary.tags,
                             ),
                           ),
-                          IconButton(
-                            onPressed: () {},
-                            icon: Icon(Icons.favorite),
-                          ),
+                          Consumer(builder: (context, ref, child) {
+                            ref.watch(diaryFavoriteProvider);
+                            final favoriteProvider =
+                                ref.read(diaryFavoriteProvider.notifier);
+                            final bool isFavorite =
+                                favoriteProvider.isFavorite(_diary.id);
+                            return IconButton(
+                              onPressed: () {
+                                favoriteProvider.toggleFavorite(_diary.id);
+                              },
+                              icon: Icon(isFavorite
+                                  ? Icons.favorite
+                                  : Icons.favorite_outline),
+                            );
+                          }),
                         ],
                       ),
                     ],

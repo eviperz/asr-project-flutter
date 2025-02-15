@@ -1,9 +1,10 @@
 import 'package:asr_project/core/theme.dart';
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/pages/diary_form_page/diary_form_page.dart';
-import 'package:asr_project/providers/navbar_state_provider.dart';
+import 'package:asr_project/pages/diary_overview_page/diary_overview_page.dart';
 import 'package:asr_project/pages/diary_detail_page/diary_detail_page.dart';
 import 'package:asr_project/pages/record_voice_page.dart';
+import 'package:asr_project/providers/diary_list_provider.dart';
 import 'package:asr_project/widgets/custom_bottom_navbar.dart';
 import 'package:asr_project/pages/dashboard_page.dart';
 import 'package:flutter/material.dart';
@@ -13,11 +14,13 @@ void main() {
   runApp(ProviderScope(child: const MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final diaryProvider = ref.read(diaryListProvider.notifier);
+
     return MaterialApp(
       title: "ASR App",
       theme: darkTheme,
@@ -27,13 +30,13 @@ class MyApp extends StatelessWidget {
           case "/dashboard":
             return MaterialPageRoute(builder: (context) => DashboardPage());
 
-          // case "/diary_overview":
-          //   return MaterialPageRoute(
-          //     builder: (context) => DiaryOverviewScreen(),
-          //   );
+          case "/diary_overview":
+            return MaterialPageRoute(
+              builder: (context) => DiaryOverviewPage(),
+            );
 
           case "/diary/create":
-            Diary diary = Diary(title: '', tags: {});
+            Diary diary = Diary();
             return MaterialPageRoute(
               builder: (context) => DiaryFormPage(
                 diary: diary,
@@ -41,15 +44,16 @@ class MyApp extends StatelessWidget {
             );
 
           case "/diary/edit":
-            final diary = settings.arguments as Diary;
+            final id = settings.arguments as String;
+            Diary diary = diaryProvider.get(id);
             return MaterialPageRoute(
               builder: (context) => DiaryFormPage(diary: diary),
             );
 
           case "/diary/detail":
-            final diary = settings.arguments as Diary;
+            final id = settings.arguments as String;
             return MaterialPageRoute(
-              builder: (context) => DiaryDetailScreen(diary: diary),
+              builder: (context) => DiaryDetailScreen(id: id),
             );
 
           case "/record":
@@ -63,20 +67,35 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MainScreen extends ConsumerWidget {
+class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final currentIndex = ref.watch(currentIndexProvider);
 
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  int _currentIndex = 0;
+
+  void _onChange(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final List<Widget> pages = [
       DashboardPage(),
-      // DiaryOverviewScreen(),
+      DiaryOverviewPage(),
     ];
 
     return Scaffold(
-      body: pages[currentIndex],
-      bottomNavigationBar: CustomBottomNavBar(),
+      body: pages[_currentIndex],
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: _currentIndex,
+        onTap: _onChange,
+      ),
     );
   }
 }

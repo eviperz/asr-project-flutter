@@ -5,7 +5,7 @@ import 'package:uuid/uuid.dart';
 
 class Diary {
   final String id;
-  final String title;
+  final String _title;
   final Delta content;
   final Set<String> tags;
   final DateTime dateTime;
@@ -17,13 +17,15 @@ class Diary {
     Set<String>? tags,
     DateTime? dateTime,
   })  : id = id ?? Uuid().v4(),
-        title = title ?? '',
+        _title = title ?? '',
         content = content ?? Delta()
           ..insert('\n'),
         tags = tags ?? {},
         dateTime = dateTime ?? DateTime.now();
 
-  String getFormatDate() {
+  String get title => _title.isEmpty ? 'Untitled' : _title;
+
+  String get formatDate {
     return DateFormat("dd MMM yyyy").format(dateTime);
   }
 
