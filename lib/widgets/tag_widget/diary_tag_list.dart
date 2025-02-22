@@ -96,18 +96,6 @@ class _DiaryTagListState extends State<DiaryTagList> {
                   ),
                   controller: widget.textController,
                   onChanged: (value) {
-                    // final trimmedValue = value.trim();
-                    // final isDuplicate =
-                    //     widget.tags.any((tag) => tag.name == trimmedValue);
-                    // log("isDu: ${isDuplicate.toString()}");
-
-                    // setState(() {
-                    //   _isDuplicate = isDuplicate;
-                    // });
-
-                    // if (trimmedValue.isNotEmpty && !_isDuplicate) {
-                    //   widget.textController!.text = trimmedValue;
-                    // }
                     widget.reloadModal?.call();
                   },
                 ),
