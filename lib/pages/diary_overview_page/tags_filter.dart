@@ -66,59 +66,61 @@ class TagFillterModal extends StatefulWidget {
 class _TagFillterModalState extends State<TagFillterModal> {
   @override
   Widget build(BuildContext context) {
-    return Consumer(builder: (context, ref, child) {
-      return Container(
-        padding: EdgeInsets.all(16.0),
-        height: 300,
-        child: Column(
-          children: [
-            AppBar(
-              leading: SizedBox(
-                width: 100,
-                child: TextButton(
-                  onPressed: () {
-                    widget.onSelectTag({});
-                    Navigator.pop(context);
-                  },
-                  child: Text("Clear"),
-                ),
-              ),
-              title: Text("Tags"),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    widget.onSelectTag(widget.activeItems);
-                    Navigator.pop(context);
-                  },
-                  child: Text("Done"),
-                ),
-              ],
-              backgroundColor: Colors.transparent,
-            ),
-            Expanded(
-              child: ListView(
-                children: widget.items.map((tag) {
-                  return CheckboxListTile.adaptive(
-                    title: Text(tag),
-                    value: widget.activeItems.contains(tag),
-                    onChanged: (bool? value) {
-                      if (value == true) {
-                        setState(() {
-                          widget.activeItems.add(tag);
-                        });
-                      } else {
-                        setState(() {
-                          widget.activeItems.remove(tag);
-                        });
-                      }
-                    },
-                  );
-                }).toList(),
+    return Container(
+      padding: EdgeInsets.all(16.0),
+      height: 300,
+      child: Column(
+        children: [
+          AppBar(
+            leading: SizedBox(
+              width: 100,
+              child: TextButton(
+                onPressed: () {
+                  widget.onSelectTag({});
+                  Navigator.pop(context);
+                },
+                child: Text("Clear"),
               ),
             ),
-          ],
-        ),
-      );
-    });
+            title: Text("Tags"),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  widget.onSelectTag(widget.activeItems);
+                  Navigator.pop(context);
+                },
+                child: Text("Done"),
+              ),
+            ],
+            backgroundColor: Colors.transparent,
+          ),
+          Expanded(
+            child: widget.items.isEmpty
+                ? Center(
+                    child: Text("No tags"),
+                  )
+                : ListView(
+                    children: widget.items.map((tag) {
+                      return CheckboxListTile.adaptive(
+                        title: Text(tag),
+                        value: widget.activeItems.contains(tag),
+                        onChanged: (bool? value) {
+                          if (value == true) {
+                            setState(() {
+                              widget.activeItems.add(tag);
+                            });
+                          } else {
+                            setState(() {
+                              widget.activeItems.remove(tag);
+                            });
+                          }
+                        },
+                      );
+                    }).toList(),
+                  ),
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -53,7 +53,7 @@ class _DiaryCardState extends State<DiaryCard> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          tag,
+                          tag.name,
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       );

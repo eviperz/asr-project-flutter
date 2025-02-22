@@ -8,10 +8,9 @@ final diaryFavoriteProvider =
 class DiaryFavoriteNotifier extends StateNotifier<Set<String>> {
   DiaryFavoriteNotifier() : super(Set<String>.unmodifiable({}));
 
-  // Add a diary to favorites
   void addFavorite(String id) {
     if (state.contains(id)) return;
-    state = Set.unmodifiable({...state, id}); // Add the ID to the set
+    state = Set.unmodifiable({...state, id});
   }
 
   void addFavorites(Iterable<String> ids) {
@@ -19,11 +18,10 @@ class DiaryFavoriteNotifier extends StateNotifier<Set<String>> {
     state = Set.unmodifiable({...state, ...ids});
   }
 
-  // Remove a diary from favorites
   void removeFavorite(String id) {
     if (!state.contains(id)) return;
     state = Set.unmodifiable(
-        state.where((e) => e != id)); // Remove the ID from the set
+        state.where((e) => e != id));
   }
 
   void removeFavorites(Iterable<String> ids) {
@@ -39,7 +37,6 @@ class DiaryFavoriteNotifier extends StateNotifier<Set<String>> {
     }
   }
 
-  // Check if a diary is in favorites
   bool isFavorite(String id) {
     return state.contains(id);
   }

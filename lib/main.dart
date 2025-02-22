@@ -1,8 +1,7 @@
 import 'package:asr_project/core/theme.dart';
 import 'package:asr_project/models/diary.dart';
-import 'package:asr_project/pages/diary_form_page/diary_form_page.dart';
 import 'package:asr_project/pages/diary_overview_page/diary_overview_page.dart';
-import 'package:asr_project/pages/diary_detail_page/diary_detail_page.dart';
+import 'package:asr_project/pages/diary_form_page/diary_form_page.dart';
 import 'package:asr_project/pages/record_voice_page.dart';
 import 'package:asr_project/providers/diary_list_provider.dart';
 import 'package:asr_project/widgets/custom_bottom_navbar.dart';
@@ -43,17 +42,11 @@ class MyApp extends ConsumerWidget {
               ),
             );
 
-          case "/diary/edit":
-            final id = settings.arguments as String;
+          case "/diary/detail":
+            final String id = settings.arguments as String;
             Diary diary = diaryProvider.get(id);
             return MaterialPageRoute(
               builder: (context) => DiaryFormPage(diary: diary),
-            );
-
-          case "/diary/detail":
-            final id = settings.arguments as String;
-            return MaterialPageRoute(
-              builder: (context) => DiaryDetailScreen(id: id),
             );
 
           case "/record":

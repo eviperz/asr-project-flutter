@@ -4,6 +4,9 @@ final darkTheme = ThemeData(
   brightness: Brightness.dark,
   primaryColor: Colors.black,
   scaffoldBackgroundColor: Colors.black,
+  // bottomSheetTheme: BottomSheetThemeData(
+  //   backgroundColor: Colors.transparent,
+  // ),
   appBarTheme: AppBarTheme(
     backgroundColor: Colors.black,
     foregroundColor: Colors.white,

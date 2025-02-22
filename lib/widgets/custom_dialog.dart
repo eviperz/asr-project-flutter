@@ -25,19 +25,27 @@ class CustomDialog extends StatefulWidget {
 class _CustomDialogState extends State<CustomDialog> {
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
+    return AlertDialog.adaptive(
       title: Text(widget.title),
-      content: Text(widget.content),
+      content: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(widget.content),
+      ),
       actions: [
-        TextButton(
-          onPressed: () => widget.onConfirm(),
-          child: Text(widget.confirmLabel ?? "Confirm"),
-        ),
         if (widget.onCancel != null)
           TextButton(
             onPressed: () => widget.onCancel!(),
-            child: Text(widget.cancelLabel ?? "Cancel"),
+            child: Text(
+              widget.cancelLabel ?? "Cancel",
+              style: TextStyle(color: const Color.fromARGB(255, 255, 120, 120)),
+            ),
           ),
+        TextButton(
+          onPressed: () => widget.onConfirm(),
+          child: Text(
+            widget.confirmLabel ?? "Confirm",
+          ),
+        ),
       ],
     );
   }

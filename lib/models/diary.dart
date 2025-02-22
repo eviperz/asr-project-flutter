@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:asr_project/models/tag.dart';
 import 'package:flutter_quill/quill_delta.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
@@ -7,20 +8,20 @@ class Diary {
   final String id;
   final String _title;
   final Delta content;
-  final Set<String> tags;
+  final List<Tag> tags;
   final DateTime dateTime;
 
   Diary({
     String? id,
     String? title,
     Delta? content,
-    Set<String>? tags,
+    List<Tag>? tags,
     DateTime? dateTime,
   })  : id = id ?? Uuid().v4(),
         _title = title ?? '',
         content = content ?? Delta()
           ..insert('\n'),
-        tags = tags ?? {},
+        tags = tags ?? [],
         dateTime = dateTime ?? DateTime.now();
 
   String get title => _title.isEmpty ? 'Untitled' : _title;
@@ -66,7 +67,7 @@ class Diary {
       id: map['id'],
       title: map['title'],
       content: map['content'],
-      tags: Set<String>.from(jsonDecode(map['tags'])),
+      tags: List<Tag>.from(jsonDecode(map['tags'])),
       dateTime: DateTime.parse(map['dateTime']),
     );
   }
@@ -89,7 +90,7 @@ class DiaryDetail {
   final String id;
   final String? title;
   final Delta? content;
-  final Set<String>? tags;
+  final List<Tag>? tags;
   final DateTime? dateTime;
 
   const DiaryDetail({
