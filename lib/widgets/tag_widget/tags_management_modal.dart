@@ -45,6 +45,7 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
       padding: EdgeInsets.all(16.0),
       height: 500,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           AppBar(
             title: Text("Tags"),
@@ -83,7 +84,7 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
           SizedBox(height: 8.0),
           Container(
             width: double.maxFinite,
-            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            padding: EdgeInsets.all(8.0),
             decoration: BoxDecoration(
               border: Border.all(color: Colors.white12),
               borderRadius: BorderRadius.circular(8.0),
@@ -103,6 +104,10 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
                       _focusNode.requestFocus();
                     }
                   },
+                  style: TextButton.styleFrom(
+                    fixedSize: Size(double.infinity, 50),
+                    alignment: Alignment.centerLeft,
+                  ),
                   child: Row(
                     children: [
                       Text("Create"),
@@ -125,6 +130,7 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
                 Column(
                   children: filteredTags
                       .map((tag) => Column(
+                            mainAxisSize: MainAxisSize.max,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Divider(),
@@ -132,6 +138,7 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
                                 width: double.infinity,
                                 child: TextButton(
                                   style: TextButton.styleFrom(
+                                    fixedSize: Size(double.infinity, 50),
                                     alignment: Alignment.centerLeft,
                                   ),
                                   onPressed: () {
@@ -143,7 +150,15 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
                                       widget.onAddTag(tag.name);
                                     }
                                   },
-                                  child: Text(tag.name),
+                                  child: Chip(
+                                    label: Text(
+                                      tag.name,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium,
+                                    ),
+                                    backgroundColor: Colors.grey,
+                                  ),
                                 ),
                               ),
                             ],
