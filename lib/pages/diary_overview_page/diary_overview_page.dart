@@ -119,7 +119,7 @@ class _DiaryOverviewPageState extends ConsumerState<DiaryOverviewPage> {
                             child: DiaryCard(
                               diary: filteredDiaries[index],
                               width: double.infinity,
-                              height: 200,
+                              // height: 200,
                             ),
                           );
                         },

@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 final darkTheme = ThemeData(
   brightness: Brightness.dark,
   primaryColor: Colors.black,
+  colorScheme: ColorScheme.dark(
+    secondary: Colors.white,
+    tertiary: Colors.white70,
+  ),
   scaffoldBackgroundColor: Colors.black,
   // bottomSheetTheme: BottomSheetThemeData(
   //   backgroundColor: Colors.transparent,

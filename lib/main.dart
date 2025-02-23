@@ -5,7 +5,7 @@ import 'package:asr_project/pages/diary_form_page/diary_form_page.dart';
 import 'package:asr_project/pages/record_voice_page.dart';
 import 'package:asr_project/providers/diary_list_provider.dart';
 import 'package:asr_project/widgets/custom_bottom_navbar.dart';
-import 'package:asr_project/pages/dashboard_page.dart';
+import 'package:asr_project/pages/home_page/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -26,8 +26,8 @@ class MyApp extends ConsumerWidget {
       home: MainScreen(),
       onGenerateRoute: (settings) {
         switch (settings.name) {
-          case "/dashboard":
-            return MaterialPageRoute(builder: (context) => DashboardPage());
+          case "/home":
+            return MaterialPageRoute(builder: (context) => HomePage());
 
           case "/diary_overview":
             return MaterialPageRoute(
@@ -79,7 +79,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = [
-      DashboardPage(),
+      HomePage(),
       DiaryOverviewPage(),
     ];
 
