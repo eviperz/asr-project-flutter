@@ -32,7 +32,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
               color: Theme.of(context).colorScheme.secondary,
               child: Image.asset(
                 "assets/images/default-profile.png",
-                fit: BoxFit.cover, // Prevents stretching
+                fit: BoxFit.cover,
               ),
             ),
           ),

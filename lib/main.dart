@@ -35,10 +35,8 @@ class MyApp extends ConsumerWidget {
             );
 
           case "/diary/create":
-            Diary diary = Diary();
             return MaterialPageRoute(
               builder: (context) => DiaryFormPage(
-                diary: diary,
               ),
             );
 

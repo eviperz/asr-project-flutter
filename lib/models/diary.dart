@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:asr_project/models/tag.dart';
 import 'package:flutter_quill/quill_delta.dart';
 import 'package:intl/intl.dart';
@@ -9,95 +8,73 @@ class Diary {
   final String _title;
   final Delta content;
   final List<Tag> tags;
-  final DateTime dateTime;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
   Diary({
     String? id,
     String? title,
     Delta? content,
     List<Tag>? tags,
-    DateTime? dateTime,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   })  : id = id ?? Uuid().v4(),
         _title = title ?? '',
         content = content ?? Delta()
           ..insert('\n'),
         tags = tags ?? [],
-        dateTime = dateTime ?? DateTime.now();
+        createdAt = createdAt ?? DateTime.now(),
+        updatedAt = updatedAt ?? DateTime.now();
 
   String get title => _title.isEmpty ? 'Untitled' : _title;
 
   String get formatDate {
-    return DateFormat("dd MMM yyyy").format(dateTime);
+    return DateFormat("dd MMM yyyy").format(updatedAt);
   }
 
-  Diary copyWith(DiaryDetail detail) {
-    return Diary(
-      id: id,
-      title: detail.title ?? title,
-      content: detail.content ?? content,
-      tags: detail.tags ?? tags,
-      dateTime: detail.dateTime ?? dateTime,
-    );
-  }
-
-  // Updated toMap method with isFavorite
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'title': title,
-      'content': content,
-      'tags': jsonEncode(tags.toList()),
-      'dateTime': dateTime.toIso8601String(),
-    };
-  }
-
-  factory Diary.fromDetail(DiaryDetail detail) {
-    return Diary(
-      id: detail.id,
-      title: detail.title,
-      content: detail.content,
-      tags: detail.tags,
-      dateTime: detail.dateTime,
-    );
-  }
-
-  // Updated fromMap method with isFavorite
   factory Diary.fromMap(Map<String, dynamic> map) {
     return Diary(
-      id: map['id'],
-      title: map['title'],
-      content: map['content'],
-      tags: List<Tag>.from(jsonDecode(map['tags'])),
-      dateTime: DateTime.parse(map['dateTime']),
-    );
+        id: map['id'],
+        title: map['title'],
+        content: Delta.fromJson(map['content']),
+        tags: List.from(map['tags']),
+        createdAt: DateTime.parse(map['createdAt']),
+        updatedAt: DateTime.parse(map['updatedAt']));
   }
 
-  @override
-  bool operator ==(Object other) {
-    if (other is! Diary) return false;
-    return id == other.id &&
-        title == other.title &&
-        content == other.content &&
-        tags == other.tags &&
-        dateTime == other.dateTime;
-  }
+  // @override
+  // bool operator ==(Object other) {
+  //   if (other is! Diary) return false;
+  //   return id == other.id &&
+  //       title == other.title &&
+  //       content == other.content &&
+  //       tags == other.tags &&
+  //       dateTime == other.dateTime;
+  // }
 
-  @override
-  int get hashCode => Object.hash(id, title, content, tags, dateTime);
+  // @override
+  // int get hashCode => Object.hash(id, title, content, tags, dateTime);
 }
 
 class DiaryDetail {
-  final String id;
   final String? title;
   final Delta? content;
-  final List<Tag>? tags;
-  final DateTime? dateTime;
+  final List<String>? tagIds;
 
-  const DiaryDetail({
-    required this.id,
-    this.title,
-    this.content,
-    this.tags,
-    this.dateTime,
-  });
+  DiaryDetail({
+    String? title,
+    Delta? content,
+    List<String>? tagIds,
+  })  : title = title ?? 'Untitled',
+        content = content ?? Delta()
+          ..insert('\n'),
+        tagIds = tagIds ?? [];
+
+  Map<String, dynamic> toJson() {
+    return {
+      "title": title,
+      "content": content?.toJson(),
+      "tagIds": tagIds,
+    };
+  }
 }

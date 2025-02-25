@@ -106,8 +106,8 @@ class _DiaryOverviewPageState extends ConsumerState<DiaryOverviewPage> {
                     // Sort the filtered diaries
                     filteredDiaries.sort((a, b) {
                       return _isAscending
-                          ? a.dateTime.compareTo(b.dateTime)
-                          : b.dateTime.compareTo(a.dateTime);
+                          ? a.updatedAt.compareTo(b.updatedAt)
+                          : b.updatedAt.compareTo(a.updatedAt);
                     });
 
                     return Expanded(

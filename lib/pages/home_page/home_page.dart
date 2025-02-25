@@ -1,7 +1,7 @@
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/pages/home_page/categories_widget.dart';
 import 'package:asr_project/pages/home_page/home_app_bar.dart';
-import 'package:asr_project/providers/diary_favorite_provider.dart';
+// import 'package:asr_project/providers/diary_favorite_provider.dart';
 import 'package:asr_project/providers/diary_list_provider.dart';
 import 'package:asr_project/widgets/diary_widget/diary_list_view_horizontal.dart';
 import 'package:flutter/material.dart';
@@ -15,19 +15,19 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     List<Diary> diaryList = ref.watch(diaryListProvider);
-    Set<String> favoriteIds = ref.watch(diaryFavoriteProvider);
+    // Set<String> favoriteIds = ref.watch(diaryFavoriteProvider);
 
     // Recently Diaries
     final DateTime now = DateTime.now();
     final DateTime sevenDaysAgo = now.subtract(Duration(days: 7));
 
     final List<Diary> recentDiaries = diaryList.where((e) {
-      return e.dateTime.isAfter(sevenDaysAgo) && e.dateTime.isBefore(now);
+      return e.updatedAt.isAfter(sevenDaysAgo) && e.updatedAt.isBefore(now);
     }).toList();
 
     // Favorite Diaries
-    final List<Diary> favoriteDiaries =
-        diaryList.where((e) => favoriteIds.contains(e.id)).toList();
+    // final List<Diary> favoriteDiaries =
+    //     diaryList.where((e) => favoriteIds.contains(e.id)).toList();
 
     // Categories
     final categories = [

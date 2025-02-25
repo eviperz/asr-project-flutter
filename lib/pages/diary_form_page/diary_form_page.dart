@@ -2,46 +2,50 @@ import 'package:asr_project/editor/diary_editor.dart';
 import 'package:asr_project/editor/diary_toolbar.dart';
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/tag.dart';
+import 'package:asr_project/pages/diary_form_page/diary_info.dart';
 import 'package:asr_project/pages/diary_form_page/diary_title_textfield.dart';
-import 'package:asr_project/providers/diary_favorite_provider.dart';
 import 'package:asr_project/providers/diary_list_provider.dart';
 import 'package:asr_project/widgets/custom_dialog.dart';
-import 'package:asr_project/widgets/tag_widget/diary_tag_list.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/quill_delta.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
-
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 
 class DiaryFormPage extends ConsumerStatefulWidget {
-  final Diary diary;
+  final Diary? diary;
 
-  const DiaryFormPage({super.key, required this.diary});
+  const DiaryFormPage({super.key, this.diary});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _DiaryFormState();
 }
 
 class _DiaryFormState extends ConsumerState<DiaryFormPage> {
+  late String? _id;
   final FocusNode _focusNode = FocusNode();
-  late final quill.QuillController _controller;
   late final TextEditingController _titleController;
-
+  late final quill.QuillController _controller;
   final List<Tag> _tags = [];
+  late final DateTime _updatedAt;
 
   bool _isEdited = false;
   bool _isKeyboardVisible = false;
 
   @override
   void initState() {
+    _id = widget.diary?.id;
+
     _controller = quill.QuillController(
-      document: quill.Document.fromDelta(widget.diary.content),
+      document: quill.Document.fromDelta(widget.diary?.content ?? Delta()
+        ..insert("\n")),
       selection: const TextSelection.collapsed(offset: 0),
     );
 
-    _titleController = TextEditingController(text: widget.diary.title);
+    _titleController = TextEditingController(text: widget.diary?.title ?? "");
 
-    _tags.addAll(widget.diary.tags);
+    _tags.addAll(widget.diary?.tags ?? []);
+
+    _updatedAt = widget.diary?.updatedAt ?? DateTime.now();
 
     _controller.addListener(
       () {
@@ -111,16 +115,35 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
     );
   }
 
-  void _saveProcess() {
-    ref.read(diaryListProvider.notifier).updateDiary(DiaryDetail(
-          id: widget.diary.id,
-          title: _titleController.text.isEmpty
-              ? 'Untitled'
-              : _titleController.text,
-          content: _controller.document.toDelta(),
-          tags: _tags,
-          dateTime: DateTime.now(),
-        ));
+  void _saveProcess() async {
+    if (_id == null) {
+      Diary? diary = await ref.read(diaryListProvider.notifier).addDiary(
+            DiaryDetail(
+              title: _titleController.text.isEmpty
+                  ? 'Untitled'
+                  : _titleController.text,
+              content: _controller.document.toDelta(),
+              tagIds: _tags.map((tag) => tag.id).toList(),
+            ),
+          );
+
+      if (diary != null && mounted) {
+        setState(() {
+          _id = diary.id;
+        });
+      }
+    } else {
+      await ref.read(diaryListProvider.notifier).updateDiary(
+          _id!,
+          DiaryDetail(
+            title: _titleController.text.isEmpty
+                ? 'Untitled'
+                : _titleController.text,
+            content: _controller.document.toDelta(),
+            tagIds: _tags.map((tag) => tag.id).toList(),
+          ));
+    }
+
     setState(() {
       _isEdited = false;
     });
@@ -141,20 +164,22 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
             }
           },
         ),
-        title: Text(_titleController.text),
+        title: Text(
+          _titleController.text.isNotEmpty ? _titleController.text : "Untitled",
+        ),
         actions: [
-          Consumer(builder: (context, ref, child) {
-            ref.watch(diaryFavoriteProvider);
-            final favoriteProvider = ref.read(diaryFavoriteProvider.notifier);
-            final bool isFavorite =
-                favoriteProvider.isFavorite(widget.diary.id);
-            return IconButton(
-              onPressed: () {
-                favoriteProvider.toggleFavorite(widget.diary.id);
-              },
-              icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_outline),
-            );
-          }),
+          // Consumer(builder: (context, ref, child) {
+          //   ref.watch(diaryFavoriteProvider);
+          //   final favoriteProvider = ref.read(diaryFavoriteProvider.notifier);
+          //   final bool isFavorite =
+          //       favoriteProvider.isFavorite(widget.diary.id);
+          //   return IconButton(
+          //     onPressed: () {
+          //       favoriteProvider.toggleFavorite(widget.diary.id);
+          //     },
+          //     icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_outline),
+          //   );
+          // }),
           PopupMenuButton<String>(
             position: PopupMenuPosition.under,
             onSelected: (value) {
@@ -170,19 +195,24 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
                       content: "Are you confirm for delete?",
                       onConfirm: () async {
                         try {
-                          if (!context.mounted) return;
+                          if (_id == null) {
+                            Navigator.of(context)
+                              ..pop()
+                              ..pop();
+                          } else {
+                            await ref
+                                .read(diaryListProvider.notifier)
+                                .removeDiary(_id!);
 
-                          ref
-                              .read(diaryListProvider.notifier)
-                              .removeDiary(widget.diary.id);
+                            if (!context.mounted) return;
+                            Navigator.of(context)
+                              ..pop()
+                              ..pop();
 
-                          Navigator.of(context)
-                            ..pop()
-                            ..pop();
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("ลบแล้ว!")),
-                          );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Delete Diary!")),
+                            );
+                          }
                         } catch (e) {
                           if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -199,22 +229,16 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
             itemBuilder: (BuildContext context) => [
               PopupMenuItem<String>(
                 value: 'save',
-                child: Row(
-                  spacing: 8.0,
-                  children: [
-                    Icon(Icons.save),
-                    Text('Save'),
-                  ],
+                child: ListTile(
+                  leading: Icon(Icons.save),
+                  title: Text('Save'),
                 ),
               ),
               PopupMenuItem<String>(
                 value: 'delete',
-                child: Row(
-                  spacing: 8.0,
-                  children: [
-                    Icon(Icons.delete),
-                    Text('Delete'),
-                  ],
+                child: ListTile(
+                  leading: Icon(Icons.delete),
+                  title: Text('Delete'),
                 ),
               ),
             ],
@@ -238,110 +262,10 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
                   });
                 },
               ),
-              Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(vertical: 8.0),
-                    width: 130,
-                    child: Row(
-                      spacing: 8.0,
-                      children: [
-                        Icon(
-                          Icons.person_pin,
-                          color: Colors.grey,
-                          size: 16,
-                        ),
-                        Text(
-                          "Create by",
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelLarge!
-                              .copyWith(color: Colors.grey),
-                        )
-                      ],
-                    ),
-                  ),
-                  Row(
-                    spacing: 8.0,
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(8.0),
-                          ),
-                        ),
-                        child: Icon(
-                          Icons.person,
-                          size: 24,
-                        ),
-                      ),
-                      Text(
-                        "Person Name",
-                        style: Theme.of(context).textTheme.labelLarge,
-                      )
-                    ],
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(vertical: 4.0),
-                    width: 130,
-                    child: Row(
-                      spacing: 8.0,
-                      children: [
-                        Icon(
-                          Icons.access_time_outlined,
-                          color: Colors.grey,
-                          size: 16,
-                        ),
-                        Text(
-                          "Last Edited",
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelLarge!
-                              .copyWith(color: Colors.grey),
-                        )
-                      ],
-                    ),
-                  ),
-                  Text(DateFormat.yMMMd().format(widget.diary.dateTime),
-                      style: Theme.of(context).textTheme.labelLarge)
-                ],
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(vertical: 10.0),
-                    width: 130,
-                    child: Row(
-                      spacing: 8.0,
-                      children: [
-                        Icon(
-                          Icons.tag,
-                          color: Colors.grey,
-                          size: 16,
-                        ),
-                        Text(
-                          "Tags",
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelLarge!
-                              .copyWith(color: Colors.grey),
-                        )
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: DiaryTagList(
-                      tags: _tags,
-                      onChanged: _onTagsChanged,
-                    ),
-                  ),
-                ],
+              DiaryInfo(
+                tags: _tags,
+                updatedAt: _updatedAt,
+                onChange: () => _onTagsChanged(),
               ),
               DiaryEditor(
                 focusNode: _focusNode,

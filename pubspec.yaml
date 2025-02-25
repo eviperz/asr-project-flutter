@@ -36,6 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^2.4.9
   flutter_quill: ^10.8.5
+  flutter_colorpicker:
   file_picker: ^8.3.5
   audioplayers: ^6.1.2
   flutter_sound: ^9.23.1
@@ -45,6 +46,7 @@ dependencies:
   sqflite: ^2.4.1
   path: ^1.9.0
   uuid:
+  http:
 
 dev_dependencies:
   flutter_test:
