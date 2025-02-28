@@ -37,23 +37,27 @@ class Diary {
         id: map['id'],
         title: map['title'],
         content: Delta.fromJson(map['content']),
-        tags: List.from(map['tags']),
+        tags: (map['tags'] as List)
+            .map((tag) => Tag.fromMap(tag as Map<String, dynamic>))
+            .toList(),
         createdAt: DateTime.parse(map['createdAt']),
         updatedAt: DateTime.parse(map['updatedAt']));
   }
 
-  // @override
-  // bool operator ==(Object other) {
-  //   if (other is! Diary) return false;
-  //   return id == other.id &&
-  //       title == other.title &&
-  //       content == other.content &&
-  //       tags == other.tags &&
-  //       dateTime == other.dateTime;
-  // }
+  @override
+  bool operator ==(Object other) {
+    if (other is! Diary) return false;
+    return id == other.id &&
+        title == other.title &&
+        content == other.content &&
+        tags == other.tags &&
+        createdAt == other.createdAt &&
+        updatedAt == other.updatedAt;
+  }
 
-  // @override
-  // int get hashCode => Object.hash(id, title, content, tags, dateTime);
+  @override
+  int get hashCode =>
+      Object.hash(id, title, content, tags, createdAt, updatedAt);
 }
 
 class DiaryDetail {

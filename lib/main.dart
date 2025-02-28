@@ -1,9 +1,10 @@
 import 'package:asr_project/core/theme.dart';
-import 'package:asr_project/models/diary.dart';
-import 'package:asr_project/pages/diary_overview_page/diary_overview_page.dart';
+import 'package:asr_project/models/workspace.dart';
 import 'package:asr_project/pages/diary_form_page/diary_form_page.dart';
+import 'package:asr_project/pages/event_page/event_page.dart';
 import 'package:asr_project/pages/record_voice_page.dart';
-import 'package:asr_project/providers/diary_list_provider.dart';
+import 'package:asr_project/pages/workspace_page/workspace_detail_page/workspace_detail_page.dart';
+import 'package:asr_project/pages/workspace_page/workspace_page.dart';
 import 'package:asr_project/widgets/custom_bottom_navbar.dart';
 import 'package:asr_project/pages/home_page/home_page.dart';
 import 'package:flutter/material.dart';
@@ -18,33 +19,38 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final diaryProvider = ref.read(diaryListProvider.notifier);
-
     return MaterialApp(
       title: "ASR App",
-      theme: darkTheme,
+      theme: lightTheme,
       home: MainScreen(),
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case "/home":
             return MaterialPageRoute(builder: (context) => HomePage());
 
-          case "/diary_overview":
+          case "/workspace":
+            return MaterialPageRoute(builder: (context) => WorkspacePage());
+
+          case "/workspace/detail":
+            Workspace workspace = settings.arguments as Workspace;
             return MaterialPageRoute(
-              builder: (context) => DiaryOverviewPage(),
-            );
+                builder: (context) =>
+                    WorkspaceDetailPage(workspace: workspace));
+
+          // case "/diary_overview":
+          //   return MaterialPageRoute(
+          //     builder: (context) => DiaryOverviewPage(),
+          //   );
 
           case "/diary/create":
             return MaterialPageRoute(
-              builder: (context) => DiaryFormPage(
-              ),
+              builder: (context) => DiaryFormPage(),
             );
 
           case "/diary/detail":
             final String id = settings.arguments as String;
-            Diary diary = diaryProvider.get(id);
             return MaterialPageRoute(
-              builder: (context) => DiaryFormPage(diary: diary),
+              builder: (context) => DiaryFormPage(id: id),
             );
 
           case "/record":
@@ -78,7 +84,9 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     final List<Widget> pages = [
       HomePage(),
-      DiaryOverviewPage(),
+      // DiaryOverviewPage(),
+      WorkspacePage(),
+      EventPage(),
     ];
 
     return Scaffold(

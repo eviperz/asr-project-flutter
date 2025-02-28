@@ -1,6 +1,6 @@
 import 'package:asr_project/models/tag.dart';
 import 'package:asr_project/providers/tag_list_provider.dart';
-import 'package:asr_project/widgets/tag_widget/diary_tag_list.dart';
+import 'package:asr_project/widgets/diary/diary_tag_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -43,76 +43,87 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Tag> tags = ref.watch(tagListProvider);
+    final List<Tag> tags = ref.watch(tagListProvider).asData?.value ?? [];
     final List<Tag> filteredTags = tags
         .where((tag) => !widget.tags.any((t) => t.name == tag.name))
         .toList();
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        title: const Text("Tags Management"),
-        backgroundColor: Colors.transparent,
-      ),
-      body: Container(
-        padding: const EdgeInsets.all(16.0),
-        height: double.maxFinite,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildTagInputField(),
-            const SizedBox(height: 24.0),
-            Text(
-              "Select or Create Tag",
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 8.0),
-            Container(
-              height: 250,
-              width: double.maxFinite,
-              padding: const EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.white12),
-                borderRadius: BorderRadius.circular(8.0),
-                color: Colors.white10,
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    _buildCreateTagButton(filteredTags),
-                    _buildFilteredTagList(filteredTags),
-                  ],
+    return SafeArea(
+      bottom: false,
+      child: ClipRRect(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
+        child: Scaffold(
+          backgroundColor: ColorScheme.of(context).surface,
+          appBar: AppBar(
+            title: const Text("Tags Management"),
+            backgroundColor: Colors.transparent,
+          ),
+          body: Container(
+            padding: const EdgeInsets.all(16.0),
+            height: double.maxFinite,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildTagInputField(),
+                const SizedBox(height: 24.0),
+                Text(
+                  "Select or Create Tag",
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
-              ),
+                const SizedBox(height: 8.0),
+                Expanded(
+                  child: Card(
+                    child: Container(
+                      width: double.maxFinite,
+                      padding: const EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.white12),
+                        borderRadius: BorderRadius.circular(8.0),
+                        color: Colors.white10,
+                      ),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            _buildCreateTagButton(filteredTags),
+                            _buildFilteredTagList(filteredTags),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildTagInputField() {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _focusNode.requestFocus();
-        });
-      },
-      child: Container(
-        width: double.maxFinite,
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.white12),
-          borderRadius: BorderRadius.circular(8.0),
-          color: Colors.white10,
-        ),
-        child: Wrap(spacing: 8.0, children: [
-          DiaryTagList(
-            tags: widget.tags,
-            textField: _buildTextField(),
-            onChanged: widget.onChanged,
+    return Card(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _focusNode.requestFocus();
+          });
+        },
+        child: Container(
+          width: double.maxFinite,
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.white12),
+            borderRadius: BorderRadius.circular(8.0),
+            color: Colors.white10,
           ),
-        ]),
+          child: Wrap(spacing: 8.0, children: [
+            DiaryTagList(
+              tags: widget.tags,
+              textField: _buildTextField(),
+              onChanged: widget.onChanged,
+            ),
+          ]),
+        ),
       ),
     );
   }

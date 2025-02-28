@@ -1,13 +1,15 @@
 import 'package:asr_project/models/tag.dart';
-import 'package:asr_project/widgets/tag_widget/diary_tag_list.dart';
+import 'package:asr_project/widgets/profile_image.dart';
+import 'package:asr_project/widgets/diary/diary_tag_list.dart';
 import 'package:asr_project/pages/diary_form_page/tags_management_modal.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class DiaryInfo extends StatelessWidget {
   final DateTime updatedAt;
   final List<Tag> tags;
-  final Function() onChange;
+  final VoidCallback onChange;
 
   const DiaryInfo({
     super.key,
@@ -18,6 +20,7 @@ class DiaryInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textStyle = Theme.of(context).textTheme.labelLarge;
     return Column(
       children: [
         _buildInfoRow(
@@ -26,10 +29,9 @@ class DiaryInfo extends StatelessWidget {
           label: "Created by",
           child: Row(
             children: [
-              _buildProfileIcon(context),
-              SizedBox(width: 8.0),
-              Text("Person Name",
-                  style: Theme.of(context).textTheme.labelLarge),
+              const ProfileImage(),
+              const SizedBox(width: 8.0),
+              Text("Person Name", style: textStyle),
             ],
           ),
         ),
@@ -39,7 +41,7 @@ class DiaryInfo extends StatelessWidget {
           label: "Last Edited",
           child: Text(
             DateFormat.yMMMd().format(updatedAt),
-            style: Theme.of(context).textTheme.labelLarge,
+            style: textStyle,
           ),
         ),
         _buildInfoRow(
@@ -64,59 +66,47 @@ class DiaryInfo extends StatelessWidget {
     required String label,
     required Widget child,
   }) {
-    return Row(
-      children: [
-        Container(
-          padding: EdgeInsets.symmetric(vertical: 10.0),
-          width: 130,
-          child: Row(
-            children: [
-              Icon(icon, color: Colors.grey, size: 16),
-              SizedBox(width: 8.0),
-              Text(label,
-                  style: Theme.of(context)
-                      .textTheme
-                      .labelLarge!
-                      .copyWith(color: Colors.grey)),
-            ],
-          ),
-        ),
-        Expanded(child: child),
-      ],
-    );
-  }
+    final labelStyle =
+        Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.grey);
 
-  Widget _buildProfileIcon(BuildContext context) {
-    return Container(
-      width: 35,
-      height: 35,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.secondary,
-        borderRadius: BorderRadius.circular(20.0),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5.0),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 130,
+            child: Row(
+              children: [
+                Icon(icon, color: Colors.grey, size: 16),
+                const SizedBox(width: 8.0),
+                Text(label, style: labelStyle),
+              ],
+            ),
+          ),
+          Expanded(child: child),
+        ],
       ),
-      child:
-          Image.asset("assets/images/default-profile.png", fit: BoxFit.cover),
     );
   }
 
   Widget _buildAddTagButton(BuildContext context) {
     return OutlinedButton(
-      onPressed: () => showModalBottomSheet(
+      onPressed: () => showCupertinoModalPopup(
         context: context,
-        builder: (context) =>
-            TagsManagementModal(tags: tags, onChanged: onChange),
+        barrierDismissible: true,
+        builder: (_) => TagsManagementModal(tags: tags, onChanged: onChange),
       ),
       style: OutlinedButton.styleFrom(
-        minimumSize: Size(100, 35),
-        padding: EdgeInsets.all(8.0),
+        minimumSize: const Size(100, 35),
+        padding: const EdgeInsets.all(8.0),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
-      child: Row(
+      child: const Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.add, size: 16),
           SizedBox(width: 6.0),
-          Text("Add Tag", style: Theme.of(context).textTheme.labelMedium),
+          Text("Add Tag"),
         ],
       ),
     );

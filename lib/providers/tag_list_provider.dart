@@ -1,121 +1,60 @@
-import 'dart:convert';
-import 'dart:developer';
-import 'package:asr_project/config.dart';
 import 'package:asr_project/models/tag.dart';
+import 'package:asr_project/services/tag_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:http/http.dart' as http;
 
-final tagListProvider = StateNotifierProvider<TagListNotifier, List<Tag>>(
-  (ref) => TagListNotifier(),
+// AsyncNotifier Provider
+final tagListProvider = AsyncNotifierProvider<TagListNotifier, List<Tag>>(
+  () => TagListNotifier(),
 );
 
-class TagListNotifier extends StateNotifier<List<Tag>> {
-  TagListNotifier() : super([]) {
-    fetchTags();
+// Notifier Class
+class TagListNotifier extends AsyncNotifier<List<Tag>> {
+  late final TagService _tagService;
+
+  @override
+  Future<List<Tag>> build() async {
+    _tagService = TagService();
+    return await _tagService.fetchTags();
   }
 
-  Future<void> fetchTags() async {
-    try {
-      final response = await http.get(
-        Uri.parse("${AppConfig.baseUrl}/tags"),
-        headers: {
-          'Authorization': AppConfig.basicAuth,
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final List<dynamic> jsonData = jsonDecode(response.body);
-        final List<Tag> tags =
-            jsonData.map((data) => Tag.fromMap(data)).toList();
-        state.clear();
-        state.addAll(tags);
-      } else {
-        log("Error fetching tags: ${response.statusCode}");
-      }
-    } catch (e) {
-      log("Exception occurred while fetching tags: $e");
-    }
+  Future<void> loadTags() async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() => _tagService.fetchTags());
   }
 
   Future<Tag?> addTag(TagDetail tagDetail) async {
-    try {
-      final http.Response response = await http.post(
-        Uri.parse("${AppConfig.baseUrl}/tags"),
-        headers: {
-          'Authorization': AppConfig.basicAuth,
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(tagDetail.toJson()),
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonData = jsonDecode(response.body);
-        final Tag tag = Tag.fromMap(jsonData);
-
-        fetchTags(); // Fetch updated tags after adding
-
-        return tag;
-      } else {
-        log("Error adding tag: ${response.body}");
-      }
-    } catch (e) {
-      log("Exception occurred while adding tag: $e");
+    final tag = await _tagService.addTag(tagDetail);
+    if (tag != null) {
+      state = AsyncValue.data([...state.value ?? [], tag]);
+      return tag;
     }
     return null;
   }
 
   Future<Tag?> updateTag(String id, TagDetail tagDetail) async {
-    try {
-      final http.Response response = await http.patch(
-        Uri.parse("${AppConfig.baseUrl}/tags/$id"),
-        headers: {
-          'Authorization': AppConfig.basicAuth,
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(tagDetail.toJson()),
-      );
-
-      if (response.statusCode == 200) {
-        fetchTags();
-        return getTagById(id);
-      } else {
-        log("Error updating tag: ${response.body}");
-      }
-    } catch (e) {
-      log("Exception occurred while updating tag: $e");
+    final updatedTag = await _tagService.updateTag(id, tagDetail);
+    if (updatedTag != null) {
+      state = AsyncValue.data(
+          state.value!.map((d) => d.id == id ? updatedTag : d).toList());
+      return updatedTag;
     }
     return null;
   }
 
   Future<void> removeTag(String id) async {
-    try {
-      final http.Response response = await http.delete(
-        Uri.parse("${AppConfig.baseUrl}/tags/$id"),
-        headers: {
-          'Authorization': AppConfig.basicAuth,
-          'Content-Type': 'application/json',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        fetchTags(); // Fetch updated tags after removal
-      } else {
-        log("Error removing tag: ${response.body}");
-      }
-    } catch (e) {
-      log("Exception occurred while removing tag: $e");
+    final success = await _tagService.deleteTag(id);
+    if (success) {
+      state = AsyncValue.data(state.value!.where((d) => d.id != id).toList());
     }
   }
 
-  Tag getTagById(String id) {
+  Tag? getTag(String id) {
     try {
-      final tag = state.firstWhere(
-        (tag) => tag.id == id,
-        orElse: () => throw Exception('Tag not found'),
-      );
-      return tag;
+      return state.value?.firstWhere((e) => e.id == id);
     } catch (e) {
-      rethrow;
+      return null;
     }
   }
+
+  bool isExist(String id) => state.value?.any((e) => e.id == id) ?? false;
 }

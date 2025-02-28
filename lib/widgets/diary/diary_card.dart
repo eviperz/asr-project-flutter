@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/providers/diary_favorite_provider.dart';
 import 'package:flutter/material.dart';

@@ -17,8 +17,11 @@ class CustomBottomNavBar extends StatelessWidget {
       onTap: onTap,
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+        // BottomNavigationBarItem(
+        //     icon: Icon(Icons.text_snippet), label: "All Diary"),
+        BottomNavigationBarItem(icon: Icon(Icons.work), label: "Workspace"),
         BottomNavigationBarItem(
-            icon: Icon(Icons.text_snippet), label: "All Diary"),
+            icon: Icon(Icons.calendar_month), label: "Event")
       ],
     );
   }

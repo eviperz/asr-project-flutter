@@ -1,4 +1,4 @@
-import 'package:asr_project/widgets/asr_widget/audio_player_widget.dart';
+import 'package:asr_project/widgets/asr/audio_player_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 
