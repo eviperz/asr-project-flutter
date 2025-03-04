@@ -1,3 +1,4 @@
+import 'package:asr_project/config.dart';
 import 'package:asr_project/models/tag.dart';
 import 'package:asr_project/services/tag_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,17 +10,18 @@ final tagListProvider = AsyncNotifierProvider<TagListNotifier, List<Tag>>(
 
 // Notifier Class
 class TagListNotifier extends AsyncNotifier<List<Tag>> {
+  final String ownerId = AppConfig.userId;
   late final TagService _tagService;
 
   @override
   Future<List<Tag>> build() async {
     _tagService = TagService();
-    return await _tagService.fetchTags();
+    return await _tagService.getAllTagsByOwnerId(ownerId);
   }
 
   Future<void> loadTags() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _tagService.fetchTags());
+    state = await AsyncValue.guard(() => _tagService.getAllTagsByOwnerId(ownerId));
   }
 
   Future<Tag?> addTag(TagDetail tagDetail) async {

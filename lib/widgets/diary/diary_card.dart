@@ -22,8 +22,11 @@ class _DiaryCardState extends State<DiaryCard> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, "/diary/detail",
-          arguments: widget.diary.id),
+      onTap: () => Navigator.pushNamed(
+        context,
+        "/diary/detail",
+        arguments: widget.diary,
+      ),
       child: Card(
         child: Container(
           width: widget.width,

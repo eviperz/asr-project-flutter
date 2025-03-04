@@ -1,4 +1,3 @@
-import 'package:asr_project/models/user.dart';
 import 'package:asr_project/models/workspace.dart';
 import 'package:asr_project/pages/workspace_page/starred_workspace_list.dart';
 import 'package:asr_project/pages/workspace_page/workspace_list.dart';
@@ -14,25 +13,25 @@ class WorkspacePage extends StatefulWidget {
 class _WorkspacePageState extends State<WorkspacePage> {
   final TextEditingController _controller = TextEditingController();
   List<Workspace> workspaces = [
-    Workspace(name: "name1", owner: User(username: "username1")),
-    Workspace(
-      name: "name2",
-      owner: User(username: "username2"),
-      users: [
-        User(username: "username4"),
-        User(username: "username5"),
-      ],
-    ),
-    Workspace(
-      name: "Project X",
-      owner: User(username: "username3"),
-      users: [
-        User(username: "username4"),
-        User(username: "username5"),
-        User(username: "username6"),
-        User(username: "username7"),
-      ],
-    ),
+    // Workspace(name: "name1", owner: User(username: "username1")),
+    // Workspace(
+    //   name: "name2",
+    //   owner: User(username: "username2"),
+    //   users: [
+    //     User(username: "username4"),
+    //     User(username: "username5"),
+    //   ],
+    // ),
+    // Workspace(
+    //   name: "Project X",
+    //   owner: User(username: "username3"),
+    //   users: [
+    //     User(username: "username4"),
+    //     User(username: "username5"),
+    //     User(username: "username6"),
+    //     User(username: "username7"),
+    //   ],
+    // ),
   ];
   List<Workspace> filteredWorkspaces = [];
   Set<String> starredWorkspace = {};

@@ -11,9 +11,11 @@ class TagService {
     'Content-Type': 'application/json',
   };
 
-  Future<List<Tag>> fetchTags() async {
+  Future<List<Tag>> getAllTagsByOwnerId(String ownerId) async {
     try {
-      final response = await http.get(Uri.parse(baseUrl), headers: headers);
+      final response = await http.get(Uri.parse("$baseUrl/owner/$ownerId"),
+          headers: headers);
+
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = jsonDecode(response.body);
         return jsonData.map((data) => Tag.fromMap(data)).toList();

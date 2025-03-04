@@ -1,31 +1,30 @@
+import 'package:asr_project/providers/tag_list_provider.dart';
+import 'package:asr_project/providers/user_diary_folder_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/tag.dart';
-import 'package:asr_project/providers/diary_list_provider.dart';
 import 'package:asr_project/widgets/custom_dialog.dart';
 import 'package:asr_project/editor/diary_editor.dart';
 import 'package:asr_project/editor/diary_toolbar.dart';
 import 'package:asr_project/pages/diary_form_page/diary_info.dart';
 
 class DiaryFormPage extends ConsumerStatefulWidget {
-  final String? id;
+  final Diary diary;
 
-  const DiaryFormPage({super.key, this.id});
+  const DiaryFormPage(
+      {super.key, required this.diary});
 
   @override
   ConsumerState<DiaryFormPage> createState() => _DiaryFormState();
 }
 
 class _DiaryFormState extends ConsumerState<DiaryFormPage> {
-  late Diary? _diary;
   late final TextEditingController _titleController;
   late final quill.QuillController _controller;
-  List<Tag> _tags = [];
-  DateTime _updatedAt = DateTime.now();
-
-  bool _isCreating = false;
+  late List<Tag> _tags;
+  late DateTime _updatedAt;
   bool _isEdited = false;
   bool _isKeyboardVisible = false;
 
@@ -34,26 +33,20 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
     super.initState();
 
     _titleController = TextEditingController();
-    
+
     _controller = quill.QuillController.basic();
     _controller.addListener(() => setState(() => _isEdited = true));
   }
 
   @override
   void didChangeDependencies() {
-    if (widget.id != null) {
-      _diary = ref.watch(diaryListProvider.notifier).getDiary(widget.id!);
-    } else {
-      _diary = Diary();
-      setState(() {
-        _isCreating = true;
-      });
-    }
-
-    _titleController.text = _diary!.title;
-    _controller.document = quill.Document.fromDelta(_diary!.content);
-    _tags = _diary!.tags;
-    _updatedAt = _diary!.updatedAt;
+    _titleController.text = widget.diary.title;
+    _controller.document = quill.Document.fromDelta(widget.diary.content);
+    _tags = (widget.diary.tagIds)
+        .map((id) => ref.read(tagListProvider.notifier).getTag(id))
+        .whereType<Tag>()
+        .toList();
+    _updatedAt = widget.diary.updatedAt;
     _isEdited = false;
     super.didChangeDependencies();
   }
@@ -66,8 +59,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
   }
 
   Future<void> _saveDiary() async {
-    final diaryProvider = ref.read(diaryListProvider.notifier);
-    final diaryData = DiaryDetail(
+    final DiaryDetail diaryDetail = DiaryDetail(
       title: _titleController.text.trim().isEmpty
           ? 'Untitled'
           : _titleController.text.trim(),
@@ -75,16 +67,12 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
       tagIds: _tags.map((tag) => tag.id).toList(),
     );
 
-    if (_isCreating) {
-      _diary = await diaryProvider.addDiary(diaryData);
-      if (_diary != null) {
-        setState(() {
-          _isCreating = false;
-        });
-      }
-    } else {
-      _diary = await diaryProvider.updateDiary(_diary!.id, diaryData);
-    }
+    // if (widget.typeWithFolderId.keys.first == "Personal") {
+      await ref.watch(userDiaryFoldersProvider.notifier).updateDiary(widget.diary.id, diaryDetail);
+    // } else {
+      // await ref.watch(userDiaryFoldersProvider.notifier).updateDiary(
+      //     widget.typeWithFolderId["Workspace"], widget.diary.id, diaryDetail);
+    // }
 
     setState(() => _isEdited = false);
   }
@@ -136,11 +124,9 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
                     title: "Delete Diary",
                     content: "Are you sure you want to delete this diary?",
                     onConfirm: () async {
-                      if (!_isCreating) {
                         await ref
-                            .read(diaryListProvider.notifier)
-                            .removeDiary(_diary!.id);
-                      }
+                            .read(userDiaryFoldersProvider.notifier)
+                            .removeDiary(widget.diary.id);
                       if (mounted) {
                         Navigator.pop(context);
                         Navigator.pop(context);

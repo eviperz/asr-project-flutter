@@ -1,4 +1,3 @@
-import 'package:asr_project/models/tag.dart';
 import 'package:flutter_quill/quill_delta.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
@@ -7,7 +6,7 @@ class Diary {
   final String id;
   final String _title;
   final Delta content;
-  final List<Tag> tags;
+  final List<String> tagIds;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -15,14 +14,14 @@ class Diary {
     String? id,
     String? title,
     Delta? content,
-    List<Tag>? tags,
+    List<String>? tagIds,
     DateTime? createdAt,
     DateTime? updatedAt,
   })  : id = id ?? Uuid().v4(),
         _title = title ?? '',
         content = content ?? Delta()
           ..insert('\n'),
-        tags = tags ?? [],
+        tagIds = tagIds ?? [],
         createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
 
@@ -34,12 +33,10 @@ class Diary {
 
   factory Diary.fromMap(Map<String, dynamic> map) {
     return Diary(
-        id: map['id'],
-        title: map['title'],
+        id: map['diaryId'] as String,
+        title: map['title'] as String,
         content: Delta.fromJson(map['content']),
-        tags: (map['tags'] as List)
-            .map((tag) => Tag.fromMap(tag as Map<String, dynamic>))
-            .toList(),
+        tagIds: (map['tagIds'] as List<dynamic>).cast<String>(),
         createdAt: DateTime.parse(map['createdAt']),
         updatedAt: DateTime.parse(map['updatedAt']));
   }
@@ -50,14 +47,14 @@ class Diary {
     return id == other.id &&
         title == other.title &&
         content == other.content &&
-        tags == other.tags &&
+        tagIds == other.tagIds &&
         createdAt == other.createdAt &&
         updatedAt == other.updatedAt;
   }
 
   @override
   int get hashCode =>
-      Object.hash(id, title, content, tags, createdAt, updatedAt);
+      Object.hash(id, title, content, tagIds, createdAt, updatedAt);
 }
 
 class DiaryDetail {

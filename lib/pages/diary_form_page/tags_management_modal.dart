@@ -1,3 +1,4 @@
+import 'package:asr_project/config.dart';
 import 'package:asr_project/models/tag.dart';
 import 'package:asr_project/providers/tag_list_provider.dart';
 import 'package:asr_project/widgets/diary/diary_tag_list.dart';
@@ -157,7 +158,7 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
           if (!tagExists) {
             Tag? tag = await ref
                 .read(tagListProvider.notifier)
-                .addTag(TagDetail(name: _controller.text.trim()));
+                .addTag(TagDetail(name: _controller.text.trim(), ownerId: AppConfig.userId));
 
             _controller.clear();
 
@@ -276,7 +277,7 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
                   String hexColor = colorToHex(currentColor);
                   ref.read(tagListProvider.notifier).updateTag(
                         tag.id,
-                        TagDetail(name: tag.name, colorCode: hexColor),
+                        TagDetail(name: tag.name, colorCode: hexColor, ownerId: AppConfig.userId),
                       );
                   Navigator.pop(context);
                 },

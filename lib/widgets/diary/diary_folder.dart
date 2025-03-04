@@ -1,16 +1,25 @@
 import 'package:asr_project/models/diary.dart';
+import 'package:asr_project/models/diary_folder.dart';
 import 'package:asr_project/widgets/custom_dialog.dart';
 import 'package:asr_project/widgets/diary/diary_card.dart';
 import 'package:flutter/material.dart';
 
 class DiaryFolder extends StatefulWidget {
-  final category;
+  final DiaryFolderModel folder;
+  final List<Diary> diaries;
   final FocusNode? focusNode;
+  final Function onUpdateFolderName;
+  final Function onCreateDiary;
+  final Function onDeleteFolder;
 
   const DiaryFolder({
     super.key,
-    required this.category,
+    required this.folder,
+    required this.diaries,
     this.focusNode,
+    required this.onUpdateFolderName,
+    required this.onCreateDiary,
+    required this.onDeleteFolder,
   });
 
   @override
@@ -34,9 +43,9 @@ class _DiaryFolderState extends State<DiaryFolder> {
 
     _focusNode.addListener(() {
       if (mounted) {
-        if (_textEditingController.text != widget.category["name"]) {
+        if (_textEditingController.text != widget.folder.name) {
           if (_textEditingController.text.isEmpty) {
-            _textEditingController.text = widget.category["name"];
+            _textEditingController.text = widget.folder.name;
           } else {
             //
           }
@@ -45,7 +54,7 @@ class _DiaryFolderState extends State<DiaryFolder> {
     });
 
     _textEditingController = TextEditingController();
-    _textEditingController.text = widget.category["name"];
+    _textEditingController.text = widget.folder.name;
 
     super.initState();
   }
@@ -55,10 +64,6 @@ class _DiaryFolderState extends State<DiaryFolder> {
     _focusNode.dispose();
     _textEditingController.dispose();
     super.dispose();
-  }
-
-  void _addDiary() {
-    Navigator.pushNamed(context, "/diary/create");
   }
 
   @override
@@ -97,6 +102,8 @@ class _DiaryFolderState extends State<DiaryFolder> {
                   focusNode: _focusNode,
                   controller: _textEditingController,
                   onTapOutside: (event) {
+                    widget.onUpdateFolderName(
+                        widget.folder.id, _textEditingController.text);
                     _focusNode.unfocus();
                   },
                 ),
@@ -108,7 +115,7 @@ class _DiaryFolderState extends State<DiaryFolder> {
             onSelected: (value) {
               switch (value) {
                 case "add":
-                  _addDiary();
+                  widget.onCreateDiary(widget.folder.id);
 
                 case "delete":
                   showDialog(
@@ -118,24 +125,11 @@ class _DiaryFolderState extends State<DiaryFolder> {
                       content: "Are you confirm for delete?",
                       onConfirm: () async {
                         try {
-                          // if (widget == null) {
-                          //   Navigator.of(context)
-                          //     ..pop()
-                          //     ..pop();
-                          // } else {
-                          // await ref
-                          //     .read(diaryListProvider.notifier)
-                          //     .removeDiary(_id!);
-
-                          if (!context.mounted) return;
-                          Navigator.of(context)
-                            ..pop()
-                            ..pop();
-
+                          widget.onDeleteFolder(widget.folder.id);
+                          Navigator.of(context).pop();
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text("Delete Folder!")),
                           );
-                          // }
                         } catch (e) {
                           if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -157,7 +151,7 @@ class _DiaryFolderState extends State<DiaryFolder> {
                   title: Text('Add Diary'),
                 ),
               ),
-              if (widget.category["name"] != "Default")
+              if (widget.folder.name != "Default")
                 PopupMenuItem<String>(
                   value: 'delete',
                   child: ListTile(
@@ -169,15 +163,6 @@ class _DiaryFolderState extends State<DiaryFolder> {
             padding: EdgeInsets.all(0),
             menuPadding: EdgeInsets.all(8.0),
           ),
-
-          //  IconButton(
-          //   onPressed: () {
-          //     PopupMenuButton()
-          //     // Navigator.pushNamed(context, "/diary/create");
-          //   },
-          //   icon: Icon(Icons.more_horiz_rounded),
-          //   // icon: Icon(Icons.add),
-          // ),
         ),
         if (_isOpen)
           Container(
@@ -186,9 +171,9 @@ class _DiaryFolderState extends State<DiaryFolder> {
               children: [
                 ListView.separated(
                   shrinkWrap: true,
-                  itemCount: widget.category["diaries"].length,
+                  itemCount: widget.diaries.length,
                   itemBuilder: (context, index) {
-                    final Diary diary = widget.category["diaries"][index];
+                    final Diary diary = widget.diaries[index];
                     return Padding(
                       padding: const EdgeInsets.only(left: 32.0),
                       child: DiaryCard(diary: diary, width: 100),

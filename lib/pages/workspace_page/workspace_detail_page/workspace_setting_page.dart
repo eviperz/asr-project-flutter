@@ -99,7 +99,7 @@ class _WorkspaceSettingPageState extends State<WorkspaceSettingPage> {
                               ][index];
                               return ListTile(
                                 leading: ProfileImage(),
-                                title: Text(user.username),
+                                // title: Text(user.username),
                                 subtitle: Text(index == 0 ? "Owner" : "User"),
                                 trailing: IconButton(
                                   onPressed: () {},

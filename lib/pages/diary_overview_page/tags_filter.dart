@@ -1,4 +1,3 @@
-import 'package:asr_project/providers/diary_list_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -18,15 +17,15 @@ class TagsFilter extends ConsumerStatefulWidget {
 
 class _TagsFilterState extends ConsumerState<TagsFilter> {
   void _showMultiSelectOptions() {
-    showModalBottomSheet(
-        context: context,
-        builder: (BuildContext context) {
-          return TagFillterModal(
-            items: ref.read(diaryListProvider.notifier).tags,
-            activeItems: widget.selectedTags,
-            onSelectTag: widget.onSelectTags,
-          );
-        });
+    // showModalBottomSheet(
+    //     context: context,
+    //     builder: (BuildContext context) {
+    //       return TagFillterModal(
+    //         items: ref.read(diaryListProvider.notifier).tags,
+    //         activeItems: widget.selectedTags,
+    //         onSelectTag: widget.onSelectTags,
+    //       );
+    //     });
   }
 
   @override

@@ -92,11 +92,11 @@ class _WorkspaceDetailPageState extends State<WorkspaceDetailPage>
                 ),
                 Column(
                   children: [
-                    DiaryFolderBlocks(
-                      categories: categories,
-                      onCreateFolder: _addFolder,
-                      creatingFolderMode: _creatingFolderMode,
-                    ),
+                    // DiaryFolderBlocks(
+                    //   folders: categories,
+                    //   onCreateFolder: _addFolder,
+                    //   creatingFolderMode: _creatingFolderMode,
+                    // ),
                   ],
                 ),
               ],

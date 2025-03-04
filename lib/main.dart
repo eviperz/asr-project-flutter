@@ -1,4 +1,5 @@
 import 'package:asr_project/core/theme.dart';
+import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/workspace.dart';
 import 'package:asr_project/pages/diary_form_page/diary_form_page.dart';
 import 'package:asr_project/pages/event_page/event_page.dart';
@@ -42,15 +43,11 @@ class MyApp extends ConsumerWidget {
           //     builder: (context) => DiaryOverviewPage(),
           //   );
 
-          case "/diary/create":
-            return MaterialPageRoute(
-              builder: (context) => DiaryFormPage(),
-            );
-
           case "/diary/detail":
-            final String id = settings.arguments as String;
+            final Diary diary = settings.arguments as Diary;
+
             return MaterialPageRoute(
-              builder: (context) => DiaryFormPage(id: id),
+              builder: (context) => DiaryFormPage(diary: diary),
             );
 
           case "/record":

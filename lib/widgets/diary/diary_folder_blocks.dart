@@ -1,15 +1,23 @@
+import 'package:asr_project/models/diary.dart';
+import 'package:asr_project/models/diary_folder.dart';
 import 'package:asr_project/widgets/diary/diary_folder.dart';
 import 'package:flutter/material.dart';
 
 class DiaryFolderBlocks extends StatelessWidget {
-  final List categories;
+  final List<DiaryFolderModel> folders;
   final Function onCreateFolder;
+  final Function onUpdateFolderName;
+  final Function onCreateDiary;
+  final Function onDeleteFolder;
   final bool creatingFolderMode;
 
   const DiaryFolderBlocks({
     super.key,
-    required this.categories,
+    required this.folders,
     required this.onCreateFolder,
+    required this.onUpdateFolderName,
+    required this.onCreateDiary,
+    required this.onDeleteFolder,
     required this.creatingFolderMode,
   });
 
@@ -39,11 +47,16 @@ class DiaryFolderBlocks extends StatelessWidget {
           child: ListView.separated(
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
-            itemCount: categories.length,
+            itemCount: folders.length,
             itemBuilder: (context, index) {
-              final category = categories[index];
+              final DiaryFolderModel folder = folders[index];
+              final List<Diary> diaries = folder.diaries ?? [];
               return DiaryFolder(
-                category: category,
+                folder: folder,
+                diaries: diaries,
+                onUpdateFolderName: onUpdateFolderName,
+                onCreateDiary: onCreateDiary,
+                onDeleteFolder: onDeleteFolder,
                 focusNode: creatingFolderMode ? FocusNode() : null,
               );
             },
