@@ -1,27 +1,43 @@
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
 
 class User {
-  final String? id;
+  final String id;
   final String name;
+  final String email;
   final Image profile;
 
-  User(
-      {String? id,
-      required this.name,
-      Image? profile,
-      List<String>? diaryFolderIds})
-      : id = id ?? Uuid().v4(),
-        profile = profile ??
+  static final Map<String, User> _cache = {};
+
+  User({
+    required this.id,
+    required this.name,
+    required this.email,
+    Image? profile,
+  }) : profile = profile ??
             Image.asset(
               "assets/images/default-profile.png",
               fit: BoxFit.cover,
             );
 
   factory User.fromMap(Map<String, dynamic> map) {
-    return User(
+    if (_cache.containsKey(map['id'])) {
+      User cachedUser = _cache[map['id']]!;
+
+      if (cachedUser.id == map['id'] &&
+          cachedUser.name == map['name'] &&
+          cachedUser.email == map['email']) {
+        return cachedUser;
+      }
+    }
+
+    User user = User(
       id: map['id'],
       name: map['name'],
+      email: map['email'],
     );
+
+    _cache[map['id']] = user;
+
+    return user;
   }
 }

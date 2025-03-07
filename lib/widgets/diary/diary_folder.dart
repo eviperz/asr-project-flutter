@@ -5,6 +5,7 @@ import 'package:asr_project/widgets/diary/diary_card.dart';
 import 'package:flutter/material.dart';
 
 class DiaryFolder extends StatefulWidget {
+  final String type;
   final DiaryFolderModel folder;
   final List<Diary> diaries;
   final FocusNode? focusNode;
@@ -14,6 +15,7 @@ class DiaryFolder extends StatefulWidget {
 
   const DiaryFolder({
     super.key,
+    required this.type,
     required this.folder,
     required this.diaries,
     this.focusNode,
@@ -176,7 +178,8 @@ class _DiaryFolderState extends State<DiaryFolder> {
                     final Diary diary = widget.diaries[index];
                     return Padding(
                       padding: const EdgeInsets.only(left: 32.0),
-                      child: DiaryCard(diary: diary, width: 100),
+                      child: DiaryCard(
+                          type: widget.type, diary: diary, width: 100),
                     );
                   },
                   separatorBuilder: (context, index) {

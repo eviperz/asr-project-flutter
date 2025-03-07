@@ -1,53 +1,47 @@
 import 'package:asr_project/models/workspace.dart';
 import 'package:asr_project/pages/workspace_page/starred_workspace_list.dart';
-import 'package:asr_project/pages/workspace_page/workspace_list.dart';
+import 'package:asr_project/pages/workspace_page/workspace_create_form.dart';
+import 'package:asr_project/widgets/workspace/workspace_list.dart';
+import 'package:asr_project/providers/workspace_provider.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class WorkspacePage extends StatefulWidget {
+final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+
+class WorkspacePage extends ConsumerStatefulWidget with RouteAware {
   const WorkspacePage({super.key});
 
   @override
-  State<WorkspacePage> createState() => _WorkspacePageState();
+  ConsumerState<WorkspacePage> createState() => _WorkspacePageState();
 }
 
-class _WorkspacePageState extends State<WorkspacePage> {
+class _WorkspacePageState extends ConsumerState<WorkspacePage> {
   final TextEditingController _controller = TextEditingController();
-  List<Workspace> workspaces = [
-    // Workspace(name: "name1", owner: User(username: "username1")),
-    // Workspace(
-    //   name: "name2",
-    //   owner: User(username: "username2"),
-    //   users: [
-    //     User(username: "username4"),
-    //     User(username: "username5"),
-    //   ],
-    // ),
-    // Workspace(
-    //   name: "Project X",
-    //   owner: User(username: "username3"),
-    //   users: [
-    //     User(username: "username4"),
-    //     User(username: "username5"),
-    //     User(username: "username6"),
-    //     User(username: "username7"),
-    //   ],
-    // ),
-  ];
-  List<Workspace> filteredWorkspaces = [];
+  // List<Workspace> filteredWorkspaces = [];
   Set<String> starredWorkspace = {};
 
   @override
   void initState() {
     super.initState();
-    filteredWorkspaces = workspaces;
+    _controller.addListener(() {
+      _filterWorkspaces(_controller.text);
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   void _filterWorkspaces(String value) {
+    final allWorkspaces = ref.read(workspaceProvider).value ?? [];
     setState(() {
-      filteredWorkspaces = workspaces
-          .where((workspace) =>
-              workspace.name.toLowerCase().contains(value.trim().toLowerCase()))
-          .toList();
+      // filteredWorkspaces = allWorkspaces
+      //     .where((workspace) =>
+      //         workspace.name.toLowerCase().contains(value.trim().toLowerCase()))
+      //     .toList();
     });
   }
 
@@ -62,14 +56,24 @@ class _WorkspacePageState extends State<WorkspacePage> {
   }
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final List<Workspace> workspaces = ref.watch(workspaceProvider).value ?? [];
+    // filteredWorkspaces =
+    //     filteredWorkspaces.isEmpty ? workspaces : filteredWorkspaces;
+
     return Scaffold(
+      appBar: AppBar(
+        actions: [
+          IconButton(
+            onPressed: () => showCupertinoModalPopup(
+              context: context,
+              barrierDismissible: true,
+              builder: (_) => WorkspaceCreateForm(),
+            ),
+            icon: Icon(Icons.add),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -97,7 +101,8 @@ class _WorkspacePageState extends State<WorkspacePage> {
                   toggleStarred: _toggleStarredWorkspace,
                 ),
               WorkspaceList(
-                workspaces: filteredWorkspaces,
+                // workspaces: filteredWorkspaces,
+                workspaces: workspaces,
                 starredWorkspace: starredWorkspace,
                 toggleStarred: _toggleStarredWorkspace,
               ),

@@ -5,11 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 class DiaryCard extends StatefulWidget {
+  final String type;
   final Diary diary;
   final double width;
 
   const DiaryCard({
     super.key,
+    required this.type,
     required this.diary,
     required this.width,
   });
@@ -25,7 +27,10 @@ class _DiaryCardState extends State<DiaryCard> {
       onTap: () => Navigator.pushNamed(
         context,
         "/diary/detail",
-        arguments: widget.diary,
+        arguments: {
+          "type": widget.type,
+          "diary": widget.diary,
+        },
       ),
       child: Card(
         child: Container(

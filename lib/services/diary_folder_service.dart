@@ -8,14 +8,14 @@ import 'package:asr_project/models/diary_folder.dart';
 import 'package:http/http.dart' as http;
 
 class DiaryFolderService {
+  final String userId = AppConfig.userId;
   final String baseUrl = "${AppConfig.baseUrl}/folders";
   final Map<String, String> headers = {
     'Authorization': AppConfig.basicAuth,
     'Content-Type': 'application/json',
   };
 
-  Future<List<DiaryFolderModel>> getAllPersonalDiaryFoldersWithDiaries(
-      String userId) async {
+  Future<List<DiaryFolderModel>> getAllPersonalDiaryFoldersWithDiaries() async {
     try {
       final String type = "personal";
       final response =
@@ -32,10 +32,42 @@ class DiaryFolderService {
     }
   }
 
-  Future<DiaryFolderModel?> createPersonalDiaryFolder(String userId) async {
+  Future<DiaryFolderModel?> createPersonalDiaryFolder() async {
     try {
       final String type = "personal";
       final response = await http.post(Uri.parse("$baseUrl/$type/$userId"),
+          headers: headers,
+          body:
+              jsonEncode(DiaryFolderDetail(folderName: "New Folder").toJson()));
+
+      if (response.statusCode == 200) {
+        return DiaryFolderModel.fromJson(jsonDecode(response.body));
+      }
+    } catch (e) {
+      log("Error creating diary folders: $e");
+    }
+    return null;
+  }
+
+  Future<List<DiaryFolderModel>> getAllWorkspaceDiaryFoldersWithDiaries(String workspaceId) async {
+    try {
+      final response =
+          await http.get(Uri.parse("$baseUrl/workspace/$userId"), headers: headers);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = jsonDecode(response.body);
+        return jsonData.map((data) => DiaryFolderModel.fromJson(data)).toList();
+      }
+      throw Exception("Fail to fetch diary folders: ${response.statusCode}");
+    } catch (e) {
+      log("Error fetching diary folders: $e");
+      return [];
+    }
+  }
+
+  Future<DiaryFolderModel?> createWorkspaceDiaryFolder(String workspaceId) async {
+    try {
+      final response = await http.post(Uri.parse("$baseUrl/workspace/$userId"),
           headers: headers,
           body:
               jsonEncode(DiaryFolderDetail(folderName: "New Folder").toJson()));

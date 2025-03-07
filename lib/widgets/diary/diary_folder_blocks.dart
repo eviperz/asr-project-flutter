@@ -4,6 +4,7 @@ import 'package:asr_project/widgets/diary/diary_folder.dart';
 import 'package:flutter/material.dart';
 
 class DiaryFolderBlocks extends StatelessWidget {
+  final String type;
   final List<DiaryFolderModel> folders;
   final Function onCreateFolder;
   final Function onUpdateFolderName;
@@ -13,6 +14,7 @@ class DiaryFolderBlocks extends StatelessWidget {
 
   const DiaryFolderBlocks({
     super.key,
+    required this.type,
     required this.folders,
     required this.onCreateFolder,
     required this.onUpdateFolderName,
@@ -52,6 +54,7 @@ class DiaryFolderBlocks extends StatelessWidget {
               final DiaryFolderModel folder = folders[index];
               final List<Diary> diaries = folder.diaries ?? [];
               return DiaryFolder(
+                type: type,
                 folder: folder,
                 diaries: diaries,
                 onUpdateFolderName: onUpdateFolderName,

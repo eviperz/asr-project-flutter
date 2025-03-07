@@ -1,38 +1,36 @@
+import 'dart:developer';
+
 import 'package:asr_project/models/diary.dart';
+import 'package:asr_project/models/diary_folder.dart';
 import 'package:asr_project/models/workspace.dart';
-import 'package:asr_project/pages/workspace_page/workspace_detail_page/workspace_setting_page.dart';
+import 'package:asr_project/pages/workspace_page/workspace_detail_page/workspace_setting/workspace_setting_page.dart';
+import 'package:asr_project/providers/workspace_diary_folder_provider%20copy.dart';
 import 'package:asr_project/widgets/diary/diary_folder_blocks.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class WorkspaceDetailPage extends StatefulWidget {
+class WorkspaceDetailPage extends ConsumerStatefulWidget {
   final Workspace workspace;
   const WorkspaceDetailPage({super.key, required this.workspace});
 
   @override
-  State<WorkspaceDetailPage> createState() => _WorkspaceDetailPageState();
+  ConsumerState<WorkspaceDetailPage> createState() =>
+      _WorkspaceDetailPageState();
 }
 
-class _WorkspaceDetailPageState extends State<WorkspaceDetailPage>
-    with SingleTickerProviderStateMixin {
+class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
+  late Workspace _workspace;
+  late bool creatingFolderMode = false;
+  List<DiaryFolderModel> filteredDiaryFolders = [];
+
   late TextEditingController _textEditingController;
-
-  final List categories = [
-    {
-      "name": "Default",
-      "diaries": [Diary(), Diary()],
-    },
-    {
-      "name": "category 2",
-      "diaries": [Diary(), Diary()],
-    }
-  ];
-
-  bool _creatingFolderMode = false;
 
   @override
   void initState() {
     super.initState();
+    _workspace = widget.workspace;
     _textEditingController = TextEditingController();
   }
 
@@ -42,31 +40,117 @@ class _WorkspaceDetailPageState extends State<WorkspaceDetailPage>
     super.dispose();
   }
 
-  void _addFolder() {
-    categories.add({
-      "name": "New Folder",
-      "diaries": [],
-    });
+  void _addFolder() async {
+    String? responseMessage = await ref
+        .read(workspaceDiaryFoldersProvider.notifier)
+        .createWorkspaceDiaryFolder();
 
-    setState(() {
-      _creatingFolderMode = true;
-    });
+    if (!mounted) return;
+    if (responseMessage != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(responseMessage)),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Failed to create diary folder")),
+      );
+    }
   }
 
-  void _showSettingModal() {
-    showCupertinoModalPopup(
+  void _updateFolderName(String id, String name) async {
+    DiaryFolderModel? diaryFolder =
+        (ref.read(workspaceDiaryFoldersProvider).value ?? [])
+            .firstWhereOrNull((folder) => folder.id == id);
+
+    if (diaryFolder == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Folder not found")),
+      );
+      return;
+    }
+
+    DiaryFolderDetail diaryFolderDetail = DiaryFolderDetail(
+      folderName: name,
+      diaryIds: (diaryFolder.diaries ?? []).map((diary) => diary.id).toList(),
+    );
+
+    try {
+      String? responseMessage = await ref
+          .read(workspaceDiaryFoldersProvider.notifier)
+          .updateDiaryFolder(id, diaryFolderDetail);
+      log(responseMessage.toString());
+
+      if (!mounted) return;
+      if (responseMessage != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(responseMessage)),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Failed to update name of diary folder")),
+      );
+    }
+  }
+
+  Future<void> _deleteFolder(String id) async {
+    String? responseMessage = await ref
+        .read(workspaceDiaryFoldersProvider.notifier)
+        .deleteDiaryFolder(id);
+
+    if (!mounted) return;
+    if (responseMessage != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(responseMessage)),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Failed to delete diary folder")),
+      );
+    }
+  }
+
+  Future<void> _addDiaryInFolder(String folderId) async {
+    DiaryDetail diaryDetail = DiaryDetail();
+    Diary? diary = await ref
+        .read(workspaceDiaryFoldersProvider.notifier)
+        .addDiaryToFolder(folderId, diaryDetail);
+
+    if (!mounted) return;
+    if (diary != null) {
+      Navigator.pushNamed(context, "/diary/detail",
+          arguments: {"type": "workspace", "diary": diary});
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Failed to create diary")),
+      );
+    }
+  }
+
+  void _showSettingModal() async {
+    final Workspace? updatedWorkspace =
+        await showCupertinoModalPopup<Workspace>(
       context: context,
       builder: (context) {
-        return WorkspaceSettingPage(workspace: widget.workspace);
+        return WorkspaceSettingPage(workspace: _workspace);
       },
     );
+
+    if (updatedWorkspace != null) {
+      setState(() {
+        _workspace = updatedWorkspace;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final List<DiaryFolderModel> diaryFolders =
+        ref.watch(workspaceDiaryFoldersProvider).value ?? [];
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.workspace.name),
+        title: Text(_workspace.name),
         actions: [
           IconButton(onPressed: _showSettingModal, icon: Icon(Icons.settings))
         ],
@@ -85,18 +169,21 @@ class _WorkspaceDetailPageState extends State<WorkspaceDetailPage>
                     hintText: "Search Diary",
                   ),
                   controller: _textEditingController,
-                  // onTap: () {
-                  //   Navigator.pushNamed(context, route)
-                  // },
-                  // onChanged: _filterWorkspaces,
+                  onTap: () {
+                    // Navigator.pushNamed(context, route)
+                  },
                 ),
                 Column(
                   children: [
-                    // DiaryFolderBlocks(
-                    //   folders: categories,
-                    //   onCreateFolder: _addFolder,
-                    //   creatingFolderMode: _creatingFolderMode,
-                    // ),
+                    DiaryFolderBlocks(
+                      type: "workspace",
+                      folders: diaryFolders,
+                      onCreateFolder: _addFolder,
+                      onUpdateFolderName: _updateFolderName,
+                      onCreateDiary: _addDiaryInFolder,
+                      onDeleteFolder: _deleteFolder,
+                      creatingFolderMode: creatingFolderMode,
+                    ),
                   ],
                 ),
               ],

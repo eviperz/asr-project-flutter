@@ -3,11 +3,13 @@ import 'package:asr_project/widgets/diary/diary_card.dart';
 import 'package:flutter/material.dart';
 
 class DiaryListViewHorizontal extends StatelessWidget {
+  final String type;
   final String title;
   final List diaryList;
 
   const DiaryListViewHorizontal({
     super.key,
+    required this.type,
     required this.title,
     required this.diaryList,
   });
@@ -33,6 +35,7 @@ class DiaryListViewHorizontal extends StatelessWidget {
               return Padding(
                 padding: const EdgeInsets.only(right: 8.0),
                 child: DiaryCard(
+                  type: type,
                   diary: diary,
                   width: 250,
                 ),

@@ -1,5 +1,6 @@
 import 'package:asr_project/providers/tag_list_provider.dart';
-import 'package:asr_project/providers/user_diary_folder_provider.dart';
+import 'package:asr_project/providers/personal_diary_folder_provider.dart';
+import 'package:asr_project/providers/workspace_diary_folder_provider%20copy.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,18 +12,22 @@ import 'package:asr_project/editor/diary_toolbar.dart';
 import 'package:asr_project/pages/diary_form_page/diary_info.dart';
 
 class DiaryFormPage extends ConsumerStatefulWidget {
+  final String type;
   final Diary diary;
 
-  const DiaryFormPage(
-      {super.key, required this.diary});
+  const DiaryFormPage({
+    super.key,
+    required this.type,
+    required this.diary,
+  });
 
   @override
   ConsumerState<DiaryFormPage> createState() => _DiaryFormState();
 }
 
 class _DiaryFormState extends ConsumerState<DiaryFormPage> {
-  late final TextEditingController _titleController;
-  late final quill.QuillController _controller;
+  final TextEditingController _titleController = TextEditingController();
+  final quill.QuillController _controller = quill.QuillController.basic();
   late List<Tag> _tags;
   late DateTime _updatedAt;
   bool _isEdited = false;
@@ -31,10 +36,6 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
   @override
   void initState() {
     super.initState();
-
-    _titleController = TextEditingController();
-
-    _controller = quill.QuillController.basic();
     _controller.addListener(() => setState(() => _isEdited = true));
   }
 
@@ -67,12 +68,15 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
       tagIds: _tags.map((tag) => tag.id).toList(),
     );
 
-    // if (widget.typeWithFolderId.keys.first == "Personal") {
-      await ref.watch(userDiaryFoldersProvider.notifier).updateDiary(widget.diary.id, diaryDetail);
-    // } else {
-      // await ref.watch(userDiaryFoldersProvider.notifier).updateDiary(
-      //     widget.typeWithFolderId["Workspace"], widget.diary.id, diaryDetail);
-    // }
+    if (widget.type == "personal") {
+      await ref
+          .read(personalDiaryFoldersProvider.notifier)
+          .updateDiary(widget.diary.id, diaryDetail);
+    } else {
+      await ref
+          .watch(workspaceDiaryFoldersProvider.notifier)
+          .updateDiary(widget.diary.id, diaryDetail);
+    }
 
     setState(() => _isEdited = false);
   }
@@ -124,13 +128,11 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
                     title: "Delete Diary",
                     content: "Are you sure you want to delete this diary?",
                     onConfirm: () async {
-                        await ref
-                            .read(userDiaryFoldersProvider.notifier)
-                            .removeDiary(widget.diary.id);
-                      if (mounted) {
-                        Navigator.pop(context);
-                        Navigator.pop(context);
-                      }
+                      await ref
+                          .read(personalDiaryFoldersProvider.notifier)
+                          .deleteDiary(widget.diary.id);
+                      Navigator.pop(context);
+                      Navigator.pop(context);
                     },
                     onCancel: () => Navigator.pop(context),
                   ),
@@ -191,6 +193,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
         hintText: "Untitled",
         counterText: "",
       ),
+      autocorrect: false,
       maxLength: 20,
       onChanged: (_) => setState(() => _isEdited = true),
     );

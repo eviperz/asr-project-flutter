@@ -44,10 +44,12 @@ class MyApp extends ConsumerWidget {
           //   );
 
           case "/diary/detail":
-            final Diary diary = settings.arguments as Diary;
+            final Map<String, dynamic> args = settings.arguments as Map<String, dynamic>;
+            final String type = args["type"];
+            final Diary diary = args["diary"];
 
             return MaterialPageRoute(
-              builder: (context) => DiaryFormPage(diary: diary),
+              builder: (context) => DiaryFormPage(type: type, diary: diary),
             );
 
           case "/record":

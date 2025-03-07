@@ -1,30 +1,45 @@
+import 'package:asr_project/models/enum/workspace_permission.dart';
+import 'package:asr_project/models/user.dart';
 import 'package:asr_project/models/workspace.dart';
+import 'package:asr_project/providers/workspace_diary_folder_provider%20copy.dart';
 import 'package:asr_project/widgets/profile_image.dart';
 import 'package:asr_project/widgets/workspace_icon.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class WorkspaceTile extends StatelessWidget {
+class WorkspaceTile extends ConsumerWidget {
   final Workspace workspace;
   final bool isStarred;
   final Function(String) toggleStarred;
 
   const WorkspaceTile({
+    super.key,
     required this.workspace,
     required this.isStarred,
     required this.toggleStarred,
-    super.key,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final User owner = workspace.members.entries
+        .firstWhere((entry) => entry.value == WorkspacePermission.owner)
+        .key;
+
+    final List<User> memberWithoutOwner = Map.fromEntries(
+      workspace.members.entries.where((entry) => entry.key != owner),
+    ).keys.toList();
+
     return Column(
       children: [
         ListTile(
-          onTap: () => Navigator.pushNamed(
-            context,
-            "/workspace/detail",
-            arguments: workspace,
-          ),
+          onTap: () {
+            ref.read(workspaceIdProvider.notifier).state = workspace.id;
+            Navigator.pushNamed(
+              context,
+              "/workspace/detail",
+              arguments: workspace,
+            );
+          },
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8.0),
           ),
@@ -35,7 +50,7 @@ class WorkspaceTile extends StatelessWidget {
               width: 105,
               child: Stack(
                 children: [
-                  if (workspace.users.length > 1)
+                  if (memberWithoutOwner.length > 1)
                     Positioned(
                       left: 60,
                       child: Container(
@@ -44,11 +59,11 @@ class WorkspaceTile extends StatelessWidget {
                             color: Theme.of(context).scaffoldBackgroundColor,
                             borderRadius: BorderRadius.circular(24.0)),
                         child: ProfileImage(
-                          profile: workspace.users[1].profile,
+                          profile: memberWithoutOwner[1].profile,
                         ),
                       ),
                     ),
-                  if (workspace.users.isNotEmpty)
+                  if (memberWithoutOwner.isNotEmpty)
                     Positioned(
                       left: 30,
                       child: Container(
@@ -57,7 +72,7 @@ class WorkspaceTile extends StatelessWidget {
                             color: Theme.of(context).scaffoldBackgroundColor,
                             borderRadius: BorderRadius.circular(24.0)),
                         child: ProfileImage(
-                          profile: workspace.users[0].profile,
+                          profile: memberWithoutOwner[0].profile,
                         ),
                       ),
                     ),
@@ -67,7 +82,7 @@ class WorkspaceTile extends StatelessWidget {
                         color: Theme.of(context).scaffoldBackgroundColor,
                         borderRadius: BorderRadius.circular(24.0)),
                     child: ProfileImage(
-                      profile: workspace.owner.profile,
+                      profile: owner.profile,
                     ),
                   ),
                 ],
@@ -76,12 +91,12 @@ class WorkspaceTile extends StatelessWidget {
             SizedBox(
               width: 8.0,
             ),
-            if (workspace.users.length > 2)
-              Text("+ ${workspace.users.length - 2}")
+            if (memberWithoutOwner.length > 2)
+              Text("+ ${memberWithoutOwner.length - 2}")
           ]),
           trailing: IconButton(
             onPressed: () {
-              toggleStarred(workspace.id!);
+              toggleStarred(workspace.id);
             },
             icon: Icon(
               isStarred ? Icons.star : Icons.star_border,

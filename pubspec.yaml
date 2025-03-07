@@ -39,7 +39,7 @@ dependencies:
   flutter_colorpicker:
   file_picker: ^8.3.5
   audioplayers: ^6.1.2
-  flutter_sound: ^9.23.1
+  flutter_sound: ^9.24.5
   permission_handler: ^11.3.1
   intl:
   audio_waveforms: ^1.2.0
@@ -47,6 +47,7 @@ dependencies:
   path: ^1.9.0
   uuid:
   http:
+  collection:
 
 dev_dependencies:
   flutter_test:

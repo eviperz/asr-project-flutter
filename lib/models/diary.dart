@@ -10,6 +10,8 @@ class Diary {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  static final Map<String, Diary> _cache = {};
+
   Diary({
     String? id,
     String? title,
@@ -32,14 +34,32 @@ class Diary {
   }
 
   factory Diary.fromMap(Map<String, dynamic> map) {
-    return Diary(
-        id: map['diaryId'] as String,
-        title: map['title'] as String,
-        content: Delta.fromJson(map['content']),
-        tagIds: (map['tagIds'] as List<dynamic>).cast<String>(),
-        createdAt: DateTime.parse(map['createdAt']),
-        updatedAt: DateTime.parse(map['updatedAt']));
+    if (_cache.containsKey(map['diaryId'])) {
+      Diary cachedDiary = _cache[map['diaryId']]!;
+
+      if (cachedDiary.title == map['title'] &&
+          cachedDiary.content == Delta.fromJson(map['content']) &&
+          cachedDiary.tagIds ==
+              (map['tagIds'] as List<dynamic>).cast<String>()) {
+        return cachedDiary;
+      }
+    }
+
+    Diary diary = Diary(
+      id: map['diaryId'] as String,
+      title: map['title'] as String,
+      content: Delta.fromJson(map['content']),
+      tagIds: (map['tagIds'] as List<dynamic>).cast<String>(),
+      createdAt: DateTime.parse(map['createdAt']),
+      updatedAt: DateTime.parse(map['updatedAt']),
+    );
+
+    _cache[map['diaryId']] = diary;
+
+    return diary;
   }
+
+  static void removeCache(String id) => _cache.remove(id);
 
   @override
   bool operator ==(Object other) {

@@ -6,39 +6,40 @@ import 'package:asr_project/services/diary_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // StateNotifier Provider
-final userDiaryFoldersProvider =
-    AsyncNotifierProvider<UserDiaryFoldersNotifier, List<DiaryFolderModel>>(() {
-  return UserDiaryFoldersNotifier();
+final personalDiaryFoldersProvider =
+    AsyncNotifierProvider<PersonalDiaryFoldersNotifier, List<DiaryFolderModel>>(() {
+  return PersonalDiaryFoldersNotifier();
 });
 
 // Notifier Class
-class UserDiaryFoldersNotifier extends AsyncNotifier<List<DiaryFolderModel>> {
-  final String userId = "67c6dc96cebfae511c3c7a3a";
+class PersonalDiaryFoldersNotifier extends AsyncNotifier<List<DiaryFolderModel>> {
   final DiaryFolderService _diaryFolderService = DiaryFolderService();
   final DiaryService _diaryService = DiaryService();
 
   @override
   Future<List<DiaryFolderModel>> build() async {
-    return _diaryFolderService.getAllPersonalDiaryFoldersWithDiaries(userId);
+    return _diaryFolderService.getAllPersonalDiaryFoldersWithDiaries();
   }
 
   Future<void> _fetchData() async {
-    state =
-        const AsyncValue.loading();
-    state = await AsyncValue.guard(() =>
-        _diaryFolderService.getAllPersonalDiaryFoldersWithDiaries(userId));
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(
+        () => _diaryFolderService.getAllPersonalDiaryFoldersWithDiaries());
   }
 
-  Future<void> createPersonalDiaryFolder() async {
+  Future<String?> createPersonalDiaryFolder() async {
     DiaryFolderModel? diaryFolderModel =
-        await _diaryFolderService.createPersonalDiaryFolder(userId);
+        await _diaryFolderService.createPersonalDiaryFolder();
 
     if (diaryFolderModel != null) {
-      state = AsyncValue.data([...?state.value, diaryFolderModel]);
+      state = AsyncValue.data([...(state.value ?? []), diaryFolderModel]);
+      // _fetchData();
+      return "Sucess to create Diary Folder";
     }
+    return null;
   }
 
-  Future<void> updateDiaryFolder(
+  Future<String?> updateDiaryFolder(
       String id, DiaryFolderDetail diaryFolderDetail) async {
     DiaryFolderModel? diaryFolderModel =
         await _diaryFolderService.updateDiaryFolder(id, diaryFolderDetail);
@@ -47,15 +48,20 @@ class UserDiaryFoldersNotifier extends AsyncNotifier<List<DiaryFolderModel>> {
       state = AsyncValue.data((state.value ?? [])
           .map((d) => d.id == id ? diaryFolderModel : d)
           .toList());
+      // _fetchData();
+      return "Sucess to update Diary Folder";
     }
+    return null;
   }
 
-  Future<void> deleteDiaryFolder(String folderId) async {
+  Future<String?> deleteDiaryFolder(String folderId) async {
     String? id = await _diaryFolderService.deleteDiaryFolder(folderId);
     if (id != null) {
       state = AsyncValue.data(
           (state.value ?? []).where((d) => d.id != id).toList());
+      return "Sucess to delete Diary Folder";
     }
+    return null;
   }
 
   Future<Diary?> addDiaryToFolder(
@@ -89,7 +95,7 @@ class UserDiaryFoldersNotifier extends AsyncNotifier<List<DiaryFolderModel>> {
     return null;
   }
 
-  Future<void> removeDiary(String diaryId) async {
+  Future<void> deleteDiary(String diaryId) async {
     await _diaryService.deleteDiary(diaryId);
     await _fetchData();
   }

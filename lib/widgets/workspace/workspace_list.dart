@@ -1,5 +1,5 @@
 import 'package:asr_project/models/workspace.dart';
-import 'package:asr_project/pages/workspace_page/workspace_tile.dart';
+import 'package:asr_project/widgets/workspace/workspace_tile.dart';
 import 'package:flutter/material.dart';
 
 class WorkspaceList extends StatelessWidget {
