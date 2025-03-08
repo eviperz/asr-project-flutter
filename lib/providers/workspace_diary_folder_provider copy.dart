@@ -5,7 +5,7 @@ import 'package:asr_project/services/diary_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final workspaceIdProvider = StateProvider<String>((ref) {
-  return ''; // Default value, which can be updated later
+  return '';
 });
 
 final workspaceDiaryFoldersProvider = AsyncNotifierProvider<
@@ -31,10 +31,10 @@ class WorkspaceDiaryFoldersNotifier
         () => _diaryFolderService.getAllWorkspaceDiaryFoldersWithDiaries(id));
   }
 
-  Future<String?> createWorkspaceDiaryFolder() async {
+  Future<String?> createWorkspaceDiaryFolder(DiaryFolderDetail diaryFolderDetail) async {
     final String id = ref.watch(workspaceIdProvider);
     final result = await AsyncValue.guard(
-        () => _diaryFolderService.createWorkspaceDiaryFolder(id));
+        () => _diaryFolderService.createWorkspaceDiaryFolder(id, diaryFolderDetail));
 
     return result.when(
       data: (diaryFolderModel) {

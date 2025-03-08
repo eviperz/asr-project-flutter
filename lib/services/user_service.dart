@@ -6,13 +6,14 @@ import 'package:asr_project/models/user.dart';
 import 'package:http/http.dart' as http;
 
 class UserService {
+  final String id = AppConfig.userId;
   final String baseUrl = "${AppConfig.baseUrl}/users";
   final Map<String, String> headers = {
     'Authorization': AppConfig.basicAuth,
     'Content-Type': 'application/json',
   };
 
-  Future<User?> getUserById(String id) async {
+  Future<User?> getUserById() async {
     try {
       final response =
           await http.get(Uri.parse("$baseUrl/$id"), headers: headers);

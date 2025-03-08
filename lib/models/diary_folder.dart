@@ -9,19 +9,9 @@ class DiaryFolderModel {
       : diaries = diaries ?? [];
 
   factory DiaryFolderModel.fromJson(Map<String, dynamic> json) {
-    Map<String, dynamic> folderData = {};
-
-    if (json.containsKey('personalFolder')) {
-      folderData = json['personalFolder'];
-    } else if (json.containsKey('workspaceFolder')) {
-      folderData = json['workspaceFolder'];
-    } else {
-      folderData = json;
-    }
-
     return DiaryFolderModel(
-      id: folderData['diaryFolderId'] as String,
-      name: folderData['folderName'] as String,
+      id: json['diaryFolderModel']['diaryFolderId'] as String,
+      name: json['diaryFolderModel']['folderName'] as String,
       diaries: json.containsKey('diaries')
           ? (json['diaries'] as List<dynamic>)
               .map((item) => Diary.fromMap(item))
@@ -40,16 +30,15 @@ class DiaryFolderModel {
 }
 
 class DiaryFolderDetail {
-  final String folderName;
+  final String? folderName;
   final List<String>? diaryIds;
 
-  DiaryFolderDetail({required this.folderName, List<String>? diaryIds})
-      : diaryIds = diaryIds ?? [];
+  DiaryFolderDetail({this.folderName, this.diaryIds});
 
   Map<String, dynamic> toJson() {
     return {
-      "folderName": folderName,
-      "diaryIds": diaryIds,
+      if (folderName != null) "folderName": folderName,
+      if (diaryIds != null) "diaryIds": diaryIds,
     };
   }
 }

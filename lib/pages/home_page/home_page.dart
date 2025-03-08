@@ -27,9 +27,15 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   void _addFolder() async {
+    String uniqueName = _generateUniqueFolderName("New Folder", 0);
+
+    DiaryFolderDetail diaryFolderDetail = DiaryFolderDetail(
+      folderName: uniqueName,
+    );
+
     String? responseMessage = await ref
         .read(personalDiaryFoldersProvider.notifier)
-        .createPersonalDiaryFolder();
+        .createPersonalDiaryFolder(diaryFolderDetail);
 
     if (!mounted) return;
     if (responseMessage != null) {
@@ -43,21 +49,24 @@ class _HomePageState extends ConsumerState<HomePage> {
     }
   }
 
-  void _updateFolderName(String id, String name) async {
-    DiaryFolderModel? diaryFolder =
-        (ref.read(personalDiaryFoldersProvider).value ?? [])
-            .firstWhereOrNull((folder) => folder.id == id);
+  String _generateUniqueFolderName(String baseName, double count) {
+    final List<DiaryFolderModel> diaryFolders =
+        ref.read(personalDiaryFoldersProvider).value ?? [];
 
-    if (diaryFolder == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Folder not found")),
-      );
-      return;
+    String newName = count == 0 ? baseName : "$baseName (${count.toInt()})";
+
+    bool isDuplicate = diaryFolders.any((folder) => folder.name == newName);
+
+    if (isDuplicate) {
+      return _generateUniqueFolderName(baseName, count + 1);
     }
 
+    return newName;
+  }
+
+  void _updateFolderName(String id, String name) async {
     DiaryFolderDetail diaryFolderDetail = DiaryFolderDetail(
       folderName: name,
-      diaryIds: (diaryFolder.diaries ?? []).map((diary) => diary.id).toList(),
     );
 
     try {

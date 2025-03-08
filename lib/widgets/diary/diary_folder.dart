@@ -1,12 +1,14 @@
+import 'dart:developer';
+
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/diary_folder.dart';
 import 'package:asr_project/widgets/custom_dialog.dart';
-import 'package:asr_project/widgets/diary/diary_card.dart';
 import 'package:flutter/material.dart';
 
 class DiaryFolder extends StatefulWidget {
   final String type;
   final DiaryFolderModel folder;
+  final List<DiaryFolderModel> folders;
   final List<Diary> diaries;
   final FocusNode? focusNode;
   final Function onUpdateFolderName;
@@ -17,6 +19,7 @@ class DiaryFolder extends StatefulWidget {
     super.key,
     required this.type,
     required this.folder,
+    required this.folders,
     required this.diaries,
     this.focusNode,
     required this.onUpdateFolderName,
@@ -41,18 +44,11 @@ class _DiaryFolderState extends State<DiaryFolder> {
 
     if (widget.focusNode != null) {
       _focusNode.requestFocus();
+      log(_focusNode.hasFocus.toString());
     }
 
     _focusNode.addListener(() {
-      if (mounted) {
-        if (_textEditingController.text != widget.folder.name) {
-          if (_textEditingController.text.isEmpty) {
-            _textEditingController.text = widget.folder.name;
-          } else {
-            //
-          }
-        }
-      }
+      setState(() {});
     });
 
     _textEditingController = TextEditingController();
@@ -66,6 +62,21 @@ class _DiaryFolderState extends State<DiaryFolder> {
     _focusNode.dispose();
     _textEditingController.dispose();
     super.dispose();
+  }
+
+  String _generateUniqueFolderName(String baseName, double count) {
+    List<DiaryFolderModel> diaryFolders = widget.folders;
+
+    String newName = count == 0 ? baseName : "$baseName (${count.toInt()})";
+
+    bool isDuplicate = diaryFolders.any((folder) =>
+        folder.name == newName && folder.name != widget.folder.name);
+
+    if (isDuplicate) {
+      return _generateUniqueFolderName(baseName, count + 1);
+    }
+
+    return newName;
   }
 
   @override
@@ -103,9 +114,17 @@ class _DiaryFolderState extends State<DiaryFolder> {
                   ),
                   focusNode: _focusNode,
                   controller: _textEditingController,
+                  onSubmitted: (value) {
+                    String uniqueName =
+                        _generateUniqueFolderName(value.trim(), 0);
+                    _textEditingController.text = uniqueName;
+                    widget.onUpdateFolderName(widget.folder.id, uniqueName);
+                  },
                   onTapOutside: (event) {
-                    widget.onUpdateFolderName(
-                        widget.folder.id, _textEditingController.text);
+                    String uniqueName = _generateUniqueFolderName(
+                        _textEditingController.text.trim(), 0);
+                    _textEditingController.text = uniqueName;
+                    widget.onUpdateFolderName(widget.folder.id, uniqueName);
                     _focusNode.unfocus();
                   },
                 ),
@@ -167,27 +186,29 @@ class _DiaryFolderState extends State<DiaryFolder> {
           ),
         ),
         if (_isOpen)
-          Container(
-            padding: EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                ListView.separated(
-                  shrinkWrap: true,
-                  itemCount: widget.diaries.length,
-                  itemBuilder: (context, index) {
-                    final Diary diary = widget.diaries[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(left: 32.0),
-                      child: DiaryCard(
-                          type: widget.type, diary: diary, width: 100),
-                    );
-                  },
-                  separatorBuilder: (context, index) {
-                    return Divider();
-                  },
-                ),
-              ],
-            ),
+          ListView.separated(
+            shrinkWrap: true,
+            itemCount: widget.diaries.length,
+            itemBuilder: (context, index) {
+              final Diary diary = widget.diaries[index];
+              return ListTile(
+                contentPadding: EdgeInsets.only(left: 90.0),
+                leading: Icon(Icons.note),
+                title: Text(diary.title),
+                onTap: () {
+                  Navigator.pushNamed(context, "/diary/detail", arguments: {
+                    "type": widget.type,
+                    "diary": diary,
+                  });
+                },
+              );
+            },
+            separatorBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.only(left: 32.0),
+                child: Divider(),
+              );
+            },
           )
       ],
     );

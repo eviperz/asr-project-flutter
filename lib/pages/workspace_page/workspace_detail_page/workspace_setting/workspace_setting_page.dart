@@ -5,7 +5,7 @@ import 'package:asr_project/widgets/workspace/workspace_invite_members_by_email_
 import 'package:asr_project/providers/workspace_provider.dart';
 import 'package:asr_project/widgets/default_modal.dart';
 import 'package:asr_project/widgets/profile_image.dart';
-import 'package:asr_project/widgets/workspace/workspace_name_text_field.dart';
+import 'package:asr_project/widgets/workspace/workspace_name_and_description_text_field.dart';
 import 'package:asr_project/widgets/workspace_icon.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -215,7 +215,7 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
                         ],
                       ),
                       SizedBox(
-                        height: 400,
+                        height: 150,
                         child: ListView.separated(
                             itemCount: _workspace.members.length,
                             itemBuilder: (context, index) {

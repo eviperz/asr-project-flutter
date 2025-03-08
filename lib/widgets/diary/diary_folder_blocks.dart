@@ -53,14 +53,17 @@ class DiaryFolderBlocks extends StatelessWidget {
             itemBuilder: (context, index) {
               final DiaryFolderModel folder = folders[index];
               final List<Diary> diaries = folder.diaries ?? [];
+              final FocusNode focusNode = FocusNode();
+              focusNode.requestFocus();
               return DiaryFolder(
                 type: type,
                 folder: folder,
+                folders: folders,
                 diaries: diaries,
                 onUpdateFolderName: onUpdateFolderName,
                 onCreateDiary: onCreateDiary,
                 onDeleteFolder: onDeleteFolder,
-                focusNode: creatingFolderMode ? FocusNode() : null,
+                focusNode: creatingFolderMode ? focusNode : null,
               );
             },
             separatorBuilder: (context, index) {

@@ -39,6 +39,23 @@ final darkTheme = ThemeData(
 
 final lightTheme = ThemeData(
   brightness: Brightness.light,
+  colorScheme: ColorScheme(
+    brightness: Brightness.light,
+    primary: Colors.indigoAccent,
+    onPrimary: Colors.white,
+    secondary: Colors.black54,
+    onSecondary: Colors.white,
+    tertiary: Colors.black38,
+    error: Colors.red,
+    onError: Colors.white,
+    surface: Colors.white,
+    onSurface: Colors.black,
+  ),
+  dividerTheme: DividerThemeData(color: Colors.black12),
+  cardTheme: CardTheme(
+      color: const Color.fromARGB(255, 245, 245, 245),
+      shadowColor: Colors.transparent),
+
   // primaryColor: Colors.black,
 
   // colorScheme: ColorScheme.dark(

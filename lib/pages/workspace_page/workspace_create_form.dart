@@ -1,7 +1,7 @@
 import 'package:asr_project/models/workspace.dart';
 import 'package:asr_project/providers/workspace_provider.dart';
 import 'package:asr_project/widgets/workspace/workspace_invite_members_by_email_box.dart';
-import 'package:asr_project/widgets/workspace/workspace_name_text_field.dart';
+import 'package:asr_project/widgets/workspace/workspace_name_and_description_text_field.dart';
 import 'package:asr_project/widgets/workspace_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -71,21 +71,13 @@ class _WorkspaceCreateFormState extends ConsumerState<WorkspaceCreateForm> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
         child: Scaffold(
           appBar: AppBar(
-            leading: TextButton(
+            leading: IconButton(
               onPressed: () => Navigator.pop(context),
-              child: Text("Cancel"),
+              icon: Icon(Icons.close),
             ),
             title: Text(
               "Create Workspace",
             ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  _createWorkspace();
-                },
-                child: Text("Create"),
-              ),
-            ],
           ),
           body: SingleChildScrollView(
             child: Padding(
@@ -121,6 +113,23 @@ class _WorkspaceCreateFormState extends ConsumerState<WorkspaceCreateForm> {
                     addEmail: _addInvitedMemberEmails,
                     removeEmail: _removeInvitedMemberEmails,
                   ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStatePropertyAll(
+                            Theme.of(context).primaryColor),
+                        shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        )),
+                      ),
+                      onPressed: () {
+                        _createWorkspace();
+                      },
+                      child:
+                          Text("Create", style: TextStyle(color: Colors.white)),
+                    ),
+                  )
                 ],
               ),
             ),

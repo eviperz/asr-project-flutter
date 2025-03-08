@@ -32,13 +32,12 @@ class DiaryFolderService {
     }
   }
 
-  Future<DiaryFolderModel?> createPersonalDiaryFolder() async {
+  Future<DiaryFolderModel?> createPersonalDiaryFolder(
+      DiaryFolderDetail diaryFolderDetail) async {
     try {
       final String type = "personal";
       final response = await http.post(Uri.parse("$baseUrl/$type/$userId"),
-          headers: headers,
-          body:
-              jsonEncode(DiaryFolderDetail(folderName: "New Folder").toJson()));
+          headers: headers, body: jsonEncode(diaryFolderDetail.toJson()));
 
       if (response.statusCode == 200) {
         return DiaryFolderModel.fromJson(jsonDecode(response.body));
@@ -49,10 +48,11 @@ class DiaryFolderService {
     return null;
   }
 
-  Future<List<DiaryFolderModel>> getAllWorkspaceDiaryFoldersWithDiaries(String workspaceId) async {
+  Future<List<DiaryFolderModel>> getAllWorkspaceDiaryFoldersWithDiaries(
+      String workspaceId) async {
     try {
-      final response =
-          await http.get(Uri.parse("$baseUrl/workspace/$userId"), headers: headers);
+      final response = await http.get(Uri.parse("$baseUrl/workspace/$userId"),
+          headers: headers);
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = jsonDecode(response.body);
@@ -65,12 +65,13 @@ class DiaryFolderService {
     }
   }
 
-  Future<DiaryFolderModel?> createWorkspaceDiaryFolder(String workspaceId) async {
+  Future<DiaryFolderModel?> createWorkspaceDiaryFolder(
+      String workspaceId, DiaryFolderDetail diaryFolderDetail) async {
     try {
       final response = await http.post(Uri.parse("$baseUrl/workspace/$userId"),
           headers: headers,
           body:
-              jsonEncode(DiaryFolderDetail(folderName: "New Folder").toJson()));
+              jsonEncode(diaryFolderDetail.toJson()));
 
       if (response.statusCode == 200) {
         return DiaryFolderModel.fromJson(jsonDecode(response.body));

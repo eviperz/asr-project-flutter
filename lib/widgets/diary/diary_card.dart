@@ -1,7 +1,5 @@
 import 'package:asr_project/models/diary.dart';
-import 'package:asr_project/providers/diary_favorite_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 class DiaryCard extends StatefulWidget {
@@ -58,36 +56,36 @@ class _DiaryCardState extends State<DiaryCard> {
                           ),
                         ),
                       ),
-                      Consumer(
-                        builder: (context, ref, child) {
-                          late bool isFavorite = ref
-                              .read(diaryFavoriteProvider.notifier)
-                              .isFavorite(widget.diary.id);
-                          return IconButton(
-                            onPressed: () {
-                              if (isFavorite) {
-                                ref
-                                    .read(diaryFavoriteProvider.notifier)
-                                    .removeFavorite(widget.diary.id);
-                              } else {
-                                ref
-                                    .read(diaryFavoriteProvider.notifier)
-                                    .addFavorite(widget.diary.id);
-                              }
+                      // Consumer(
+                      //   builder: (context, ref, child) {
+                      //     late bool isFavorite = ref
+                      //         .read(diaryFavoriteProvider.notifier)
+                      //         .isFavorite(widget.diary.id);
+                      //     return IconButton(
+                      //       onPressed: () {
+                      //         if (isFavorite) {
+                      //           ref
+                      //               .read(diaryFavoriteProvider.notifier)
+                      //               .removeFavorite(widget.diary.id);
+                      //         } else {
+                      //           ref
+                      //               .read(diaryFavoriteProvider.notifier)
+                      //               .addFavorite(widget.diary.id);
+                      //         }
 
-                              setState(() {});
-                            },
-                            icon: isFavorite
-                                ? Icon(
-                                    Icons.favorite,
-                                    color: Colors.red,
-                                  )
-                                : Icon(
-                                    Icons.favorite_border,
-                                  ),
-                          );
-                        },
-                      ),
+                      //         setState(() {});
+                      //       },
+                      //       icon: isFavorite
+                      //           ? Icon(
+                      //               Icons.favorite,
+                      //               color: Colors.red,
+                      //             )
+                      //           : Icon(
+                      //               Icons.favorite_border,
+                      //             ),
+                      //     );
+                      //   },
+                      // ),
                     ],
                   ),
                   Text(

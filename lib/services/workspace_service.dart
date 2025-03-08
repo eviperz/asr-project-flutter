@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 
 class WorkspaceService {
   final String userId = AppConfig.userId;
-  final String baseUrl = "${AppConfig.baseUrl}/workspace";
+  final String baseUrl = "${AppConfig.baseUrl}/workspaces";
   final Map<String, String> headers = {
     'Authorization': AppConfig.basicAuth,
     'Content-Type': 'application/json',
@@ -37,7 +37,7 @@ class WorkspaceService {
         ),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         return Workspace.fromJson(jsonDecode(response.body));
       }
       throw Exception("Fail to create workspace: ${response.statusCode}");

@@ -13,7 +13,7 @@ class UserNotifier extends AsyncNotifier<User?> {
 
   @override
   Future<User?> build() async {
-    User? user = await _userService.getUserById("67c6dc96cebfae511c3c7a3a");
+    User? user = await _userService.getUserById();
     if (user != null) {
       return user;
     }

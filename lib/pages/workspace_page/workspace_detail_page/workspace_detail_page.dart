@@ -6,7 +6,6 @@ import 'package:asr_project/models/workspace.dart';
 import 'package:asr_project/pages/workspace_page/workspace_detail_page/workspace_setting/workspace_setting_page.dart';
 import 'package:asr_project/providers/workspace_diary_folder_provider%20copy.dart';
 import 'package:asr_project/widgets/diary/diary_folder_blocks.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,10 +39,29 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
     super.dispose();
   }
 
+  String _generateUniqueFolderName(String baseName, double count) {
+    final List<DiaryFolderModel> diaryFolders =
+        ref.read(workspaceDiaryFoldersProvider).value ?? [];
+
+    String newName = count == 0 ? baseName : "$baseName (${count.toInt()})";
+
+    bool isDuplicate = diaryFolders.any((folder) => folder.name == newName);
+
+    if (isDuplicate) {
+      return _generateUniqueFolderName(baseName, count + 1);
+    }
+
+    return newName;
+  }
+
   void _addFolder() async {
+    String uniqueName = _generateUniqueFolderName("New Folder", 0);
+    DiaryFolderDetail diaryFolderDetail =
+        DiaryFolderDetail(folderName: uniqueName);
+
     String? responseMessage = await ref
         .read(workspaceDiaryFoldersProvider.notifier)
-        .createWorkspaceDiaryFolder();
+        .createWorkspaceDiaryFolder(diaryFolderDetail);
 
     if (!mounted) return;
     if (responseMessage != null) {
@@ -58,20 +76,8 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
   }
 
   void _updateFolderName(String id, String name) async {
-    DiaryFolderModel? diaryFolder =
-        (ref.read(workspaceDiaryFoldersProvider).value ?? [])
-            .firstWhereOrNull((folder) => folder.id == id);
-
-    if (diaryFolder == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Folder not found")),
-      );
-      return;
-    }
-
     DiaryFolderDetail diaryFolderDetail = DiaryFolderDetail(
       folderName: name,
-      diaryIds: (diaryFolder.diaries ?? []).map((diary) => diary.id).toList(),
     );
 
     try {
