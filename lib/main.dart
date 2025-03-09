@@ -1,6 +1,7 @@
 import 'package:asr_project/core/theme.dart';
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/workspace.dart';
+import 'package:asr_project/pages/authentication_page/sign_in_page.dart';
 import 'package:asr_project/pages/diary_form_page/diary_form_page.dart';
 import 'package:asr_project/pages/event_page/event_page.dart';
 import 'package:asr_project/pages/record_voice_page.dart';
@@ -23,7 +24,7 @@ class MyApp extends ConsumerWidget {
     return MaterialApp(
       title: "ASR App",
       theme: lightTheme,
-      home: MainScreen(),
+      home: SignInPage(),
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case "/home":
@@ -44,7 +45,8 @@ class MyApp extends ConsumerWidget {
           //   );
 
           case "/diary/detail":
-            final Map<String, dynamic> args = settings.arguments as Map<String, dynamic>;
+            final Map<String, dynamic> args =
+                settings.arguments as Map<String, dynamic>;
             final String type = args["type"];
             final Diary diary = args["diary"];
 

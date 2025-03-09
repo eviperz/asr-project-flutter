@@ -40,10 +40,10 @@ PODS:
   - Flutter (1.0.0)
   - flutter_keyboard_visibility_temp_fork (0.0.1):
     - Flutter
-  - flutter_sound (9.23.1):
+  - flutter_sound (9.25.1):
     - Flutter
-    - flutter_sound_core (= 9.23.1)
-  - flutter_sound_core (9.23.1)
+    - flutter_sound_core (= 9.25.1)
+  - flutter_sound_core (9.25.1)
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -114,8 +114,8 @@ SPEC CHECKSUMS:
   file_picker: b159e0c068aef54932bb15dc9fd1571818edaf49
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_keyboard_visibility_temp_fork: 8a8809c4129e31d25fca77446e0f3fd548122ced
-  flutter_sound: 094823bc99ca323422808f386c6f597ea157dc49
-  flutter_sound_core: 8d3c08efc430a06debc49a627f9b651b542e8351
+  flutter_sound: d76615597357951358e1de808b0c1edbb06354b4
+  flutter_sound_core: 065aca7698f13a934d8cb8156a2865efd282b1e8
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
   quill_native_bridge_ios: 2b01d585fcc73d0f5eed78c0bd244ee564b06f5a
@@ -124,6 +124,6 @@ SPEC CHECKSUMS:
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
   url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
 
-PODFILE CHECKSUM: 819463e6a0290f5a72f145ba7cde16e8b6ef0796
+PODFILE CHECKSUM: a57f30d18f102dd3ce366b1d62a55ecbef2158e5
 
 COCOAPODS: 1.16.2
