@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class SortFilterWidget extends StatelessWidget {
-  final Function(bool) onSort;
+  final VoidCallback onSort;
   final bool isAscending;
 
   const SortFilterWidget({
@@ -14,7 +14,7 @@ class SortFilterWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return OutlinedButton(
       onPressed: () {
-        onSort(!isAscending);
+        onSort();
       },
       child: Wrap(
         spacing: 5,

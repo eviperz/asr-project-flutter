@@ -1,47 +1,15 @@
 import 'package:flutter/material.dart';
 
-final darkTheme = ThemeData(
+final ThemeData darkTheme = ThemeData(
   brightness: Brightness.dark,
-  // primaryColor: Colors.black,
-  // colorScheme: ColorScheme.dark(
-  //   secondary: Colors.white,
-  //   tertiary: Colors.white70,
-  // ),
-  // // scaffoldBackgroundColor: Colors.black,
-  // // bottomSheetTheme: BottomSheetThemeData(
-  // //   backgroundColor: Colors.transparent,
-  // // ),
-  // appBarTheme: AppBarTheme(
-  //   // backgroundColor: Colors.black,
-  //   foregroundColor: Colors.white,
-  // ),
-  textTheme: TextTheme(
-    headlineLarge: TextStyle(
-      fontWeight: FontWeight.bold,
-      fontSize: 32,
-    ),
-    headlineMedium: TextStyle(
-      fontWeight: FontWeight.bold,
-      fontSize: 20,
-    ),
-    headlineSmall: TextStyle(
-      fontWeight: FontWeight.bold,
-      fontSize: 16,
-    ),
-    titleLarge: TextStyle(),
-    titleMedium: TextStyle(
-      fontWeight: FontWeight.normal,
-      fontSize: 20,
-    ),
-    titleSmall: TextStyle(),
-  ),
+  textTheme: textTheme,
   elevatedButtonTheme: elevatedButtonThemeData,
 );
 
-final lightTheme = ThemeData(
+final ThemeData lightTheme = ThemeData(
   brightness: Brightness.light,
   colorScheme: lightThemeColorScheme,
-  dividerTheme: DividerThemeData(color: Colors.black12),
+  dividerTheme: DividerThemeData(color: Colors.black12, space: 0),
   cardTheme: CardTheme(
       color: const Color.fromARGB(255, 245, 245, 245),
       shadowColor: Colors.transparent),
@@ -53,26 +21,20 @@ final lightTheme = ThemeData(
   //   secondary: Colors.white,
   //   tertiary: Colors.white70,
   // ),
-  textTheme: TextTheme(
-    headlineLarge: TextStyle(
-      fontWeight: FontWeight.bold,
-      fontSize: 32,
-    ),
-    headlineMedium: TextStyle(
-      fontWeight: FontWeight.bold,
-      fontSize: 20,
-    ),
-    headlineSmall: TextStyle(
-      fontWeight: FontWeight.bold,
-      fontSize: 16,
-    ),
-    titleLarge: TextStyle(),
-    titleMedium: TextStyle(
-      fontWeight: FontWeight.normal,
-      fontSize: 20,
-    ),
-    titleSmall: TextStyle(),
-  ),
+  textTheme: textTheme,
+);
+
+final ColorScheme darkThemeColorSchema = ColorScheme(
+  brightness: Brightness.dark,
+  primary: Colors.indigoAccent,
+  onPrimary: Colors.black,
+  secondary: Color(0xFFF8F8F8),
+  onSecondary: Colors.black38,
+  tertiary: Colors.black38,
+  error: Colors.red,
+  onError: Colors.white,
+  surface: Colors.white,
+  onSurface: Colors.black,
 );
 
 final ColorScheme lightThemeColorScheme = ColorScheme(
@@ -86,6 +48,27 @@ final ColorScheme lightThemeColorScheme = ColorScheme(
   onError: Colors.white,
   surface: Colors.white,
   onSurface: Colors.black,
+);
+
+final TextTheme textTheme = TextTheme(
+  headlineLarge: TextStyle(
+    fontWeight: FontWeight.bold,
+    fontSize: 32,
+  ),
+  headlineMedium: TextStyle(
+    fontWeight: FontWeight.bold,
+    fontSize: 20,
+  ),
+  headlineSmall: TextStyle(
+    fontWeight: FontWeight.bold,
+    fontSize: 16,
+  ),
+  titleLarge: TextStyle(),
+  titleMedium: TextStyle(
+    fontWeight: FontWeight.normal,
+    fontSize: 20,
+  ),
+  titleSmall: TextStyle(),
 );
 
 final ElevatedButtonThemeData elevatedButtonThemeData = ElevatedButtonThemeData(

@@ -14,6 +14,7 @@ class UserService {
   };
 
   Future<User?> getUserById() async {
+    log("$baseUrl/$id");
     try {
       final response =
           await http.get(Uri.parse("$baseUrl/$id"), headers: headers);

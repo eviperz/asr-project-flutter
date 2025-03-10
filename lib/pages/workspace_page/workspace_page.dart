@@ -1,15 +1,17 @@
+import 'package:asr_project/models/user.dart';
 import 'package:asr_project/models/workspace.dart';
 import 'package:asr_project/pages/workspace_page/starred_workspace_list.dart';
 import 'package:asr_project/pages/workspace_page/workspace_create_form.dart';
+import 'package:asr_project/providers/user_provider.dart';
+import 'package:asr_project/widgets/custom_drawer.dart';
+import 'package:asr_project/widgets/custom_textfield.dart';
 import 'package:asr_project/widgets/workspace/workspace_list.dart';
 import 'package:asr_project/providers/workspace_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
-
-class WorkspacePage extends ConsumerStatefulWidget with RouteAware {
+class WorkspacePage extends ConsumerStatefulWidget {
   const WorkspacePage({super.key});
 
   @override
@@ -17,32 +19,36 @@ class WorkspacePage extends ConsumerStatefulWidget with RouteAware {
 }
 
 class _WorkspacePageState extends ConsumerState<WorkspacePage> {
-  final TextEditingController _controller = TextEditingController();
-  // List<Workspace> filteredWorkspaces = [];
+  final TextEditingController _searchTextEditingController =
+      TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   Set<String> starredWorkspace = {};
 
   @override
   void initState() {
     super.initState();
-    _controller.addListener(() {
-      _filterWorkspaces(_controller.text);
-    });
+    _searchTextEditingController.addListener(() => setState(() {}));
+    _searchFocusNode.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
-    _controller.dispose();
     super.dispose();
+    _searchTextEditingController.dispose();
+    _searchFocusNode.dispose();
   }
 
-  void _filterWorkspaces(String value) {
-    final allWorkspaces = ref.read(workspaceProvider).value ?? [];
-    setState(() {
-      // filteredWorkspaces = allWorkspaces
-      //     .where((workspace) =>
-      //         workspace.name.toLowerCase().contains(value.trim().toLowerCase()))
-      //     .toList();
-    });
+  List<Workspace> _filterWorkspace() {
+    List<Workspace> filtered =
+        (ref.read(workspaceProvider).value ?? []).where((workspace) {
+      bool matchesSearch = _searchTextEditingController.text.isEmpty ||
+          workspace.name
+              .toLowerCase()
+              .contains(_searchTextEditingController.text.toLowerCase().trim());
+
+      return matchesSearch;
+    }).toList();
+    return filtered;
   }
 
   void _toggleStarredWorkspace(String id) {
@@ -58,10 +64,10 @@ class _WorkspacePageState extends ConsumerState<WorkspacePage> {
   @override
   Widget build(BuildContext context) {
     final List<Workspace> workspaces = ref.watch(workspaceProvider).value ?? [];
-    // filteredWorkspaces =
-    //     filteredWorkspaces.isEmpty ? workspaces : filteredWorkspaces;
+    final User? user = ref.watch(userProvider).value;
 
     return Scaffold(
+      drawer: CustomDrawer(name: user?.name ?? "Guest"),
       appBar: AppBar(
         actions: [
           IconButton(
@@ -79,20 +85,21 @@ class _WorkspacePageState extends ConsumerState<WorkspacePage> {
           padding: const EdgeInsets.all(20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 16.0,
             children: [
               Text(
                 "Workspace",
                 style: Theme.of(context).textTheme.headlineLarge,
               ),
-              TextField(
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.search),
-                  border: OutlineInputBorder(),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20.0),
+                child: CustomTextfield(
                   hintText: "Search Workspace",
+                  keyboardType: TextInputType.text,
+                  textEditController: _searchTextEditingController,
+                  focusNode: _searchFocusNode,
+                  canClear: true,
+                  iconData: Icons.search,
                 ),
-                controller: _controller,
-                onChanged: _filterWorkspaces,
               ),
               if (starredWorkspace.isNotEmpty)
                 StarredWorkspaceList(
@@ -102,7 +109,7 @@ class _WorkspacePageState extends ConsumerState<WorkspacePage> {
                 ),
               WorkspaceList(
                 // workspaces: filteredWorkspaces,
-                workspaces: workspaces,
+                workspaces: _filterWorkspace(),
                 starredWorkspace: starredWorkspace,
                 toggleStarred: _toggleStarredWorkspace,
               ),

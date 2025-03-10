@@ -3,10 +3,12 @@ import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/workspace.dart';
 import 'package:asr_project/pages/authentication_page/sign_in_page.dart';
 import 'package:asr_project/pages/diary_form_page/diary_form_page.dart';
+import 'package:asr_project/pages/diary_search_page/diary_search_page.dart';
 import 'package:asr_project/pages/event_page/event_page.dart';
 import 'package:asr_project/pages/record_voice_page.dart';
 import 'package:asr_project/pages/workspace_page/workspace_detail_page/workspace_detail_page.dart';
 import 'package:asr_project/pages/workspace_page/workspace_page.dart';
+import 'package:asr_project/providers/theme_provider.dart';
 import 'package:asr_project/widgets/custom_bottom_navbar.dart';
 import 'package:asr_project/pages/home_page/home_page.dart';
 import 'package:flutter/material.dart';
@@ -21,9 +23,10 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final ThemeData theme = ref.watch(themeProvider);
     return MaterialApp(
       title: "ASR App",
-      theme: lightTheme,
+      theme: theme,
       home: SignInPage(),
       onGenerateRoute: (settings) {
         switch (settings.name) {
@@ -39,19 +42,18 @@ class MyApp extends ConsumerWidget {
                 builder: (context) =>
                     WorkspaceDetailPage(workspace: workspace));
 
-          // case "/diary_overview":
-          //   return MaterialPageRoute(
-          //     builder: (context) => DiaryOverviewPage(),
-          //   );
+          case "/diary/search":
+            final List<Diary> diaries = settings.arguments as List<Diary>;
+            return MaterialPageRoute(
+              builder: (context) =>
+                  DiarySearchPage(type: "personal", diaries: diaries),
+            );
 
           case "/diary/detail":
-            final Map<String, dynamic> args =
-                settings.arguments as Map<String, dynamic>;
-            final String type = args["type"];
-            final Diary diary = args["diary"];
+            final Diary diary = settings.arguments as Diary;
 
             return MaterialPageRoute(
-              builder: (context) => DiaryFormPage(type: type, diary: diary),
+              builder: (context) => DiaryFormPage(diary: diary),
             );
 
           case "/record":

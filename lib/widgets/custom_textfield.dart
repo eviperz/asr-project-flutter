@@ -7,8 +7,9 @@ class CustomTextfield extends StatefulWidget {
   final bool canClear;
   final TextInputType? keyboardType;
   final String? errorText;
-  final TextEditingController textEditController;
-  final FocusNode focusNode;
+  final TextEditingController? textEditController;
+  final FocusNode? focusNode;
+  final Function? onTap;
 
   const CustomTextfield({
     super.key,
@@ -18,8 +19,9 @@ class CustomTextfield extends StatefulWidget {
     bool? canClear,
     this.errorText,
     required this.keyboardType,
-    required this.textEditController,
-    required this.focusNode,
+    this.textEditController,
+    this.focusNode,
+    this.onTap,
   }) : canClear = canClear ?? false;
 
   @override
@@ -27,7 +29,13 @@ class CustomTextfield extends StatefulWidget {
 }
 
 class _CustomTextfieldState extends State<CustomTextfield> {
-  bool _isObscured = true;
+  late bool _isObscured;
+
+  @override
+  void initState() {
+    super.initState();
+    _isObscured = widget.keyboardType == TextInputType.visiblePassword;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,10 +47,10 @@ class _CustomTextfieldState extends State<CustomTextfield> {
         if (widget.label != null)
           Text(widget.label ?? "",
               style: Theme.of(context).textTheme.headlineSmall),
-        SizedBox(height: 8.0),
+        const SizedBox(height: 8.0),
         TextField(
-          controller: widget.textEditController,
-          focusNode: widget.focusNode,
+          controller: widget.textEditController ?? TextEditingController(),
+          focusNode: widget.focusNode ?? FocusNode(),
           autocorrect: false,
           keyboardType: widget.keyboardType,
           obscureText: isPasswordField ? _isObscured : false, // Hide password
@@ -58,7 +66,7 @@ class _CustomTextfieldState extends State<CustomTextfield> {
                     widget.iconData,
                     color: widget.errorText != null
                         ? Theme.of(context).colorScheme.error
-                        : widget.focusNode.hasFocus
+                        : widget.focusNode?.hasFocus ?? false
                             ? Theme.of(context).colorScheme.primary
                             : Theme.of(context).colorScheme.onSecondary,
                   )
@@ -73,17 +81,16 @@ class _CustomTextfieldState extends State<CustomTextfield> {
                       });
                     },
                   )
-                : widget.canClear
-                    ? (widget.textEditController.text.isNotEmpty
-                        ? IconButton(
-                            onPressed: () {
-                              widget.textEditController.clear();
-                              (context as Element).markNeedsBuild();
-                            },
-                            icon: Icon(Icons.close),
-                            iconSize: 18,
-                          )
-                        : null)
+                : widget.canClear &&
+                        widget.textEditController?.text.isNotEmpty == true
+                    ? IconButton(
+                        onPressed: () {
+                          widget.textEditController?.clear();
+                          setState(() {});
+                        },
+                        icon: Icon(Icons.close),
+                        iconSize: 18,
+                      )
                     : null,
             hintText: widget.hintText,
             hintStyle: TextStyle(
@@ -91,8 +98,9 @@ class _CustomTextfieldState extends State<CustomTextfield> {
             ),
             errorText: widget.errorText,
           ),
-          onTapOutside: (event) {
-            widget.focusNode.unfocus();
+          onTapOutside: (_) => widget.focusNode?.unfocus(),
+          onTap: () {
+            if (widget.onTap != null) widget.onTap!();
           },
         ),
       ],

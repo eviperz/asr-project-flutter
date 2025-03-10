@@ -3,13 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class DiaryCard extends StatefulWidget {
-  final String type;
   final Diary diary;
   final double width;
 
   const DiaryCard({
     super.key,
-    required this.type,
     required this.diary,
     required this.width,
   });
@@ -25,10 +23,7 @@ class _DiaryCardState extends State<DiaryCard> {
       onTap: () => Navigator.pushNamed(
         context,
         "/diary/detail",
-        arguments: {
-          "type": widget.type,
-          "diary": widget.diary,
-        },
+        arguments: widget.diary,
       ),
       child: Card(
         child: Container(
@@ -52,7 +47,7 @@ class _DiaryCardState extends State<DiaryCard> {
                           padding: EdgeInsets.all(16.0),
                           child: Icon(
                             Icons.event_note,
-                            color: Theme.of(context).primaryColor,
+                            color: Theme.of(context).colorScheme.onPrimary,
                           ),
                         ),
                       ),

@@ -2,6 +2,10 @@ import 'package:asr_project/models/workspace.dart';
 import 'package:asr_project/services/workspace_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+final workspaceIdProvider = StateProvider<String?>((ref) {
+  return null;
+});
+
 // StateNotifier Provider
 final workspaceProvider =
     AsyncNotifierProvider<WorkspaceNotifier, List<Workspace>>(() {

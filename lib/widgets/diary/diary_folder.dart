@@ -3,10 +3,10 @@ import 'dart:developer';
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/diary_folder.dart';
 import 'package:asr_project/widgets/custom_dialog.dart';
+import 'package:asr_project/widgets/diary/diary_list_tile.dart';
 import 'package:flutter/material.dart';
 
 class DiaryFolder extends StatefulWidget {
-  final String type;
   final DiaryFolderModel folder;
   final List<DiaryFolderModel> folders;
   final List<Diary> diaries;
@@ -17,7 +17,6 @@ class DiaryFolder extends StatefulWidget {
 
   const DiaryFolder({
     super.key,
-    required this.type,
     required this.folder,
     required this.folders,
     required this.diaries,
@@ -35,6 +34,7 @@ class _DiaryFolderState extends State<DiaryFolder> {
   late FocusNode _focusNode;
   late TextEditingController _textEditingController;
   late bool _isOpen;
+  late bool _readOnly = true;
 
   @override
   void initState() {
@@ -108,6 +108,7 @@ class _DiaryFolderState extends State<DiaryFolder> {
               Icon(Icons.folder),
               Expanded(
                 child: TextField(
+                  readOnly: _readOnly,
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: "Folder Name",
@@ -119,6 +120,9 @@ class _DiaryFolderState extends State<DiaryFolder> {
                         _generateUniqueFolderName(value.trim(), 0);
                     _textEditingController.text = uniqueName;
                     widget.onUpdateFolderName(widget.folder.id, uniqueName);
+                    setState(() {
+                      _readOnly = true;
+                    });
                   },
                   onTapOutside: (event) {
                     String uniqueName = _generateUniqueFolderName(
@@ -126,6 +130,9 @@ class _DiaryFolderState extends State<DiaryFolder> {
                     _textEditingController.text = uniqueName;
                     widget.onUpdateFolderName(widget.folder.id, uniqueName);
                     _focusNode.unfocus();
+                    setState(() {
+                      _readOnly = true;
+                    });
                   },
                 ),
               ),
@@ -137,6 +144,12 @@ class _DiaryFolderState extends State<DiaryFolder> {
               switch (value) {
                 case "add":
                   widget.onCreateDiary(widget.folder.id);
+
+                case "change":
+                  _focusNode.requestFocus();
+                  setState(() {
+                    _readOnly = false;
+                  });
 
                 case "delete":
                   showDialog(
@@ -168,10 +181,18 @@ class _DiaryFolderState extends State<DiaryFolder> {
               PopupMenuItem<String>(
                 value: 'add',
                 child: ListTile(
-                  leading: Icon(Icons.note),
-                  title: Text('Add Diary'),
+                  leading: Icon(Icons.note_add),
+                  title: Text('Diary'),
                 ),
               ),
+              if (widget.folder.name != "Default")
+                PopupMenuItem<String>(
+                  value: 'change',
+                  child: ListTile(
+                    leading: Icon(Icons.edit),
+                    title: Text('Edit Name'),
+                  ),
+                ),
               if (widget.folder.name != "Default")
                 PopupMenuItem<String>(
                   value: 'delete',
@@ -186,30 +207,31 @@ class _DiaryFolderState extends State<DiaryFolder> {
           ),
         ),
         if (_isOpen)
-          ListView.separated(
-            shrinkWrap: true,
-            itemCount: widget.diaries.length,
-            itemBuilder: (context, index) {
-              final Diary diary = widget.diaries[index];
-              return ListTile(
-                contentPadding: EdgeInsets.only(left: 90.0),
-                leading: Icon(Icons.note),
-                title: Text(diary.title),
-                onTap: () {
-                  Navigator.pushNamed(context, "/diary/detail", arguments: {
-                    "type": widget.type,
-                    "diary": diary,
-                  });
-                },
-              );
-            },
-            separatorBuilder: (context, index) {
-              return Padding(
-                padding: const EdgeInsets.only(left: 32.0),
-                child: Divider(),
-              );
-            },
-          )
+          Column(
+            children: [
+              Divider(),
+              SizedBox(
+                height: widget.diaries.isEmpty ? 0 : 270,
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: widget.diaries.length,
+                  itemBuilder: (context, index) {
+                    final Diary diary = widget.diaries[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 70.0),
+                      child: DiaryListTile(diary: diary),
+                    );
+                  },
+                  separatorBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 40.0),
+                      child: Divider(),
+                    );
+                  },
+                ),
+              )
+            ],
+          ),
       ],
     );
   }

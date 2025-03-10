@@ -1,6 +1,5 @@
+import 'package:asr_project/providers/diary_folder_provider.dart';
 import 'package:asr_project/providers/tag_list_provider.dart';
-import 'package:asr_project/providers/personal_diary_folder_provider.dart';
-import 'package:asr_project/providers/workspace_diary_folder_provider%20copy.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,12 +11,10 @@ import 'package:asr_project/editor/diary_toolbar.dart';
 import 'package:asr_project/pages/diary_form_page/diary_info.dart';
 
 class DiaryFormPage extends ConsumerStatefulWidget {
-  final String type;
   final Diary diary;
 
   const DiaryFormPage({
     super.key,
-    required this.type,
     required this.diary,
   });
 
@@ -68,15 +65,9 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
       tagIds: _tags.map((tag) => tag.id).toList(),
     );
 
-    if (widget.type == "personal") {
-      await ref
-          .read(personalDiaryFoldersProvider.notifier)
-          .updateDiary(widget.diary.id, diaryDetail);
-    } else {
-      await ref
-          .watch(workspaceDiaryFoldersProvider.notifier)
-          .updateDiary(widget.diary.id, diaryDetail);
-    }
+    await ref
+        .read(diaryFoldersProvider.notifier)
+        .updateDiary(widget.diary.id, diaryDetail);
 
     setState(() => _isEdited = false);
   }
@@ -129,7 +120,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
                     content: "Are you sure you want to delete this diary?",
                     onConfirm: () async {
                       await ref
-                          .read(personalDiaryFoldersProvider.notifier)
+                          .read(diaryFoldersProvider.notifier)
                           .deleteDiary(widget.diary.id);
                       Navigator.pop(context);
                       Navigator.pop(context);

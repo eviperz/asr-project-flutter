@@ -1,8 +1,6 @@
 import 'package:asr_project/models/enum/workspace_permission.dart';
 import 'package:asr_project/models/user.dart';
-import 'package:asr_project/models/workspace.dart';
-import 'package:asr_project/providers/workspace_diary_folder_provider%20copy.dart';
-import 'package:asr_project/widgets/profile_image.dart';
+import 'package:asr_project/models/workspace.dart';import 'package:asr_project/widgets/profile_image.dart';
 import 'package:asr_project/widgets/workspace_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,7 +31,6 @@ class WorkspaceTile extends ConsumerWidget {
       children: [
         ListTile(
           onTap: () {
-            ref.read(workspaceIdProvider.notifier).state = workspace.id;
             Navigator.pushNamed(
               context,
               "/workspace/detail",

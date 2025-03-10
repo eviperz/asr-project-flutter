@@ -1,5 +1,4 @@
 import 'package:asr_project/providers/user_provider.dart';
-import 'package:asr_project/providers/workspace_diary_folder_provider%20copy.dart';
 import 'package:asr_project/providers/workspace_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

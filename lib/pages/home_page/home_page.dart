@@ -1,8 +1,11 @@
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/diary_folder.dart';
+import 'package:asr_project/providers/diary_folder_provider.dart';
 import 'package:asr_project/providers/tag_list_provider.dart';
-import 'package:asr_project/providers/personal_diary_folder_provider.dart';
 import 'package:asr_project/providers/user_provider.dart';
+import 'package:asr_project/providers/workspace_provider.dart';
+import 'package:asr_project/widgets/custom_drawer.dart';
+import 'package:asr_project/widgets/custom_textfield.dart';
 import 'package:asr_project/widgets/diary/diary_folder_blocks.dart';
 import 'package:asr_project/widgets/diary/diary_list_view_horizontal.dart';
 import 'package:asr_project/widgets/profile_image.dart';
@@ -18,12 +21,23 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
+  final FocusNode _searchFocusNode = FocusNode();
   late bool creatingFolderMode = false;
 
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => ref.read(tagListProvider));
+    Future.microtask(() {
+      ref.read(tagListProvider);
+      ref.read(workspaceIdProvider.notifier).state = null;
+    });
+    _searchFocusNode.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _searchFocusNode.dispose();
   }
 
   void _addFolder() async {
@@ -34,8 +48,8 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
 
     String? responseMessage = await ref
-        .read(personalDiaryFoldersProvider.notifier)
-        .createPersonalDiaryFolder(diaryFolderDetail);
+        .read(diaryFoldersProvider.notifier)
+        .createDiaryFolder(diaryFolderDetail);
 
     if (!mounted) return;
     if (responseMessage != null) {
@@ -51,7 +65,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   String _generateUniqueFolderName(String baseName, double count) {
     final List<DiaryFolderModel> diaryFolders =
-        ref.read(personalDiaryFoldersProvider).value ?? [];
+        ref.read(diaryFoldersProvider).value ?? [];
 
     String newName = count == 0 ? baseName : "$baseName (${count.toInt()})";
 
@@ -71,7 +85,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     try {
       String? responseMessage = await ref
-          .read(personalDiaryFoldersProvider.notifier)
+          .read(diaryFoldersProvider.notifier)
           .updateDiaryFolder(id, diaryFolderDetail);
 
       if (!mounted) return;
@@ -88,9 +102,8 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Future<void> _deleteFolder(String id) async {
-    String? responseMessage = await ref
-        .read(personalDiaryFoldersProvider.notifier)
-        .deleteDiaryFolder(id);
+    String? responseMessage =
+        await ref.read(diaryFoldersProvider.notifier).deleteDiaryFolder(id);
 
     if (!mounted) return;
     if (responseMessage != null) {
@@ -107,15 +120,12 @@ class _HomePageState extends ConsumerState<HomePage> {
   Future<void> _addDiaryInFolder(String folderId) async {
     DiaryDetail diaryDetail = DiaryDetail();
     Diary? diary = await ref
-        .read(personalDiaryFoldersProvider.notifier)
+        .read(diaryFoldersProvider.notifier)
         .addDiaryToFolder(folderId, diaryDetail);
 
     if (!mounted) return;
     if (diary != null) {
-      Navigator.pushNamed(context, "/diary/detail", arguments: {
-        "type": "personal",
-        "diary": diary,
-      });
+      Navigator.pushNamed(context, "/diary/detail", arguments: diary);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Failed to create diary")),
@@ -127,12 +137,14 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget build(BuildContext context) {
     final String? name = ref.watch(userProvider).value?.name;
     final List<DiaryFolderModel> diaryFolders =
-        ref.watch(personalDiaryFoldersProvider).value ?? [];
+        ref.watch(diaryFoldersProvider).value ?? [];
+    final List<Diary> diaries =
+        ref.watch(diaryFoldersProvider.notifier).allDiariesInFolders;
 
     return Scaffold(
       appBar: AppBar(),
-      drawer: _buildDrawer(name ?? "Guest"),
-      body: _buildBody(context, diaryFolders, name ?? "Guest"),
+      drawer: CustomDrawer(name: name ?? "Guest"),
+      body: _buildBody(context, diaryFolders, diaries, name ?? "Guest"),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           final DiaryFolderModel? defaultFolder = diaryFolders
@@ -152,38 +164,8 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  Widget _buildDrawer(String name) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          DrawerHeader(
-            decoration: const BoxDecoration(color: Colors.blue),
-            child: Row(
-              children: [
-                const ProfileImage(),
-                const SizedBox(width: 8.0),
-                Text(name),
-              ],
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.home),
-            title: const Text("Home"),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text("Settings"),
-            onTap: () {},
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBody(
-      BuildContext context, List<DiaryFolderModel> diaryFolders, String name) {
+  Widget _buildBody(BuildContext context, List<DiaryFolderModel> diaryFolders,
+      List<Diary> diaries, String name) {
     final DateTime now = DateTime.now();
     final DateTime sevenDaysAgo = now.subtract(const Duration(days: 7));
 
@@ -203,17 +185,30 @@ class _HomePageState extends ConsumerState<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHomeWelcomeContainer(context, name),
-            if (recentDiaries.isNotEmpty)
-              DiaryListViewHorizontal(
-                type: "personal",
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: CustomTextfield(
+                  hintText: "Search",
+                  iconData: Icons.search,
+                  canClear: true,
+                  keyboardType: TextInputType.text,
+                  focusNode: _searchFocusNode,
+                  onTap: () {
+                    Navigator.pushNamed(context, "/diary/search",
+                        arguments: diaries);
+                    _searchFocusNode.unfocus();
+                  }),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20.0),
+              child: DiaryListViewHorizontal(
                 title: "Recently",
                 diaryList: recentDiaries,
               ),
-            const SizedBox(height: 20.0),
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: DiaryFolderBlocks(
-                type: "workspace",
                 folders: diaryFolders,
                 onCreateFolder: _addFolder,
                 onUpdateFolderName: _updateFolderName,
@@ -223,6 +218,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               ),
             ),
           ],
+          // ],
         ),
       ),
     );
@@ -230,7 +226,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   Widget _buildHomeWelcomeContainer(BuildContext context, String name) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      padding: const EdgeInsets.fromLTRB(20.0, 0, 20.0, 20.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
