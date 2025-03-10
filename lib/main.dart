@@ -30,6 +30,9 @@ class MyApp extends ConsumerWidget {
       home: SignInPage(),
       onGenerateRoute: (settings) {
         switch (settings.name) {
+          case "/signin":
+            return MaterialPageRoute(builder: (context) => SignInPage());
+
           case "/home":
             return MaterialPageRoute(builder: (context) => HomePage());
 
@@ -87,7 +90,6 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     final List<Widget> pages = [
       HomePage(),
-      // DiaryOverviewPage(),
       WorkspacePage(),
       EventPage(),
     ];
