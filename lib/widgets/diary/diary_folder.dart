@@ -218,7 +218,7 @@ class _DiaryFolderState extends State<DiaryFolder> {
                   itemBuilder: (context, index) {
                     final Diary diary = widget.diaries[index];
                     return Padding(
-                      padding: const EdgeInsets.only(left: 70.0),
+                      padding: const EdgeInsets.only(left: 40.0),
                       child: DiaryListTile(diary: diary),
                     );
                   },
