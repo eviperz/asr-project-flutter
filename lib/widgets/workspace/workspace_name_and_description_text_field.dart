@@ -56,19 +56,16 @@ class _WorkspaceNameAndDescriptionTextFieldState
       mainAxisSize: MainAxisSize.min,
       spacing: 8.0,
       children: [
+        Text(
+          "Workspace",
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
         Container(
           width: double.maxFinite,
           padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8.0),
-            border: Border.all(
-                color: !_validateWorkspaceName()
-                    ? Theme.of(context).colorScheme.error
-                    : (_nameFocusNode.hasFocus ||
-                            _descriptionFocusNode.hasFocus)
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.tertiary),
-            color: Theme.of(context).cardTheme.color,
+            color: Theme.of(context).colorScheme.secondary,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,7 +80,7 @@ class _WorkspaceNameAndDescriptionTextFieldState
                               ? Theme.of(context).colorScheme.error
                               : _nameFocusNode.hasFocus
                                   ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context).colorScheme.secondary,
+                                  : Theme.of(context).colorScheme.onSecondary,
                         ),
                   ),
                   TextField(
@@ -107,7 +104,10 @@ class _WorkspaceNameAndDescriptionTextFieldState
                   ),
                 ],
               ),
-              Divider(),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: Divider(),
+              ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -116,7 +116,7 @@ class _WorkspaceNameAndDescriptionTextFieldState
                     style: Theme.of(context).textTheme.labelLarge!.copyWith(
                           color: _descriptionFocusNode.hasFocus
                               ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.secondary,
+                              : Theme.of(context).colorScheme.onSecondary,
                         ),
                   ),
                   SizedBox(

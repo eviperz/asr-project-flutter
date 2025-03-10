@@ -79,22 +79,17 @@ class _WorkspaceAddModalState
       mainAxisSize: MainAxisSize.min,
       spacing: 8.0,
       children: [
-        if (widget.inviteByEmails != null)
-          Text(
-            "Invite member by Email",
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
+        Text(
+          "Invite member by Email",
+          style: widget.inviteByEmails != null
+              ? Theme.of(context).textTheme.headlineMedium
+              : Theme.of(context).textTheme.headlineSmall,
+        ),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
           decoration: BoxDecoration(
             color: Theme.of(context).cardTheme.color,
             borderRadius: BorderRadius.circular(8.0),
-            border: Border.all(
-                color: (_checkError || isCurrentUserEmail || isExistEmails)
-                    ? Theme.of(context).colorScheme.error
-                    : _focusNode.hasFocus
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.tertiary),
           ),
           child: GestureDetector(
             onTap: () {
@@ -113,7 +108,7 @@ class _WorkspaceAddModalState
                                 ? Theme.of(context).colorScheme.error
                                 : _focusNode.hasFocus
                                     ? Theme.of(context).colorScheme.primary
-                                    : Theme.of(context).colorScheme.secondary,
+                                    : Theme.of(context).colorScheme.onSecondary,
                       ),
                 ),
                 Container(

@@ -24,8 +24,15 @@ class _WorkspaceCreateFormState extends ConsumerState<WorkspaceCreateForm> {
   @override
   void initState() {
     super.initState();
-    _nameTextEditingController.text = "";
-    _descriptionTextEditingController.text = "";
+    _nameTextEditingController.addListener(() => setState(() {}));
+    _descriptionTextEditingController.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _nameTextEditingController.dispose();
+    _descriptionTextEditingController.dispose();
   }
 
   void _createWorkspace() async {
@@ -83,7 +90,7 @@ class _WorkspaceCreateFormState extends ConsumerState<WorkspaceCreateForm> {
             child: Padding(
               padding: EdgeInsets.all(20.0),
               child: Column(
-                spacing: 16.0,
+                spacing: 8.0,
                 children: [
                   SizedBox(
                     height: 150,
@@ -116,13 +123,6 @@ class _WorkspaceCreateFormState extends ConsumerState<WorkspaceCreateForm> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      style: ButtonStyle(
-                        backgroundColor: WidgetStatePropertyAll(
-                            Theme.of(context).primaryColor),
-                        shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        )),
-                      ),
                       onPressed: () {
                         _createWorkspace();
                       },
