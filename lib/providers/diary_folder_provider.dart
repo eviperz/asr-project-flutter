@@ -27,7 +27,7 @@ class PersonalDiaryFoldersNotifier
             .getAllWorkspaceDiaryFoldersWithDiaries(workspaceId);
   }
 
-  Future<void> fetchData() async {
+  Future<void> _fetchData() async {
     final String? workspaceId = getWorkspaceId;
 
     state = const AsyncValue.loading();
@@ -127,7 +127,7 @@ class PersonalDiaryFoldersNotifier
   Future<Diary?> updateDiary(String diaryId, DiaryDetail diaryDetail) async {
     final diary = await _diaryService.updateDiary(diaryId, diaryDetail);
     if (diary != null) {
-      await fetchData();
+      await _fetchData();
       return diary;
     }
     return null;
@@ -135,7 +135,7 @@ class PersonalDiaryFoldersNotifier
 
   Future<void> deleteDiary(String diaryId) async {
     await _diaryService.deleteDiary(diaryId);
-    await fetchData();
+    await _fetchData();
   }
 
   DiaryFolderModel? diaryFolderById(String folderId) =>

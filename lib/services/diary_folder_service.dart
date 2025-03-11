@@ -17,9 +17,9 @@ class DiaryFolderService {
 
   Future<List<DiaryFolderModel>> getAllPersonalDiaryFoldersWithDiaries() async {
     try {
-      final String type = "personal";
-      final response =
-          await http.get(Uri.parse("$baseUrl/$type/$userId"), headers: headers);
+      log(userId);
+      final response = await http.get(Uri.parse("$baseUrl/personal/$userId"),
+          headers: headers);
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = jsonDecode(response.body);
@@ -35,8 +35,7 @@ class DiaryFolderService {
   Future<DiaryFolderModel?> createPersonalDiaryFolder(
       DiaryFolderDetail diaryFolderDetail) async {
     try {
-      final String type = "personal";
-      final response = await http.post(Uri.parse("$baseUrl/$type/$userId"),
+      final response = await http.post(Uri.parse("$baseUrl/personal/$userId"),
           headers: headers, body: jsonEncode(diaryFolderDetail.toJson()));
 
       if (response.statusCode == 200) {
@@ -53,6 +52,7 @@ class DiaryFolderService {
     try {
       final response = await http
           .get(Uri.parse("$baseUrl/workspace/$workspaceId"), headers: headers);
+      log(workspaceId);
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = jsonDecode(response.body);
