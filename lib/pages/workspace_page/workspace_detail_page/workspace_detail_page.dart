@@ -163,9 +163,6 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
     final List<Diary> diaries =
         ref.read(diaryFoldersProvider.notifier).allDiariesInFolders;
 
-    log(ref.watch(workspaceIdProvider).toString());
-    // log(diaryFolders.length.toString());
-
     return Scaffold(
       appBar: AppBar(
         title: Text(_workspace.name),

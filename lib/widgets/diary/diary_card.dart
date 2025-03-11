@@ -1,6 +1,5 @@
 import 'package:asr_project/models/diary.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class DiaryCard extends StatefulWidget {
   final Diary diary;
@@ -46,7 +45,7 @@ class _DiaryCardState extends State<DiaryCard> {
                           color: Theme.of(context).colorScheme.primary,
                           padding: EdgeInsets.all(16.0),
                           child: Icon(
-                            Icons.event_note,
+                            Icons.note,
                             color: Theme.of(context).colorScheme.onPrimary,
                           ),
                         ),
@@ -92,9 +91,7 @@ class _DiaryCardState extends State<DiaryCard> {
               Container(
                 padding: const EdgeInsets.only(bottom: 8.0),
                 child: Text(
-                  DateFormat.yMMMd().format(
-                    widget.diary.updatedAt,
-                  ),
+                  widget.diary.formatDate,
                   style: Theme.of(context)
                       .textTheme
                       .labelSmall!

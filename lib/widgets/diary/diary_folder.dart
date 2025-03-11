@@ -44,7 +44,6 @@ class _DiaryFolderState extends State<DiaryFolder> {
 
     if (widget.focusNode != null) {
       _focusNode.requestFocus();
-      log(_focusNode.hasFocus.toString());
     }
 
     _focusNode.addListener(() {

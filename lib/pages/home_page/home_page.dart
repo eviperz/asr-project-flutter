@@ -226,7 +226,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   Widget _buildHomeWelcomeContainer(BuildContext context, String name) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20.0, 0, 20.0, 20.0),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

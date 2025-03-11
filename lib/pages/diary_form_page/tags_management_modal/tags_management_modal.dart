@@ -193,7 +193,6 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
   }
 
   Widget _buildCreateTagButton(List<Tag> filteredTags) {
-    log(_controller.text.isEmpty.toString());
     return Column(
       children: [
         ListTile(

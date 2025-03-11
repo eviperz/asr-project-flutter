@@ -20,6 +20,7 @@ class _DiarySearchPageState extends State<DiarySearchPage> {
   final List<Diary> _filteredDiaries = [];
   late bool _openFilterMenu = false;
   late bool _isAscending = true;
+  final Set<String> _activeTags = {};
 
   @override
   void initState() {
@@ -62,6 +63,22 @@ class _DiarySearchPageState extends State<DiarySearchPage> {
     });
   }
 
+  void _updateFilterTags(String tagName) {
+    setState(() {
+      if (_activeTags.contains(tagName)) {
+        _activeTags.remove(tagName);
+      } else {
+        _activeTags.add(tagName);
+      }
+    });
+  }
+
+  void _clearActiveTags() {
+    setState(() {
+      _activeTags.clear();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,11 +103,13 @@ class _DiarySearchPageState extends State<DiarySearchPage> {
         ],
         bottom: _openFilterMenu
             ? PreferredSize(
-                preferredSize: Size.fromHeight(
-                    70.0), // Set the height you want for the FilterMenu
+                preferredSize: Size.fromHeight(70.0),
                 child: FilterMenu(
                   onSort: _sort,
                   isAscending: _isAscending,
+                  onSelectTags: _updateFilterTags,
+                  clearActiveTags: _clearActiveTags,
+                  activeTags: _activeTags,
                 ),
               )
             : null,

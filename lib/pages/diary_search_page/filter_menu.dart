@@ -1,18 +1,21 @@
 import 'package:asr_project/pages/diary_search_page/sort_filter_widget.dart';
+import 'package:asr_project/pages/diary_search_page/tags_filter.dart';
 import 'package:flutter/material.dart';
 
 class FilterMenu extends StatelessWidget {
   final VoidCallback onSort;
   final bool isAscending;
-  // final Function(Set<String>) onSelectTags;
-  // final Set<String> selectedTags;
+  final Function(String) onSelectTags;
+  final Function() clearActiveTags;
+  final Set<String> activeTags;
 
   const FilterMenu({
     super.key,
     required this.onSort,
     required this.isAscending,
-    // required this.onSelectTags,
-    // required this.selectedTags,
+    required this.onSelectTags,
+    required this.clearActiveTags,
+    required this.activeTags,
   });
 
   @override
@@ -25,18 +28,22 @@ class FilterMenu extends StatelessWidget {
             bottom: BorderSide(
                 color: Theme.of(context).colorScheme.primary.withAlpha(24))),
       ),
-      child: Row(
-        spacing: 8,
-        children: [
-          SortFilterWidget(
-            onSort: onSort,
-            isAscending: isAscending,
-          ),
-          // TagsFilter(
-          //   onSelectTags: onSelectTags,
-          //   selectedTags: selectedTags,
-          // )
-        ],
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          spacing: 8,
+          children: [
+            SortFilterWidget(
+              onSort: onSort,
+              isAscending: isAscending,
+            ),
+            TagsFilter(
+              onSelectTags: onSelectTags,
+              clearActiveTags: clearActiveTags,
+              activeTags: activeTags,
+            )
+          ],
+        ),
       ),
     );
   }

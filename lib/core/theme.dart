@@ -14,6 +14,7 @@ final ThemeData lightTheme = ThemeData(
       color: const Color.fromARGB(255, 245, 245, 245),
       shadowColor: Colors.transparent),
   elevatedButtonTheme: elevatedButtonThemeData,
+  outlinedButtonTheme: outlinedButtonThemeData,
   chipTheme: chipThemeData,
 
   // primaryColor: Colors.black,
@@ -82,6 +83,15 @@ final ElevatedButtonThemeData elevatedButtonThemeData = ElevatedButtonThemeData(
       borderRadius: BorderRadius.circular(8.0),
     ),
     foregroundColor: lightThemeColorScheme.onPrimary,
+  ),
+);
+
+final OutlinedButtonThemeData outlinedButtonThemeData = OutlinedButtonThemeData(
+  style: OutlinedButton.styleFrom(
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(16.0),
+    ),
+    side: BorderSide(color: lightThemeColorScheme.tertiary),
   ),
 );
 

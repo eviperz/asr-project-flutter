@@ -1,14 +1,18 @@
+import 'package:asr_project/models/tag.dart';
+import 'package:asr_project/providers/tag_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TagsFilter extends ConsumerStatefulWidget {
-  final Function(Set<String>) onSelectTags;
-  final Set<String> selectedTags;
+  final Function(String) onSelectTags;
+  final Function() clearActiveTags;
+  final Set<String> activeTags;
 
   const TagsFilter({
     super.key,
     required this.onSelectTags,
-    required this.selectedTags,
+    required this.clearActiveTags,
+    required this.activeTags,
   });
 
   @override
@@ -17,15 +21,15 @@ class TagsFilter extends ConsumerStatefulWidget {
 
 class _TagsFilterState extends ConsumerState<TagsFilter> {
   void _showMultiSelectOptions() {
-    // showModalBottomSheet(
-    //     context: context,
-    //     builder: (BuildContext context) {
-    //       return TagFillterModal(
-    //         items: ref.read(diaryListProvider.notifier).tags,
-    //         activeItems: widget.selectedTags,
-    //         onSelectTag: widget.onSelectTags,
-    //       );
-    //     });
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return TagFillterModal(
+            activeTags: widget.activeTags,
+            clearActiveTags: widget.clearActiveTags,
+            onSelectTag: widget.onSelectTags,
+          );
+        });
   }
 
   @override
@@ -37,7 +41,7 @@ class _TagsFilterState extends ConsumerState<TagsFilter> {
         children: [
           Icon(Icons.tag_outlined),
           Text(
-            "Tags: ${widget.selectedTags.join(', ')}",
+            "Tags: ${widget.activeTags.join(', ')}",
           ),
           Icon(Icons.keyboard_arrow_down_outlined)
         ],
@@ -46,73 +50,77 @@ class _TagsFilterState extends ConsumerState<TagsFilter> {
   }
 }
 
-class TagFillterModal extends StatefulWidget {
-  final Set<String> items;
-  final Set<String> activeItems;
-  final Function(Set<String>) onSelectTag;
+class TagFillterModal extends ConsumerStatefulWidget {
+  final Function(String) onSelectTag;
+  final Function() clearActiveTags;
+  final Set<String> activeTags;
 
   const TagFillterModal({
     super.key,
-    required this.items,
-    required this.activeItems,
+    required this.activeTags,
+    required this.clearActiveTags,
     required this.onSelectTag,
   });
 
   @override
-  State<TagFillterModal> createState() => _TagFillterModalState();
+  ConsumerState<TagFillterModal> createState() => _TagFillterModalState();
 }
 
-class _TagFillterModalState extends State<TagFillterModal> {
+class _TagFillterModalState extends ConsumerState<TagFillterModal> {
   @override
   Widget build(BuildContext context) {
+    final List<Tag> tags = ref.watch(tagsProvider).value ?? [];
+
     return Container(
       padding: EdgeInsets.all(16.0),
-      height: 300,
       child: Column(
         children: [
-          AppBar(
-            leading: SizedBox(
-              width: 100,
-              child: TextButton(
-                onPressed: () {
-                  widget.onSelectTag({});
-                  Navigator.pop(context);
-                },
-                child: Text("Clear"),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: Icon(Icons.close)),
+              Text(
+                "Select tags",
+                style: Theme.of(context).textTheme.titleLarge,
               ),
-            ),
-            title: Text("Tags"),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  widget.onSelectTag(widget.activeItems);
-                  Navigator.pop(context);
-                },
-                child: Text("Done"),
-              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: TextButton(
+                    onPressed: () {
+                      widget.clearActiveTags();
+                    },
+                    child: Text(
+                      "clear",
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                    )),
+              )
             ],
-            backgroundColor: Colors.transparent,
           ),
           Expanded(
-            child: widget.items.isEmpty
+            child: tags.isEmpty
                 ? Center(
                     child: Text("No tags"),
                   )
                 : ListView(
-                    children: widget.items.map((tag) {
+                    children: tags.map((tag) {
                       return CheckboxListTile.adaptive(
-                        title: Text(tag),
-                        value: widget.activeItems.contains(tag),
+                        title: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Chip(
+                            label: Text(tag.name),
+                            backgroundColor: tag.color,
+                          ),
+                        ),
+                        value: widget.activeTags.contains(tag.name),
                         onChanged: (bool? value) {
-                          if (value == true) {
-                            setState(() {
-                              widget.activeItems.add(tag);
-                            });
-                          } else {
-                            setState(() {
-                              widget.activeItems.remove(tag);
-                            });
-                          }
+                          setState(() {});
+                          widget.onSelectTag(tag.name);
                         },
                       );
                     }).toList(),
