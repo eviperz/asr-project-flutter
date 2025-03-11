@@ -114,7 +114,7 @@ packages:
     source: hosted
     version: "1.1.2"
   collection:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: collection
       sha256: "2f5709ae4d3d59dd8f7cd309b4e023046b57d8a6c82130785d2b0e5868084e76"
@@ -177,14 +177,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.7"
-  etau:
-    dependency: transitive
-    description:
-      name: etau
-      sha256: "5859ee8438770e2887426dccf05bb55f2c78f20fe6db84043675155c2ebb9a7e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.14-alpha.5"
   fake_async:
     dependency: transitive
     description:
@@ -255,7 +247,7 @@ packages:
     source: sdk
     version: "0.0.0"
   flutter_colorpicker:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_colorpicker
       sha256: "969de5f6f9e2a570ac660fb7b501551451ea2a1ab9e2097e89475f60e07816ea"
@@ -351,26 +343,26 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_sound
-      sha256: a4662bd1bb15a51569b908deb58a3e9ecc14c7080783487202d015644712f1ef
+      sha256: "4b0930e2c00b4ac9b6e66974e233595e5ba887af46a0ac06a81e79d4a66fcd0b"
       url: "https://pub.dev"
     source: hosted
-    version: "9.23.1"
+    version: "9.25.4"
   flutter_sound_platform_interface:
     dependency: transitive
     description:
       name: flutter_sound_platform_interface
-      sha256: "0ebd302180ddc91c993d4bb061f08d71a047ebb0f04b05befd2ee8de59ea947d"
+      sha256: d12300544ccf548b4552186572ffdc9da7bbc59a69d4369186d9ad6f6493313a
       url: "https://pub.dev"
     source: hosted
-    version: "9.23.1"
+    version: "9.25.4"
   flutter_sound_web:
     dependency: transitive
     description:
       name: flutter_sound_web
-      sha256: "0891d977674be94d8c3f4759c6cd11e7f29a1ed29dc287b874a1393666ac831f"
+      sha256: "546eba052c83737f76a282566b6aae9064b7dc89649aa92543f4fdd87ceb5d04"
       url: "https://pub.dev"
     source: hosted
-    version: "9.23.1"
+    version: "9.25.4"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -390,7 +382,7 @@ packages:
     source: hosted
     version: "0.15.5"
   http:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: http
       sha256: fe7ab022b76f3034adc518fb6ea04a82387620e19977665ea18d30a1cf43442f
@@ -810,14 +802,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.3.0+3"
-  tau_web:
-    dependency: transitive
-    description:
-      name: tau_web
-      sha256: "81c8a0dc264f87db84678e5957dd1e4ccc015047fdea0f2cdd86d91c3c8a838e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.14-alpha.5"
   term_glyph:
     dependency: transitive
     description:
