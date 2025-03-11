@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:uuid/uuid.dart';
 
 class Tag {
   final String id;
@@ -7,10 +6,10 @@ class Tag {
   final Color color;
 
   Tag({
-    String? id,
+    required this.id,
     required this.name,
     required this.color,
-  }) : id = id ?? Uuid().v4();
+  });
 
   factory Tag.fromMap(Map<String, dynamic> map) {
     return Tag(
@@ -24,15 +23,13 @@ class Tag {
 class TagDetail {
   final String name;
   final String? colorCode;
-  final String ownerId;
 
   TagDetail({
     required this.name,
     String? colorCode,
-    required this.ownerId,
   }) : colorCode = colorCode ?? "C4C4C4";
 
   Map<String, dynamic> toJson() {
-    return {"tagName": name, "colorCode": colorCode, "ownerId": ownerId};
+    return {"tagName": name, "colorCode": colorCode,};
   }
 }

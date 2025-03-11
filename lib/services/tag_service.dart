@@ -5,16 +5,19 @@ import 'package:asr_project/models/tag.dart';
 import 'package:http/http.dart' as http;
 
 class TagService {
+  final String userId = AppConfig.userId;
   final String baseUrl = "${AppConfig.baseUrl}/tags";
   final Map<String, String> headers = {
     'Authorization': AppConfig.basicAuth,
     'Content-Type': 'application/json',
   };
 
-  Future<List<Tag>> getAllTagsByOwnerId(String ownerId) async {
+  Future<List<Tag>> getAllPersonalTags() async {
     try {
-      final response = await http.get(Uri.parse("$baseUrl/owner/$ownerId"),
-          headers: headers);
+      final response = await http.get(
+        Uri.parse("$baseUrl/personal/$userId"),
+        headers: headers,
+      );
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = jsonDecode(response.body);
@@ -27,10 +30,47 @@ class TagService {
     }
   }
 
-  Future<Tag?> addTag(TagDetail tagDetail) async {
+  Future<List<Tag>> getAllWorkspaceTags(String workspaceId) async {
+    try {
+      final response = await http.get(
+        Uri.parse("$baseUrl/workspace/$workspaceId"),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = jsonDecode(response.body);
+        return jsonData.map((data) => Tag.fromMap(data)).toList();
+      }
+      throw Exception("Fail to fetch tags: ${response.statusCode}");
+    } catch (e) {
+      log("Error fetching tags: $e");
+      return [];
+    }
+  }
+
+  Future<Tag?> createPersonalTag(TagDetail tagDetail) async {
     try {
       final response = await http.post(
-        Uri.parse(baseUrl),
+        Uri.parse("$baseUrl/personal/$userId"),
+        headers: headers,
+        body: jsonEncode(tagDetail.toJson()),
+      );
+
+      if (response.statusCode == 200) {
+        return Tag.fromMap(jsonDecode(response.body));
+      }
+      throw Exception("Fail to create tag: ${response.statusCode}");
+    } catch (e) {
+      log("Error adding tag: $e");
+      return null;
+    }
+  }
+
+  Future<Tag?> createWorkspaceTag(
+      String workspaceId, TagDetail tagDetail) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/workspace/$workspaceId"),
         headers: headers,
         body: jsonEncode(tagDetail.toJson()),
       );
@@ -47,7 +87,7 @@ class TagService {
 
   Future<Tag?> updateTag(String id, TagDetail tagDetail) async {
     try {
-      final response = await http.patch(
+      final response = await http.put(
         Uri.parse("$baseUrl/$id"),
         headers: headers,
         body: jsonEncode(tagDetail.toJson()),

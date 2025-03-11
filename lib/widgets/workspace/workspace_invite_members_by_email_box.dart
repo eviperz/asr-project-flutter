@@ -79,12 +79,6 @@ class _WorkspaceAddModalState
       mainAxisSize: MainAxisSize.min,
       spacing: 8.0,
       children: [
-        Text(
-          "Invite member by Email",
-          style: widget.inviteByEmails != null
-              ? Theme.of(context).textTheme.headlineMedium
-              : Theme.of(context).textTheme.headlineSmall,
-        ),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
           decoration: BoxDecoration(
@@ -119,16 +113,6 @@ class _WorkspaceAddModalState
                     ..._invitedMemberEmails.map((email) {
                       return Chip(
                         label: Text(email),
-                        labelStyle: Theme.of(context)
-                            .textTheme
-                            .bodyLarge!
-                            .copyWith(
-                                color: Theme.of(context).colorScheme.onPrimary),
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        side: BorderSide(
-                            color: Theme.of(context).colorScheme.onPrimary),
-                        deleteIconColor:
-                            Theme.of(context).colorScheme.onPrimary,
                         onDeleted: () {
                           widget.removeEmail(email);
                           setState(() {

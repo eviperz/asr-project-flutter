@@ -14,6 +14,7 @@ final ThemeData lightTheme = ThemeData(
       color: const Color.fromARGB(255, 245, 245, 245),
       shadowColor: Colors.transparent),
   elevatedButtonTheme: elevatedButtonThemeData,
+  chipTheme: chipThemeData,
 
   // primaryColor: Colors.black,
 
@@ -69,6 +70,9 @@ final TextTheme textTheme = TextTheme(
     fontSize: 20,
   ),
   titleSmall: TextStyle(),
+  bodyLarge: TextStyle(),
+  bodyMedium: TextStyle(),
+  bodySmall: TextStyle(),
 );
 
 final ElevatedButtonThemeData elevatedButtonThemeData = ElevatedButtonThemeData(
@@ -79,4 +83,17 @@ final ElevatedButtonThemeData elevatedButtonThemeData = ElevatedButtonThemeData(
     ),
     foregroundColor: lightThemeColorScheme.onPrimary,
   ),
+);
+
+final ChipThemeData chipThemeData = ChipThemeData(
+  backgroundColor: lightThemeColorScheme.primary,
+  labelStyle: textTheme.bodyLarge
+      ?.copyWith(color: lightThemeColorScheme.onPrimary)
+      .copyWith(
+        overflow: TextOverflow.ellipsis,
+      ),
+  side: BorderSide(
+    color: lightThemeColorScheme.onPrimary,
+  ),
+  deleteIconColor: lightThemeColorScheme.onPrimary,
 );

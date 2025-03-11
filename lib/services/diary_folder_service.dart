@@ -51,8 +51,8 @@ class DiaryFolderService {
   Future<List<DiaryFolderModel>> getAllWorkspaceDiaryFoldersWithDiaries(
       String workspaceId) async {
     try {
-      final response = await http.get(Uri.parse("$baseUrl/workspace/$userId"),
-          headers: headers);
+      final response = await http
+          .get(Uri.parse("$baseUrl/workspace/$workspaceId"), headers: headers);
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = jsonDecode(response.body);
@@ -68,10 +68,10 @@ class DiaryFolderService {
   Future<DiaryFolderModel?> createWorkspaceDiaryFolder(
       String workspaceId, DiaryFolderDetail diaryFolderDetail) async {
     try {
-      final response = await http.post(Uri.parse("$baseUrl/workspace/$userId"),
+      final response = await http.post(
+          Uri.parse("$baseUrl/workspace/$workspaceId"),
           headers: headers,
-          body:
-              jsonEncode(diaryFolderDetail.toJson()));
+          body: jsonEncode(diaryFolderDetail.toJson()));
 
       if (response.statusCode == 200) {
         return DiaryFolderModel.fromJson(jsonDecode(response.body));

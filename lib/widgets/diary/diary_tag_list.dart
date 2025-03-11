@@ -5,12 +5,14 @@ class DiaryTagList extends StatefulWidget {
   final List<Tag> tags;
   final Widget? textField;
   final Function()? onChanged;
+  final Function()? reload;
 
   const DiaryTagList({
     super.key,
     required this.tags,
     this.textField,
     this.onChanged,
+    this.reload,
   });
 
   @override
@@ -20,10 +22,11 @@ class DiaryTagList extends StatefulWidget {
 class _DiaryTagListState extends State<DiaryTagList> {
   void _removeTag(Tag tag) {
     setState(() {
-      widget.tags.removeWhere((t) => t.name == tag.name);
+      widget.tags.removeWhere((t) => t.id == tag.id);
     });
 
     widget.onChanged?.call();
+    widget.reload!();
     setState(() {});
   }
 
@@ -36,10 +39,7 @@ class _DiaryTagListState extends State<DiaryTagList> {
       children: [
         ...widget.tags.map(
           (tag) => Chip(
-            label: Text(
-              tag.name,
-              style: Theme.of(context).textTheme.labelMedium,
-            ),
+            label: Text(tag.name),
             backgroundColor: tag.color,
             onDeleted: widget.onChanged != null ? () => _removeTag(tag) : null,
           ),

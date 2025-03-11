@@ -1,7 +1,7 @@
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/diary_folder.dart';
 import 'package:asr_project/providers/diary_folder_provider.dart';
-import 'package:asr_project/providers/tag_list_provider.dart';
+import 'package:asr_project/providers/tag_provider.dart';
 import 'package:asr_project/providers/user_provider.dart';
 import 'package:asr_project/providers/workspace_provider.dart';
 import 'package:asr_project/widgets/custom_drawer.dart';
@@ -28,7 +28,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      ref.read(tagListProvider);
+      ref.read(tagsProvider);
       ref.read(workspaceIdProvider.notifier).state = null;
     });
     _searchFocusNode.addListener(() => setState(() {}));

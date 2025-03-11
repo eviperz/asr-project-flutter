@@ -1,7 +1,7 @@
 import 'package:asr_project/models/tag.dart';
 import 'package:asr_project/widgets/profile_image.dart';
 import 'package:asr_project/widgets/diary/diary_tag_list.dart';
-import 'package:asr_project/pages/diary_form_page/tags_management_modal.dart';
+import 'package:asr_project/pages/diary_form_page/tags_management_modal/tags_management_modal.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';

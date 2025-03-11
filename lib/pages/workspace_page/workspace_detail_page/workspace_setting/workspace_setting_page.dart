@@ -200,6 +200,7 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
                                     context: context,
                                     builder: (context) {
                                       return DefaultModal(
+                                        title: "Invite Member Emails",
                                         child: WorkspaceInviteMembersByEmailBox(
                                           invitedMemberEmails:
                                               _invitedMemberEmails,
