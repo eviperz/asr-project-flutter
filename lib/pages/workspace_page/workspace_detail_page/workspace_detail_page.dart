@@ -2,12 +2,16 @@ import 'dart:developer';
 
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/diary_folder.dart';
+import 'package:asr_project/models/enum/workspace_permission.dart';
+import 'package:asr_project/models/user.dart';
 import 'package:asr_project/models/workspace.dart';
 import 'package:asr_project/pages/workspace_page/workspace_detail_page/workspace_setting/workspace_setting_page.dart';
 import 'package:asr_project/providers/diary_folder_provider.dart';
 import 'package:asr_project/providers/workspace_provider.dart';
 import 'package:asr_project/widgets/custom_textfield.dart';
 import 'package:asr_project/widgets/diary/diary_folder_blocks.dart';
+import 'package:asr_project/widgets/workspace/workspace_member_display.dart';
+import 'package:asr_project/widgets/workspace_icon.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -162,13 +166,21 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
     final AsyncValue diaryFoldersAsync = ref.watch(diaryFoldersProvider);
     final List<Diary> diaries =
         ref.read(diaryFoldersProvider.notifier).allDiariesInFolders;
+    final User owner = widget.workspace.members.entries
+        .firstWhere((entry) => entry.value == WorkspacePermission.owner)
+        .key;
+
+    final List<User> memberWithoutOwner = Map.fromEntries(
+      widget.workspace.members.entries.where((entry) => entry.key != owner),
+    ).keys.toList();
 
     return Scaffold(
       appBar: AppBar(
         title: Text(_workspace.name),
-        actions: [
-          IconButton(onPressed: _showSettingModal, icon: Icon(Icons.settings))
-        ],
+        centerTitle: false,
+        // actions: [
+        // IconButton(onPressed: _showSettingModal, icon: Icon(Icons.settings))
+        // ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -177,6 +189,38 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
             child: Column(
               spacing: 16.0,
               children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      spacing: 20,
+                      children: [
+                        WorkspaceIcon(size: 80),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.workspace.name,
+                              style: Theme.of(context).textTheme.headlineLarge,
+                            ),
+                            WorkspaceMemberDisplay(
+                                memberWithoutOwner: memberWithoutOwner,
+                                owner: owner),
+                          ],
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      onPressed: _showSettingModal,
+                      icon: Icon(Icons.edit),
+                    )
+                  ],
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Divider(),
                 CustomTextfield(
                     hintText: "Search",
                     iconData: Icons.search,
