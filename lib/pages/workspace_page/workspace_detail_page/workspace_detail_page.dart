@@ -5,14 +5,12 @@ import 'package:asr_project/models/diary_folder.dart';
 import 'package:asr_project/models/enum/workspace_permission.dart';
 import 'package:asr_project/models/user.dart';
 import 'package:asr_project/models/workspace.dart';
-import 'package:asr_project/pages/workspace_page/workspace_detail_page/workspace_setting/workspace_setting_page.dart';
 import 'package:asr_project/providers/diary_folder_provider.dart';
 import 'package:asr_project/providers/workspace_provider.dart';
 import 'package:asr_project/widgets/custom_textfield.dart';
 import 'package:asr_project/widgets/diary/diary_folder_blocks.dart';
 import 'package:asr_project/widgets/workspace/workspace_member_display.dart';
 import 'package:asr_project/widgets/workspace_icon.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -145,18 +143,15 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
     }
   }
 
-  void _showSettingModal() async {
-    final Workspace? updatedWorkspace =
-        await showCupertinoModalPopup<Workspace>(
-      context: context,
-      builder: (context) {
-        return WorkspaceSettingPage(workspace: _workspace);
-      },
-    );
+  void _navigatorSetting() async {
+    final bool? isEdit = await Navigator.pushNamed<bool?>(
+        context, "/workspace/setting",
+        arguments: _workspace);
 
-    if (updatedWorkspace != null) {
+    if (isEdit != null && isEdit) {
       setState(() {
-        _workspace = updatedWorkspace;
+        _workspace = ref.read(workspaceProvider.notifier).workspaceByIdProvider;
+        log(_workspace.icon.colorEnum.hexCode.toString());
       });
     }
   }
@@ -166,21 +161,18 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
     final AsyncValue diaryFoldersAsync = ref.watch(diaryFoldersProvider);
     final List<Diary> diaries =
         ref.read(diaryFoldersProvider.notifier).allDiariesInFolders;
-    final User owner = widget.workspace.members.entries
+    final User owner = _workspace.members.entries
         .firstWhere((entry) => entry.value == WorkspacePermission.owner)
         .key;
 
     final List<User> memberWithoutOwner = Map.fromEntries(
-      widget.workspace.members.entries.where((entry) => entry.key != owner),
+      _workspace.members.entries.where((entry) => entry.key != owner),
     ).keys.toList();
 
     return Scaffold(
       appBar: AppBar(
         title: Text(_workspace.name),
         centerTitle: false,
-        // actions: [
-        // IconButton(onPressed: _showSettingModal, icon: Icon(Icons.settings))
-        // ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -196,12 +188,16 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
                     Row(
                       spacing: 20,
                       children: [
-                        WorkspaceIcon(size: 80),
+                        WorkspaceIcon(
+                          workspaceIconEnum: _workspace.icon.iconEnum,
+                          colorEnum: _workspace.icon.colorEnum,
+                          size: 80,
+                        ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              widget.workspace.name,
+                              _workspace.name,
                               style: Theme.of(context).textTheme.headlineLarge,
                             ),
                             WorkspaceMemberDisplay(
@@ -212,7 +208,7 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
                       ],
                     ),
                     IconButton(
-                      onPressed: _showSettingModal,
+                      onPressed: _navigatorSetting,
                       icon: Icon(Icons.edit),
                     )
                   ],

@@ -17,7 +17,6 @@ class DiaryFolderService {
 
   Future<List<DiaryFolderModel>> getAllPersonalDiaryFoldersWithDiaries() async {
     try {
-      log(userId);
       final response = await http.get(Uri.parse("$baseUrl/personal/$userId"),
           headers: headers);
 
@@ -52,7 +51,6 @@ class DiaryFolderService {
     try {
       final response = await http
           .get(Uri.parse("$baseUrl/workspace/$workspaceId"), headers: headers);
-      log(workspaceId);
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = jsonDecode(response.body);

@@ -84,4 +84,23 @@ class WorkspaceService {
     }
     return false;
   }
+
+  Future<bool> removeMember(
+      String id, Map<String, String> removedUserId) async {
+    try {
+      final response = await http.delete(
+        Uri.parse("$baseUrl/$id/members"),
+        headers: headers,
+        body: jsonEncode(removedUserId),
+      );
+
+      if (response.statusCode == 204) {
+        return true;
+      }
+      throw Exception("Fail to remove member: ${response.statusCode}");
+    } catch (e) {
+      log("Error remove member: $e");
+    }
+    return false;
+  }
 }

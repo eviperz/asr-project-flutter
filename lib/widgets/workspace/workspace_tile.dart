@@ -41,9 +41,13 @@ class WorkspaceTile extends ConsumerWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8.0),
           ),
-          leading: WorkspaceIcon(),
+          leading: WorkspaceIcon(
+            workspaceIconEnum: workspace.icon.iconEnum,
+            colorEnum: workspace.icon.colorEnum,
+          ),
           title: Text(workspace.name),
-          subtitle: WorkspaceMemberDisplay(memberWithoutOwner: memberWithoutOwner, owner: owner),
+          subtitle: WorkspaceMemberDisplay(
+              memberWithoutOwner: memberWithoutOwner, owner: owner),
           trailing: IconButton(
             onPressed: () {
               toggleStarred(workspace.id);

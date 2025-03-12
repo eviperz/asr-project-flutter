@@ -62,4 +62,29 @@ class WorkspaceNotifier extends AsyncNotifier<List<Workspace>> {
     }
     return false;
   }
+
+  Future<bool> removeMember(
+      String id, Map<String, String> removedUserId) async {
+    final bool response =
+        await _workspaceService.removeMember(id, removedUserId);
+
+    if (response) {
+      state = AsyncValue.data(
+        (state.value ?? []).map((w) {
+          if (w.id != id) return w;
+
+          // ลบสมาชิกออกจาก members
+          final updatedMembers = Map.of(w.members)
+            ..removeWhere((key, value) => removedUserId.containsKey(key));
+
+          return w.copyWith(members: updatedMembers);
+        }).toList(),
+      );
+      return true;
+    }
+    return false;
+  }
+
+  Workspace get workspaceByIdProvider => (state.value ?? [])
+      .firstWhere((item) => item.id == ref.read(workspaceIdProvider));
 }

@@ -10,6 +10,7 @@ class CustomTextfield extends StatefulWidget {
   final TextEditingController? textEditController;
   final FocusNode? focusNode;
   final Function? onTap;
+  final TextButton? subButton;
 
   const CustomTextfield({
     super.key,
@@ -22,6 +23,7 @@ class CustomTextfield extends StatefulWidget {
     this.textEditController,
     this.focusNode,
     this.onTap,
+    this.subButton,
   }) : canClear = canClear ?? false;
 
   @override
