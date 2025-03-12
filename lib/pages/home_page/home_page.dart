@@ -135,31 +135,43 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final String? name = ref.watch(userProvider).value?.name;
-    final List<DiaryFolderModel> diaryFolders =
-        ref.watch(diaryFoldersProvider).value ?? [];
-    final List<Diary> diaries =
-        ref.watch(diaryFoldersProvider.notifier).allDiariesInFolders;
+    final String name = ref.watch(userProvider).value?.name ?? "Guest";
+    final AsyncValue<List<DiaryFolderModel>> diaryFoldersAsync =
+        ref.watch(diaryFoldersProvider);
 
     return Scaffold(
       appBar: AppBar(),
-      drawer: CustomDrawer(name: name ?? "Guest"),
-      body: _buildBody(context, diaryFolders, diaries, name ?? "Guest"),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
+      drawer: CustomDrawer(name: name),
+      body: diaryFoldersAsync.when(
+        data: (diaryFolders) {
+          final List<Diary> diaries =
+              ref.watch(diaryFoldersProvider.notifier).allDiariesInFolders;
+          return _buildBody(context, diaryFolders, diaries, name);
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text("Error: $err")),
+      ),
+      floatingActionButton: diaryFoldersAsync.when(
+        data: (diaryFolders) {
           final DiaryFolderModel? defaultFolder = diaryFolders
               .firstWhereOrNull((folder) => folder.name == "Default");
 
-          if (defaultFolder != null) {
-            _addDiaryInFolder(defaultFolder.id);
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("No Default folder found")),
-            );
-          }
+          return FloatingActionButton.extended(
+            onPressed: () {
+              if (defaultFolder != null) {
+                _addDiaryInFolder(defaultFolder.id);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("No Default folder found")),
+                );
+              }
+            },
+            icon: const Icon(Icons.add),
+            label: const Text("Diary"),
+          );
         },
-        icon: const Icon(Icons.add),
-        label: const Text("Diary"),
+        loading: () => const SizedBox(),
+        error: (err, stack) => const SizedBox(),
       ),
     );
   }

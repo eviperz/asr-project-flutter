@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/diary_folder.dart';
 import 'package:asr_project/widgets/custom_dialog.dart';
