@@ -26,7 +26,7 @@ class _DiaryTagListState extends State<DiaryTagList> {
     });
 
     widget.onChanged?.call();
-    widget.reload!();
+    widget.reload?.call();
     setState(() {});
   }
 
