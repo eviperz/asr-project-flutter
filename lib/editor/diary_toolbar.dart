@@ -17,14 +17,14 @@ class DiaryToolbar extends StatefulWidget {
 }
 
 class _DiaryToolbarState extends State<DiaryToolbar> {
-  void _showAsrDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => ASRDialog(
-        controller: widget.controller,
-      ),
-    );
-  }
+  // void _showAsrDialog() {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => ASRDialog(
+  //       controller: widget.controller,
+  //     ),
+  //   );
+  // }
 
   void _hideKeyboard() {
     setState(() {
@@ -46,13 +46,13 @@ class _DiaryToolbarState extends State<DiaryToolbar> {
               child: quill.QuillSimpleToolbar(
                 controller: widget.controller,
                 configurations: quill.QuillSimpleToolbarConfigurations(
-                  customButtons: [
-                    quill.QuillToolbarCustomButtonOptions(
-                      icon: const Icon(Icons.mic_external_on),
-                      onPressed: _showAsrDialog,
+                    // customButtons: [
+                    //   quill.QuillToolbarCustomButtonOptions(
+                    //     icon: const Icon(Icons.mic_external_on),
+                    //     onPressed: _showAsrDialog,
+                    //   ),
+                    // ],
                     ),
-                  ],
-                ),
               ),
             ),
           ),

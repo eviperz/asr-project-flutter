@@ -40,10 +40,10 @@ PODS:
   - Flutter (1.0.0)
   - flutter_keyboard_visibility_temp_fork (0.0.1):
     - Flutter
-  - flutter_sound (9.25.1):
+  - flutter_sound (9.25.4):
     - Flutter
-    - flutter_sound_core (= 9.25.1)
-  - flutter_sound_core (9.25.1)
+    - flutter_sound_core (= 9.25.4)
+  - flutter_sound_core (9.25.4)
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -51,9 +51,11 @@ PODS:
     - Flutter
   - quill_native_bridge_ios (0.0.1):
     - Flutter
-  - SDWebImage (5.20.0):
-    - SDWebImage/Core (= 5.20.0)
-  - SDWebImage/Core (5.20.0)
+  - record (0.0.1):
+    - Flutter
+  - SDWebImage (5.21.0):
+    - SDWebImage/Core (= 5.21.0)
+  - SDWebImage/Core (5.21.0)
   - sqflite_darwin (0.0.4):
     - Flutter
     - FlutterMacOS
@@ -71,6 +73,7 @@ DEPENDENCIES:
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - quill_native_bridge_ios (from `.symlinks/plugins/quill_native_bridge_ios/ios`)
+  - record (from `.symlinks/plugins/record/ios`)
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
 
@@ -101,28 +104,31 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
   quill_native_bridge_ios:
     :path: ".symlinks/plugins/quill_native_bridge_ios/ios"
+  record:
+    :path: ".symlinks/plugins/record/ios"
   sqflite_darwin:
     :path: ".symlinks/plugins/sqflite_darwin/darwin"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
 
 SPEC CHECKSUMS:
-  audio_waveforms: cd736909ebc6b6a164eb74701d8c705ce3241e1c
-  audioplayers_darwin: 877d9a4d06331c5c374595e46e16453ac7eafa40
+  audio_waveforms: a6dde7fe7c0ea05f06ffbdb0f7c1b2b2ba6cedcf
+  audioplayers_darwin: ccf9c770ee768abb07e26d90af093f7bab1c12ab
   DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
-  file_picker: b159e0c068aef54932bb15dc9fd1571818edaf49
+  file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  flutter_keyboard_visibility_temp_fork: 8a8809c4129e31d25fca77446e0f3fd548122ced
-  flutter_sound: d76615597357951358e1de808b0c1edbb06354b4
-  flutter_sound_core: 065aca7698f13a934d8cb8156a2865efd282b1e8
-  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
-  permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
-  quill_native_bridge_ios: 2b01d585fcc73d0f5eed78c0bd244ee564b06f5a
-  SDWebImage: 73c6079366fea25fa4bb9640d5fb58f0893facd8
-  sqflite_darwin: 5a7236e3b501866c1c9befc6771dfd73ffb8702d
+  flutter_keyboard_visibility_temp_fork: 95b2d534bacf6ac62e7fcbe5c2a9e2c2a17ce06f
+  flutter_sound: fabdc933a54acb3f9cf1b7ca946398743f0287e2
+  flutter_sound_core: 50f98a00756d0853cc1e38336515f30e8577dff2
+  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
+  permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
+  quill_native_bridge_ios: f47af4b14e7757968486641656c5d23250cee521
+  record: 426d0643542aaca81f738c5d214ad99626b2f134
+  SDWebImage: f84b0feeb08d2d11e6a9b843cb06d75ebf5b8868
+  sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
-  url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
+  url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
 
 PODFILE CHECKSUM: a57f30d18f102dd3ce366b1d62a55ecbef2158e5
 

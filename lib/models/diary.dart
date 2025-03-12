@@ -81,21 +81,21 @@ class DiaryDetail {
   final String? title;
   final Delta? content;
   final List<String>? tagIds;
+  final String? audioUrl;
 
   DiaryDetail({
-    String? title,
-    Delta? content,
-    List<String>? tagIds,
-  })  : title = title ?? 'Untitled',
-        content = content ?? Delta()
-          ..insert('\n'),
-        tagIds = tagIds ?? [];
+    this.title,
+    this.content,
+    this.tagIds,
+    this.audioUrl,
+  });
 
   Map<String, dynamic> toJson() {
     return {
-      "title": title,
+      "title": title ?? 'Untitled',
       "content": content?.toJson(),
       "tagIds": tagIds,
+      "audioUrl": audioUrl,
     };
   }
 }

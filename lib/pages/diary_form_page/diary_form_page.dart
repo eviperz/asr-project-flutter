@@ -1,5 +1,6 @@
 import 'package:asr_project/providers/diary_folder_provider.dart';
 import 'package:asr_project/providers/tag_provider.dart';
+import 'package:asr_project/widgets/asr/asr_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,6 +30,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
   late DateTime _updatedAt;
   bool _isEdited = false;
   bool _isKeyboardVisible = false;
+  String? _audioUrl; // To store the audio URL
 
   @override
   void initState() {
@@ -49,6 +51,16 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
     super.didChangeDependencies();
   }
 
+  void _showAsrDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => ASRDialog(
+        controller: _controller,
+        saveDiary: _saveDiary, // Pass the saveDiary method
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -56,13 +68,15 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
     super.dispose();
   }
 
-  Future<void> _saveDiary() async {
+  // Update _saveDiary to accept audioUrl as a parameter
+  Future<void> _saveDiary(String audioUrl) async {
     final DiaryDetail diaryDetail = DiaryDetail(
       title: _titleController.text.trim().isEmpty
           ? 'Untitled'
           : _titleController.text.trim(),
       content: _controller.document.toDelta(),
       tagIds: _tags.map((tag) => tag.id).toList(),
+      audioUrl: audioUrl,
     );
 
     await ref
@@ -82,7 +96,13 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
         confirmLabel: "Save",
         cancelLabel: "Dismiss",
         onConfirm: () async {
-          await _saveDiary();
+          if (_audioUrl != null) {
+            await _saveDiary(_audioUrl!); // Pass the audioUrl to _saveDiary
+          } else {
+            await _saveDiary(
+                ""); // If no audio is recorded, pass an empty string
+          }
+
           if (mounted) {
             Navigator.pop(context);
             Navigator.pop(context);
@@ -111,7 +131,12 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
           PopupMenuButton<String>(
             onSelected: (value) async {
               if (value == "save") {
-                await _saveDiary();
+                if (_audioUrl != null) {
+                  await _saveDiary(
+                      _audioUrl!); // Pass the audioUrl to saveDiary
+                } else {
+                  await _saveDiary(""); // If no audio, pass an empty string
+                }
               } else if (value == "delete") {
                 showDialog(
                   context: context,
@@ -172,6 +197,10 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
                   setState(() => _isKeyboardVisible = isVisible),
             )
           : null,
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showAsrDialog,
+        child: const Icon(Icons.mic),
+      ),
     );
   }
 
