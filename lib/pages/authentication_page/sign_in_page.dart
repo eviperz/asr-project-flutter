@@ -118,14 +118,20 @@ class _SignInPageState extends State<SignInPage> {
                 textEditController: _emailTextEditController,
                 focusNode: _emailFocusNode,
               ),
-              CustomTextfield(
-                label: "Password",
-                hintText: "Enter password",
-                iconData: Icons.password,
-                keyboardType: TextInputType.visiblePassword,
-                errorText: _isSubmit ? _validatePassword() : null,
-                textEditController: _passwordTextEditController,
-                focusNode: _passwordFocusNode,
+              Column(
+                children: [
+                  CustomTextfield(
+                    label: "Password",
+                    hintText: "Enter password",
+                    iconData: Icons.password,
+                    keyboardType: TextInputType.visiblePassword,
+                    errorText: _isSubmit ? _validatePassword() : null,
+                    textEditController: _passwordTextEditController,
+                    focusNode: _passwordFocusNode,
+                    subButton: TextButton(
+                        onPressed: () {}, child: Text("reset password")),
+                  ),
+                ],
               ),
               Column(
                 children: [

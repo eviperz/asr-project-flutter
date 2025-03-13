@@ -1,4 +1,3 @@
-import 'package:asr_project/core/theme.dart';
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/workspace.dart';
 import 'package:asr_project/pages/authentication_page/sign_in_page.dart';
@@ -7,6 +6,7 @@ import 'package:asr_project/pages/diary_search_page/diary_search_page.dart';
 import 'package:asr_project/pages/event_page/event_page.dart';
 import 'package:asr_project/pages/record_voice_page.dart';
 import 'package:asr_project/pages/workspace_page/workspace_detail_page/workspace_detail_page.dart';
+import 'package:asr_project/pages/workspace_page/workspace_detail_page/workspace_setting/workspace_setting_page.dart';
 import 'package:asr_project/pages/workspace_page/workspace_page.dart';
 import 'package:asr_project/providers/theme_provider.dart';
 import 'package:asr_project/widgets/custom_bottom_navbar.dart';
@@ -44,6 +44,12 @@ class MyApp extends ConsumerWidget {
             return MaterialPageRoute(
                 builder: (context) =>
                     WorkspaceDetailPage(workspace: workspace));
+
+          case "/workspace/setting":
+            Workspace workspace = settings.arguments as Workspace;
+            return MaterialPageRoute<bool?>(
+                builder: (context) =>
+                    WorkspaceSettingPage(workspace: workspace));
 
           case "/diary/search":
             final List<Diary> diaries = settings.arguments as List<Diary>;

@@ -21,7 +21,7 @@ class TagService {
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = jsonDecode(response.body);
-        return jsonData.map((data) => Tag.fromMap(data)).toList();
+        return jsonData.map((data) => Tag.fromJson(data)).toList();
       }
       throw Exception("Fail to fetch tags: ${response.statusCode}");
     } catch (e) {
@@ -39,7 +39,7 @@ class TagService {
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = jsonDecode(response.body);
-        return jsonData.map((data) => Tag.fromMap(data)).toList();
+        return jsonData.map((data) => Tag.fromJson(data)).toList();
       }
       throw Exception("Fail to fetch tags: ${response.statusCode}");
     } catch (e) {
@@ -57,7 +57,7 @@ class TagService {
       );
 
       if (response.statusCode == 200) {
-        return Tag.fromMap(jsonDecode(response.body));
+        return Tag.fromJson(jsonDecode(response.body));
       }
       throw Exception("Fail to create tag: ${response.statusCode}");
     } catch (e) {
@@ -76,7 +76,7 @@ class TagService {
       );
 
       if (response.statusCode == 200) {
-        return Tag.fromMap(jsonDecode(response.body));
+        return Tag.fromJson(jsonDecode(response.body));
       }
       throw Exception("Fail to create tag: ${response.statusCode}");
     } catch (e) {
@@ -94,7 +94,7 @@ class TagService {
       );
 
       if (response.statusCode == 200) {
-        return Tag.fromMap(jsonDecode(response.body));
+        return Tag.fromJson(jsonDecode(response.body));
       }
       throw Exception("Fail to update tag: ${response.statusCode}");
     } catch (e) {

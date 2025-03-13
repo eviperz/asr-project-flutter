@@ -1,35 +1,41 @@
-import 'package:flutter/widgets.dart';
+import 'dart:developer';
+
+import 'package:asr_project/models/enum/color_platte.dart';
 
 class Tag {
   final String id;
   final String name;
-  final Color color;
+  final ColorPalette colorEnum;
 
   Tag({
     required this.id,
     required this.name,
-    required this.color,
+    required this.colorEnum,
   });
 
-  factory Tag.fromMap(Map<String, dynamic> map) {
+  factory Tag.fromJson(Map<String, dynamic> json) {
     return Tag(
-      id: map['tagId'],
-      name: map['tagName'],
-      color: Color(int.parse("0xFF${map['colorCode']}")),
+      id: json['tagId'],
+      name: json['tagName'],
+      colorEnum: ColorPalette.fromHex(json['colorCode']),
     );
   }
 }
 
 class TagDetail {
-  final String name;
-  final String? colorCode;
+  final String? name;
+  final ColorPalette? colorEnum;
 
   TagDetail({
-    required this.name,
-    String? colorCode,
-  }) : colorCode = colorCode ?? "C4C4C4";
+    this.name,
+    this.colorEnum,
+  });
 
   Map<String, dynamic> toJson() {
-    return {"tagName": name, "colorCode": colorCode,};
+    if (colorEnum != null) log(colorEnum!.hexCode.toString());
+    return {
+      if (name != null) "tagName": name,
+      if (colorEnum != null) "colorCode": colorEnum?.hexCode,
+    };
   }
 }

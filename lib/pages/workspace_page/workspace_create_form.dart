@@ -1,8 +1,13 @@
+import 'package:asr_project/models/enum/color_platte.dart';
+import 'package:asr_project/models/enum/workspace_icon.dart';
 import 'package:asr_project/models/workspace.dart';
+import 'package:asr_project/models/workspace_icon_model.dart';
 import 'package:asr_project/providers/workspace_provider.dart';
+import 'package:asr_project/widgets/workspace/workspace_icon_selector.dart';
 import 'package:asr_project/widgets/workspace/workspace_invite_members_by_email_box.dart';
 import 'package:asr_project/widgets/workspace/workspace_name_and_description_text_field.dart';
 import 'package:asr_project/widgets/workspace_icon.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -19,6 +24,8 @@ class _WorkspaceCreateFormState extends ConsumerState<WorkspaceCreateForm> {
       TextEditingController();
   final TextEditingController _descriptionTextEditingController =
       TextEditingController();
+  late WorkspaceIconEnum _workspaceIconEnum = WorkspaceIconEnum.business;
+  late ColorPalette _workspaceColorEnum = ColorPalette.gray;
   final List<String> _invitedMemberEmails = [];
 
   @override
@@ -40,6 +47,10 @@ class _WorkspaceCreateFormState extends ConsumerState<WorkspaceCreateForm> {
       final WorkspaceDetail workspaceDetail = WorkspaceDetail(
         name: _nameTextEditingController.text,
         description: _descriptionTextEditingController.text,
+        icon: WorkspaceIconDetail(
+          iconEnum: _workspaceIconEnum,
+          colorEnum: _workspaceColorEnum,
+        ),
         invitedMemberEmails: _invitedMemberEmails,
       );
 
@@ -67,6 +78,14 @@ class _WorkspaceCreateFormState extends ConsumerState<WorkspaceCreateForm> {
   void _removeInvitedMemberEmails(String email) {
     setState(() {
       _invitedMemberEmails.remove(email);
+    });
+  }
+
+  void _selectWorkspaceIcon(
+      WorkspaceIconEnum iconEnum, ColorPalette colorEnum) {
+    setState(() {
+      _workspaceIconEnum = iconEnum;
+      _workspaceColorEnum = colorEnum;
     });
   }
 
@@ -98,9 +117,27 @@ class _WorkspaceCreateFormState extends ConsumerState<WorkspaceCreateForm> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        WorkspaceIcon(),
+                        WorkspaceIcon(
+                            workspaceIconEnum: _workspaceIconEnum,
+                            colorEnum: _workspaceColorEnum),
                         TextButton(
-                            onPressed: () {},
+                            onPressed: () async {
+                              final result = await showCupertinoModalPopup<
+                                  Map<String, dynamic>>(
+                                context: context,
+                                builder: (context) => WorkspaceIconSelector(
+                                  workspaceIconEnum: _workspaceIconEnum,
+                                  workspaceIconColorEnum: _workspaceColorEnum,
+                                ),
+                              );
+
+                              if (result != null) {
+                                _selectWorkspaceIcon(
+                                  result['iconEnum'] as WorkspaceIconEnum,
+                                  result['colorEnum'] as ColorPalette,
+                                );
+                              }
+                            },
                             child: Text(
                               "Change Icon",
                             ))

@@ -3,12 +3,16 @@ import 'package:flutter/material.dart';
 class WorkspaceNameAndDescriptionTextField extends StatefulWidget {
   final TextEditingController nameTextEditingController;
   final TextEditingController descriptionTextEditingController;
+  final Function(String)? updateName;
+  final Function(String)? updateDescription;
   final Function reload;
 
   const WorkspaceNameAndDescriptionTextField({
     super.key,
     required this.nameTextEditingController,
     required this.descriptionTextEditingController,
+    this.updateName,
+    this.updateDescription,
     required this.reload,
   });
 
@@ -28,10 +32,17 @@ class _WorkspaceNameAndDescriptionTextFieldState
 
     _nameFocusNode.addListener(() {
       setState(() {});
+      if (!_nameFocusNode.hasFocus && widget.updateName != null) {
+        widget.updateName!(widget.nameTextEditingController.text.trim());
+      }
     });
 
     _descriptionFocusNode.addListener(() {
       setState(() {});
+      if (!_descriptionFocusNode.hasFocus && widget.updateDescription != null) {
+        widget.updateDescription!(
+            widget.descriptionTextEditingController.text.trim());
+      }
     });
   }
 

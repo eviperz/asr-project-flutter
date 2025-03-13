@@ -1,10 +1,16 @@
+import 'package:asr_project/models/enum/color_platte.dart';
+import 'package:asr_project/models/enum/workspace_icon.dart';
 import 'package:flutter/material.dart';
 
 class WorkspaceIcon extends StatelessWidget {
+  final WorkspaceIconEnum workspaceIconEnum;
+  final ColorPalette colorEnum;
   final double? size;
 
   const WorkspaceIcon({
     super.key,
+    required this.workspaceIconEnum,
+    required this.colorEnum,
     this.size,
   });
 
@@ -16,10 +22,10 @@ class WorkspaceIcon extends StatelessWidget {
       height: size ?? 55,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8.0),
-        color: Theme.of(context).colorScheme.primary,
+        color: colorEnum.color,
       ),
       child: Icon(
-        Icons.note,
+        workspaceIconEnum.icon,
         color: Colors.white,
       ),
     );
