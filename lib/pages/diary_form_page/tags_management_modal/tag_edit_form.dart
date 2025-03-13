@@ -1,5 +1,7 @@
+import 'package:asr_project/models/enum/color_platte.dart';
+import 'package:asr_project/widgets/color_palette_selector.dart';
+import 'package:asr_project/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:asr_project/models/tag.dart';
 import 'package:asr_project/providers/tag_provider.dart';
@@ -15,12 +17,30 @@ class TagEditModal extends ConsumerStatefulWidget {
 }
 
 class _TagEditModalState extends ConsumerState<TagEditModal> {
-  late Color currentColor;
+  final TextEditingController _textEditingController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+  late ColorPalette _currentColor;
 
   @override
   void initState() {
     super.initState();
-    currentColor = widget.tag.color;
+    _textEditingController.addListener(() => setState(() {}));
+    _focusNode.addListener(() => setState(() {}));
+    _textEditingController.text = widget.tag.name;
+    _currentColor = widget.tag.colorEnum;
+  }
+
+  String? _validateName() {
+    if (_textEditingController.text.trim().isEmpty) {
+      return "Tag name is required";
+    }
+    return null;
+  }
+
+  void _reloadColor(ColorPalette colorEnum) {
+    setState(() {
+      _currentColor = colorEnum;
+    });
   }
 
   @override
@@ -28,40 +48,46 @@ class _TagEditModalState extends ConsumerState<TagEditModal> {
     return DefaultModal(
       title: "Edit Tag",
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
+        spacing: 8.0,
         children: [
-          SizedBox(
-            width: double.maxFinite,
-            child: ColorPicker(
-              enableAlpha: false,
-              labelTypes: [],
-              hexInputBar: true,
-              colorPickerWidth: 250,
-              pickerColor: currentColor,
-              onColorChanged: (Color color) {
-                setState(() {
-                  currentColor = color;
-                });
-              },
+          Container(
+            alignment: Alignment.center,
+            padding: const EdgeInsets.symmetric(vertical: 40.0),
+            child: Chip(
+              label: Text(
+                _textEditingController.text.trim(),
+                style: TextStyle(fontSize: 20),
+              ),
+              backgroundColor: _currentColor.color,
             ),
           ),
-          SizedBox(
-            width: double.maxFinite,
-            child: ElevatedButton(
-              onPressed: () {
-                String hexColor = colorToHex(currentColor);
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: CustomTextfield(
+                label: "Tag",
+                hintText: "Enter name",
+                keyboardType: TextInputType.text,
+                textEditController: _textEditingController,
+                focusNode: _focusNode,
+                errorText: _validateName()),
+          ),
+          ColorPaletteSelector(colorEnum: _currentColor, reload: _reloadColor),
+          TextButton(
+            onPressed: () {
+              if (_validateName() == null) {
                 ref.read(tagsProvider.notifier).updateTag(
                       widget.tag.id,
                       TagDetail(
-                        name: widget.tag.name,
-                        colorCode: hexColor,
+                        name: _textEditingController.text,
+                        colorEnum: _currentColor,
                       ),
                     );
                 Navigator.pop(context);
-              },
-              child: const Text("Save"),
-            ),
+              }
+            },
+            child: const Text("Confirm"),
           ),
         ],
       ),

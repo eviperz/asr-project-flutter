@@ -114,7 +114,7 @@ class _TagFillterModalState extends ConsumerState<TagFillterModal> {
                           alignment: Alignment.centerLeft,
                           child: Chip(
                             label: Text(tag.name),
-                            backgroundColor: tag.color,
+                            backgroundColor: tag.colorEnum.color,
                           ),
                         ),
                         value: widget.activeTags.contains(tag.name),

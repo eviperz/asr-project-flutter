@@ -40,7 +40,7 @@ class _DiaryTagListState extends State<DiaryTagList> {
         ...widget.tags.map(
           (tag) => Chip(
             label: Text(tag.name),
-            backgroundColor: tag.color,
+            backgroundColor: tag.colorEnum.color,
             onDeleted: widget.onChanged != null ? () => _removeTag(tag) : null,
           ),
         ),

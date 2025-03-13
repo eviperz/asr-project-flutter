@@ -263,7 +263,7 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
                 alignment: Alignment.centerLeft,
                 child: Chip(
                   label: Text(tag.name),
-                  backgroundColor: tag.color,
+                  backgroundColor: tag.colorEnum.color,
                 ),
               ),
               trailing: Row(
