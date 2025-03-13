@@ -6,16 +6,13 @@ import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
-import 'package:audioplayers/audioplayers.dart';
 
 class ASRDialog extends StatefulWidget {
   final quill.QuillController controller;
-  final Future<void> Function(String audioUrl) saveDiary;
 
   const ASRDialog({
     super.key,
     required this.controller,
-    required this.saveDiary,
   });
 
   @override
@@ -25,13 +22,11 @@ class ASRDialog extends StatefulWidget {
 class _ASRDialogState extends State<ASRDialog> {
   bool _isRecording = false;
   late Record audioRecord;
-  late AudioPlayer audioPlayer;
   String? audioPath;
 
   @override
   void initState() {
     super.initState();
-    audioPlayer = AudioPlayer();
     audioRecord = Record();
     _requestPermissions();
   }
@@ -49,35 +44,39 @@ class _ASRDialogState extends State<ASRDialog> {
       index,
       quill.BlockEmbed.custom(AudioBlockEmbed(audioUrl)),
     );
-
-    widget.saveDiary(audioUrl);
   }
 
-  @override
-  void dispose() {
-    audioPlayer.dispose();
-    audioRecord.dispose();
-    super.dispose();
-  }
+  Future<String?> _uploadAudioFile(File file) async {
+    try {
+      // var uri = Uri.parse("https://your-backend.com/upload");
+      // var request = http.MultipartRequest("POST", uri);
 
-  Future<void> _pickAudioFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['mp3', 'wav', 'm4a'],
-    );
+      // request.files.add(
+      //   await http.MultipartFile.fromPath(
+      //     'audio',
+      //     file.path,
+      //     contentType:
+      //         MediaType.parse(lookupMimeType(file.path) ?? 'audio/mpeg'),
+      //   ),
+      // );
 
-    if (result != null && result.files.isNotEmpty) {
-      String audioUrl = result.files.single.path ?? '';
-      if (audioUrl.isNotEmpty) {
-        _insertAudio(audioUrl);
-      }
+      // var response = await request.send();
+      // if (response.statusCode == 200) {
+      //   var responseBody = await response.stream.bytesToString();
+      //   return responseBody; // Adjust this according to the response format
+      // }
+    } catch (e) {
+      print("Upload failed: $e");
     }
+    return null;
   }
 
   Future<void> _startRecording() async {
     try {
       if (await audioRecord.hasPermission()) {
-        String filePath = 'recording_${DateTime.now()}.mp3';
+        final dir = await getApplicationDocumentsDirectory();
+        String filePath =
+            '${dir.path}/recording_${DateTime.now().millisecondsSinceEpoch}.mp3';
 
         await audioRecord.start(path: filePath);
         setState(() {
@@ -102,13 +101,38 @@ class _ASRDialogState extends State<ASRDialog> {
           audioPath = path;
         });
 
-        await _insertAudio(audioPath!);
+        File file = File(path);
+        String? uploadedUrl = await _uploadAudioFile(file);
+        if (uploadedUrl != null) {
+          _insertAudio(uploadedUrl);
+        }
       } else {
         print("Recording failed or file does not exist.");
       }
     } catch (e) {
       print('Error Stop Recording: $e');
     }
+  }
+
+  Future<void> _pickAudioFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['mp3', 'wav', 'm4a'],
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      File file = File(result.files.single.path ?? '');
+      String? uploadedUrl = await _uploadAudioFile(file);
+      if (uploadedUrl != null) {
+        _insertAudio(uploadedUrl);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    audioRecord.dispose();
+    super.dispose();
   }
 
   @override
