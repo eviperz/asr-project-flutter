@@ -46,8 +46,7 @@ class Workspace {
       name: name ?? this.name,
       description: description ?? this.description,
       icon: this.icon,
-      members:
-          members ?? this.members,
+      members: members ?? this.members,
     );
   }
 }

@@ -16,15 +16,15 @@ class WorkspaceIconModel {
 }
 
 class WorkspaceIconDetail {
-  final WorkspaceIconEnum iconEnum;
-  final ColorPalette colorEnum;
+  final WorkspaceIconEnum? iconEnum;
+  final ColorPalette? colorEnum;
 
-  WorkspaceIconDetail({required this.iconEnum, required this.colorEnum});
+  WorkspaceIconDetail({this.iconEnum, this.colorEnum});
 
   Map<String, dynamic> toJson() {
     return {
-      "name": iconEnum.name,
-      "colorCode": colorEnum.hexCode,
+      if (iconEnum != null) "name": iconEnum?.name,
+      if (colorEnum != null) "colorCode": colorEnum?.hexCode,
     };
   }
 }

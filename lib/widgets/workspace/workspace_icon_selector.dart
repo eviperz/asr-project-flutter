@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:asr_project/models/enum/color_platte.dart';
 import 'package:asr_project/models/enum/workspace_icon.dart';
 import 'package:asr_project/widgets/color_palette_selector.dart';

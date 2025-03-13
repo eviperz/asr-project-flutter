@@ -1,4 +1,3 @@
-import 'package:asr_project/core/theme.dart';
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/workspace.dart';
 import 'package:asr_project/pages/authentication_page/sign_in_page.dart';
