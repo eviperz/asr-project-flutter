@@ -87,7 +87,7 @@ class TagService {
 
   Future<Tag?> updateTag(String id, TagDetail tagDetail) async {
     try {
-      final response = await http.put(
+      final response = await http.patch(
         Uri.parse("$baseUrl/$id"),
         headers: headers,
         body: jsonEncode(tagDetail.toJson()),
