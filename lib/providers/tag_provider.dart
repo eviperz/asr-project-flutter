@@ -14,60 +14,66 @@ class TagsNotifier extends AsyncNotifier<List<Tag>> {
 
   @override
   Future<List<Tag>> build() async {
-    String? workspaceId = ref.watch(workspaceIdProvider);
-    return workspaceId == null
-        ? await _tagService.getAllPersonalTags()
-        : await _tagService.getAllWorkspaceTags(workspaceId);
+    return await fetchData();
   }
 
-  Future<void> _fetchData() async {
-    final String? workspaceId = ref.watch(workspaceIdProvider);
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => workspaceId == null
-        ? _tagService.getAllPersonalTags()
-        : _tagService.getAllWorkspaceTags(workspaceId));
-  }
-
-  void _updateState(List<Tag> updatedTags) {
-    state = AsyncValue.data(updatedTags);
+  Future<List<Tag>> fetchData() async {
+    state = AsyncLoading();
+    final String? workspaceId = ref.read(workspaceIdProvider);
+    if (workspaceId == null) {
+      return await _tagService.getAllPersonalTags();
+    } else {
+      return await _tagService.getAllWorkspaceTags(workspaceId);
+    }
   }
 
   Future<Tag?> createTag(TagDetail tagDetail) async {
     final String? workspaceId = ref.watch(workspaceIdProvider);
-    final result = await AsyncValue.guard(() => workspaceId == null
-        ? _tagService.createPersonalTag(tagDetail)
-        : _tagService.createWorkspaceTag(
-            workspaceId,
-            tagDetail,
-          ));
-
-    return result.when(
-      data: (tag) {
-        if (tag != null) {
-          _updateState([...(state.value ?? []), tag]);
-          return tag;
-        }
+    try {
+      final Tag? tag = workspaceId == null
+          ? await _tagService.createPersonalTag(tagDetail)
+          : await _tagService.createWorkspaceTag(
+              workspaceId,
+              tagDetail,
+            );
+      if (tag != null) {
+        state = AsyncData([...(state.value ?? []), tag]);
+        return tag;
+      } else {
         return null;
-      },
-      loading: () => null,
-      error: (_, __) => null,
-    );
+      }
+    } catch (e) {
+      state = AsyncError(e, StackTrace.current);
+      return null;
+    }
   }
 
   Future<Tag?> updateTag(String id, TagDetail tagDetail) async {
-    final updatedTag = await _tagService.updateTag(id, tagDetail);
-    if (updatedTag != null) {
-      state = AsyncValue.data(
-          state.value!.map((d) => d.id == id ? updatedTag : d).toList());
-      return updatedTag;
+    try {
+      final updatedTag = await _tagService.updateTag(id, tagDetail);
+      if (updatedTag != null) {
+        state = AsyncData((state.value ?? [])
+            .map((d) => d.id == id ? updatedTag : d)
+            .toList());
+        return updatedTag;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      state = AsyncError(e, StackTrace.current);
+      return null;
     }
-    return null;
   }
 
   Future<void> removeTag(String id) async {
-    final success = await _tagService.deleteTag(id);
-    if (success) {
-      state = AsyncValue.data(state.value!.where((d) => d.id != id).toList());
+    try {
+      final success = await _tagService.deleteTag(id);
+      if (success) {
+        state =
+            AsyncData((state.value ?? []).where((d) => d.id != id).toList());
+      }
+    } catch (e) {
+      state = AsyncError(e, StackTrace.current);
     }
   }
 

@@ -1,4 +1,5 @@
 import 'package:asr_project/models/tag.dart';
+import 'package:asr_project/models/user.dart';
 import 'package:asr_project/widgets/profile_image.dart';
 import 'package:asr_project/widgets/diary/diary_tag_list.dart';
 import 'package:asr_project/pages/diary_form_page/tags_management_modal/tags_management_modal.dart';
@@ -7,12 +8,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class DiaryInfo extends StatelessWidget {
+  final User? owner;
   final DateTime updatedAt;
   final List<Tag> tags;
   final VoidCallback onChange;
 
   const DiaryInfo({
     super.key,
+    this.owner,
     required this.tags,
     required this.updatedAt,
     required this.onChange,
@@ -31,7 +34,7 @@ class DiaryInfo extends StatelessWidget {
             children: [
               const ProfileImage(),
               const SizedBox(width: 8.0),
-              Text("Person Name", style: textStyle),
+              Text(owner?.name ?? "Anonymous", style: textStyle),
             ],
           ),
         ),

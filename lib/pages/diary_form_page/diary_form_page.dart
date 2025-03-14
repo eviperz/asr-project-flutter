@@ -151,6 +151,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
           children: [
             _buildTitleTextField(context),
             DiaryInfo(
+              owner: widget.diary.owner,
               tags: _tags,
               updatedAt: _updatedAt,
               onChange: () => setState(() => _isEdited = true),

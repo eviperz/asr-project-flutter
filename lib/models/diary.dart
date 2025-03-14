@@ -1,33 +1,28 @@
+import 'package:asr_project/config.dart';
+import 'package:asr_project/models/user.dart';
 import 'package:flutter_quill/quill_delta.dart';
 import 'package:intl/intl.dart';
-import 'package:uuid/uuid.dart';
 
 class Diary {
   final String id;
-  final String _title;
+  final String title;
   final Delta content;
   final List<String> tagIds;
+  final User? owner;
   final DateTime createdAt;
   final DateTime updatedAt;
 
   static final Map<String, Diary> _cache = {};
 
   Diary({
-    String? id,
-    String? title,
-    Delta? content,
-    List<String>? tagIds,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-  })  : id = id ?? Uuid().v4(),
-        _title = title ?? '',
-        content = content ?? Delta()
-          ..insert('\n'),
-        tagIds = tagIds ?? [],
-        createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now();
-
-  String get title => _title.isEmpty ? 'Untitled' : _title;
+    required this.id,
+    required this.title,
+    required this.content,
+    required this.tagIds,
+    this.owner,
+    required this.createdAt,
+    required this.updatedAt,
+  });
 
   String get formatDate {
     return DateFormat("dd MMM yyyy").format(updatedAt);
@@ -37,10 +32,7 @@ class Diary {
     if (_cache.containsKey(map['diaryId'])) {
       Diary cachedDiary = _cache[map['diaryId']]!;
 
-      if (cachedDiary.title == map['title'] &&
-          cachedDiary.content == Delta.fromJson(map['content']) &&
-          cachedDiary.tagIds ==
-              (map['tagIds'] as List<dynamic>).cast<String>()) {
+      if (cachedDiary.updatedAt == DateTime.parse(map['updatedAt'])) {
         return cachedDiary;
       }
     }
@@ -49,6 +41,7 @@ class Diary {
       id: map['diaryId'] as String,
       title: map['title'] as String,
       content: Delta.fromJson(map['content']),
+      owner: User.userFromCache(map['userId']),
       tagIds: (map['tagIds'] as List<dynamic>).cast<String>(),
       createdAt: DateTime.parse(map['createdAt']),
       updatedAt: DateTime.parse(map['updatedAt']),
@@ -57,6 +50,23 @@ class Diary {
     _cache[map['diaryId']] = diary;
 
     return diary;
+  }
+
+  Diary copyWith({
+    String? title,
+    Delta? content,
+    List<String>? tagIds,
+    DateTime? updatedAt,
+  }) {
+    return Diary(
+      id: id,
+      title: title ?? this.title,
+      content: content ?? this.content,
+      tagIds: tagIds ?? this.tagIds,
+      owner: owner,
+      createdAt: createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
   }
 
   static void removeCache(String id) => _cache.remove(id);
@@ -81,21 +91,25 @@ class DiaryDetail {
   final String? title;
   final Delta? content;
   final List<String>? tagIds;
+  final String? userId;
 
   DiaryDetail({
     String? title,
     Delta? content,
     List<String>? tagIds,
+    String? userId,
   })  : title = title ?? 'Untitled',
         content = content ?? Delta()
           ..insert('\n'),
-        tagIds = tagIds ?? [];
+        tagIds = tagIds ?? [],
+        userId = userId ?? AppConfig.userId;
 
   Map<String, dynamic> toJson() {
     return {
       "title": title,
       "content": content?.toJson(),
       "tagIds": tagIds,
+      "userId": userId,
     };
   }
 }

@@ -18,12 +18,13 @@ class WorkspaceNotifier extends AsyncNotifier<List<Workspace>> {
 
   @override
   Future<List<Workspace>> build() async {
-    return await _workspaceService.getAllWorkspaces();
+    return fetchData();
   }
 
-  Future<void> _fetchData() async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _workspaceService.getAllWorkspaces());
+  Future<List<Workspace>> fetchData() async {
+    state = AsyncValue.loading();
+    state = AsyncData(await _workspaceService.getAllWorkspaces());
+    return state.value ?? [];
   }
 
   Future<bool> createWorkspace(WorkspaceDetail workspaceDetail) async {
@@ -43,9 +44,8 @@ class WorkspaceNotifier extends AsyncNotifier<List<Workspace>> {
         await _workspaceService.updateWorkspace(id, workspaceDetail);
 
     if (workspace != null) {
-      state = AsyncValue.data(
+      state = AsyncData(
           (state.value ?? []).map((d) => d.id == id ? workspace : d).toList());
-      _fetchData();
       return workspace;
     }
     return null;
@@ -55,7 +55,7 @@ class WorkspaceNotifier extends AsyncNotifier<List<Workspace>> {
     final bool response = await _workspaceService.deleteWorkspace(id);
 
     if (response) {
-      state = AsyncValue.data(
+      state = AsyncData(
         (state.value ?? []).where((w) => w.id != id).toList(),
       );
       return true;
@@ -69,11 +69,10 @@ class WorkspaceNotifier extends AsyncNotifier<List<Workspace>> {
         await _workspaceService.removeMember(id, removedUserId);
 
     if (response) {
-      state = AsyncValue.data(
+      state = AsyncData(
         (state.value ?? []).map((w) {
           if (w.id != id) return w;
 
-          // ลบสมาชิกออกจาก members
           final updatedMembers = Map.of(w.members)
             ..removeWhere((key, value) => removedUserId.containsKey(key));
 
