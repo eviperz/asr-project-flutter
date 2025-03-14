@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 class AppConfig {
-  static const String baseUrl = "http://localhost:8080";
+  static const String baseUrl = "http://192.168.1.37:8080";
 
   static const String username = "admin";
   static const String password = "password";

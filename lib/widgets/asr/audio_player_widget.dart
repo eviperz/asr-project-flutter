@@ -1,13 +1,14 @@
 import 'dart:async';
-
 import 'package:audioplayers/audioplayers.dart' as audioplayers;
 import 'package:flutter/material.dart';
+import 'package:asr_project/services/asr_service.dart';
 
 class AudioPlayerWidget extends StatefulWidget {
-  final String audioUrl;
-  const AudioPlayerWidget({
+  final String audioName;
+  final AsrService _asrService = AsrService();
+  AudioPlayerWidget({
     super.key,
-    required this.audioUrl,
+    required this.audioName,
   });
 
   @override
@@ -22,9 +23,11 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   bool _isPlaying = false;
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
+  String? _audioUrl; // Store fetched URL
 
   @override
   void initState() {
+    super.initState();
     _audioPlayer = audioplayers.AudioPlayer();
 
     _playerStateSubscription = _audioPlayer.onPlayerStateChanged
@@ -45,8 +48,6 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
         _position = p;
       });
     });
-
-    super.initState();
   }
 
   @override
@@ -54,24 +55,36 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     _playerStateSubscription.cancel();
     _durationSubscription.cancel();
     _positionSubscription.cancel();
-
-    _audioPlayer.stop();
     _audioPlayer.dispose();
     super.dispose();
   }
 
-  void _play() async {
-    setState(() {
-      _isPlaying = !_isPlaying;
-    });
-    await _audioPlayer.play(audioplayers.UrlSource(widget.audioUrl));
+  Future<void> _play() async {
+    try {
+      if (_audioUrl == null) {
+        String url = await widget._asrService.getFileUrl(widget.audioName);
+        if (url.isEmpty) {
+          throw Exception("Invalid audio URL");
+        }
+        setState(() {
+          _audioUrl = url;
+        });
+      }
+      await _audioPlayer.setSourceUrl(_audioUrl!);
+      await _audioPlayer.resume();
+      setState(() {
+        _isPlaying = true;
+      });
+    } catch (e) {
+      print("Error playing audio: $e");
+    }
   }
 
-  void _pause() async {
-    setState(() {
-      _isPlaying = !_isPlaying;
-    });
+  Future<void> _pause() async {
     await _audioPlayer.pause();
+    setState(() {
+      _isPlaying = false;
+    });
   }
 
   void _seek(double value) {
@@ -92,7 +105,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
               Wrap(
                 children: [
                   Card(
-                    shape: RoundedRectangleBorder(
+                    shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(30)),
                     ),
                     color: Colors.white24,
@@ -105,7 +118,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                             child: IconButton(
                               icon: Icon(
                                   _isPlaying ? Icons.pause : Icons.play_arrow),
-                              onPressed: !_isPlaying ? _play : _pause,
+                              onPressed: _isPlaying ? _pause : _play,
                               style: ButtonStyle(
                                 backgroundColor: WidgetStateProperty.all<Color>(
                                     Colors.deepPurpleAccent),
@@ -136,7 +149,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                   ),
                   TextButton(
                     onPressed: () {},
-                    child: Wrap(
+                    child: const Wrap(
                       spacing: 8,
                       children: [
                         Text("Edit ASR Text"),
@@ -149,7 +162,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 20.0),
                 child: Text(
-                  widget.audioUrl,
+                  widget.audioName,
                 ),
               ),
             ],

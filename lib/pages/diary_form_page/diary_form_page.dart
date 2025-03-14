@@ -30,7 +30,6 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
   late DateTime _updatedAt;
   bool _isEdited = false;
   bool _isKeyboardVisible = false;
-  String? _audioUrl; // To store the audio URL
 
   @override
   void initState() {
@@ -54,9 +53,8 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
   void _showAsrDialog() {
     showDialog(
       context: context,
-      builder: (context) => ASRDialog(
+      builder: (context) => AsrDialog(
         controller: _controller,
-        saveDiary: _saveDiary, // Pass the saveDiary method
       ),
     );
   }
@@ -69,14 +67,13 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
   }
 
   // Update _saveDiary to accept audioUrl as a parameter
-  Future<void> _saveDiary(String audioUrl) async {
+  Future<void> _saveDiary() async {
     final DiaryDetail diaryDetail = DiaryDetail(
       title: _titleController.text.trim().isEmpty
           ? 'Untitled'
           : _titleController.text.trim(),
       content: _controller.document.toDelta(),
       tagIds: _tags.map((tag) => tag.id).toList(),
-      audioUrl: audioUrl,
     );
 
     await ref
@@ -96,12 +93,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
         confirmLabel: "Save",
         cancelLabel: "Dismiss",
         onConfirm: () async {
-          if (_audioUrl != null) {
-            await _saveDiary(_audioUrl!); // Pass the audioUrl to _saveDiary
-          } else {
-            await _saveDiary(
-                ""); // If no audio is recorded, pass an empty string
-          }
+          await _saveDiary();
 
           if (mounted) {
             Navigator.pop(context);
@@ -131,12 +123,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
           PopupMenuButton<String>(
             onSelected: (value) async {
               if (value == "save") {
-                if (_audioUrl != null) {
-                  await _saveDiary(
-                      _audioUrl!); // Pass the audioUrl to saveDiary
-                } else {
-                  await _saveDiary(""); // If no audio, pass an empty string
-                }
+                await _saveDiary(); // If no audio, pass an empty string
               } else if (value == "delete") {
                 showDialog(
                   context: context,

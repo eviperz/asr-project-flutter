@@ -1,5 +1,8 @@
 import 'dart:io';
+
 import 'package:asr_project/editor/embeds/audio_block_embed.dart';
+import 'package:asr_project/services/asr_service.dart';
+import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
@@ -7,35 +10,46 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
 
-class ASRDialog extends StatefulWidget {
+class AsrDialog extends StatefulWidget {
   final quill.QuillController controller;
+  final AsrService _asrService = AsrService();
 
-  const ASRDialog({
-    super.key,
-    required this.controller,
-  });
+  AsrDialog({super.key, required this.controller});
 
   @override
   _ASRDialogState createState() => _ASRDialogState();
 }
 
-class _ASRDialogState extends State<ASRDialog> {
+class _ASRDialogState extends State<AsrDialog> {
   bool _isRecording = false;
   late Record audioRecord;
   String? audioPath;
+
+  late final RecorderController _recorderController;
 
   @override
   void initState() {
     super.initState();
     audioRecord = Record();
     _requestPermissions();
+
+    _recorderController = RecorderController()
+      ..androidEncoder = AndroidEncoder.aac
+      ..iosEncoder = IosEncoder.kAudioFormatMPEG4AAC
+      ..sampleRate = 44100
+      ..bitRate = 128000;
   }
 
-  Future<void> _requestPermissions() async {
-    var status = await Permission.microphone.request();
-    if (status.isDenied || status.isPermanentlyDenied) {
+  Future<bool> _requestPermissions() async {
+    var status = await Permission.microphone.status;
+    if (status.isGranted) return true;
+
+    if (status.isPermanentlyDenied) {
       openAppSettings();
+      return false;
     }
+
+    return await Permission.microphone.request().isGranted;
   }
 
   Future<void> _insertAudio(String audioUrl) async {
@@ -46,45 +60,16 @@ class _ASRDialogState extends State<ASRDialog> {
     );
   }
 
-  Future<String?> _uploadAudioFile(File file) async {
-    try {
-      // var uri = Uri.parse("https://your-backend.com/upload");
-      // var request = http.MultipartRequest("POST", uri);
-
-      // request.files.add(
-      //   await http.MultipartFile.fromPath(
-      //     'audio',
-      //     file.path,
-      //     contentType:
-      //         MediaType.parse(lookupMimeType(file.path) ?? 'audio/mpeg'),
-      //   ),
-      // );
-
-      // var response = await request.send();
-      // if (response.statusCode == 200) {
-      //   var responseBody = await response.stream.bytesToString();
-      //   return responseBody; // Adjust this according to the response format
-      // }
-    } catch (e) {
-      print("Upload failed: $e");
-    }
-    return null;
-  }
-
   Future<void> _startRecording() async {
     try {
       if (await audioRecord.hasPermission()) {
-        final dir = await getApplicationDocumentsDirectory();
-        String filePath =
-            '${dir.path}/recording_${DateTime.now().millisecondsSinceEpoch}.mp3';
+        final directory = await getApplicationDocumentsDirectory();
+        final filePath = '${directory.path}/recording_${DateTime.now()}.m4a';
 
-        await audioRecord.start(path: filePath);
+        await _recorderController.record(path: filePath);
         setState(() {
           _isRecording = true;
-          audioPath = filePath;
         });
-      } else {
-        print("Microphone permission not granted.");
       }
     } catch (e) {
       print('Error Start Recording: $e');
@@ -93,7 +78,7 @@ class _ASRDialogState extends State<ASRDialog> {
 
   Future<void> _stopRecording() async {
     try {
-      String? path = await audioRecord.stop();
+      String? path = await _recorderController.stop();
 
       if (path != null && File(path).existsSync()) {
         setState(() {
@@ -101,16 +86,34 @@ class _ASRDialogState extends State<ASRDialog> {
           audioPath = path;
         });
 
-        File file = File(path);
-        String? uploadedUrl = await _uploadAudioFile(file);
-        if (uploadedUrl != null) {
-          _insertAudio(uploadedUrl);
-        }
-      } else {
-        print("Recording failed or file does not exist.");
+        _uploadFile(File(path));
       }
     } catch (e) {
       print('Error Stop Recording: $e');
+    }
+  }
+
+  Future<void> _uploadFile(File file) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const UploadingDialog(),
+    );
+
+    String? uploadedUrl = await widget._asrService.uploadFile(file);
+
+    Navigator.pop(context);
+
+    if (uploadedUrl != null) {
+      showDialog(
+        context: context,
+        builder: (_) => const UploadSuccessDialog(),
+      );
+
+      Future.delayed(const Duration(seconds: 1), () {
+        Navigator.pop(context);
+        _insertAudio(uploadedUrl);
+      });
     }
   }
 
@@ -122,16 +125,14 @@ class _ASRDialogState extends State<ASRDialog> {
 
     if (result != null && result.files.isNotEmpty) {
       File file = File(result.files.single.path ?? '');
-      String? uploadedUrl = await _uploadAudioFile(file);
-      if (uploadedUrl != null) {
-        _insertAudio(uploadedUrl);
-      }
+      _uploadFile(file);
     }
   }
 
   @override
   void dispose() {
     audioRecord.dispose();
+    _recorderController.dispose();
     super.dispose();
   }
 
@@ -150,16 +151,36 @@ class _ASRDialogState extends State<ASRDialog> {
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
+            if (_isRecording)
+              AudioWaveforms(
+                enableGesture: false,
+                size: Size(MediaQuery.of(context).size.width, 50),
+                recorderController: _recorderController,
+                waveStyle: const WaveStyle(
+                  waveColor: Colors.blueAccent,
+                  spacing: 5.0,
+                  showMiddleLine: false,
+                ),
+              ),
+            const SizedBox(height: 10),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
+              child: ElevatedButton.icon(
                 onPressed: _isRecording ? _stopRecording : _startRecording,
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: _isRecording ? Colors.red : Colors.blue,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: Text(_isRecording ? "Stop Recording" : "Record Audio"),
+                icon: Icon(
+                  _isRecording ? Icons.stop : Icons.mic,
+                  color: Colors.white,
+                ),
+                label: Text(
+                  _isRecording ? "Stop Recording" : "Record Audio",
+                  style: const TextStyle(color: Colors.white),
+                ),
               ),
             ),
             SizedBox(
@@ -176,6 +197,44 @@ class _ASRDialogState extends State<ASRDialog> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// Uploading Dialog
+class UploadingDialog extends StatelessWidget {
+  const UploadingDialog({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: const [
+          CircularProgressIndicator(),
+          SizedBox(height: 10),
+          Text("Uploading..."),
+        ],
+      ),
+    );
+  }
+}
+
+//  Upload Success Dialog
+class UploadSuccessDialog extends StatelessWidget {
+  const UploadSuccessDialog({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: const [
+          Icon(Icons.check_circle, color: Colors.green, size: 50),
+          SizedBox(height: 10),
+          Text("Upload Complete!"),
+        ],
       ),
     );
   }

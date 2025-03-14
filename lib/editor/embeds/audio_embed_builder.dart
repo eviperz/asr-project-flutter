@@ -11,7 +11,7 @@ class AudioEmbedBuilder extends quill.EmbedBuilder {
       quill.Embed node, bool readOnly, bool inline, TextStyle textStyle) {
     final String audioUrl = node.value.data;
     return AudioPlayerWidget(
-      audioUrl: audioUrl,
+      audioName: audioUrl,
     );
   }
 }
