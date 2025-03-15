@@ -91,14 +91,12 @@ class DiaryDetail {
   final String? title;
   final Delta? content;
   final List<String>? tagIds;
-  final String? audioUrl;
   final String? userId;
 
   DiaryDetail({
     this.title,
     this.content,
     this.tagIds,
-    this.audioUrl,
     this.userId,
   });
 
@@ -107,7 +105,6 @@ class DiaryDetail {
       if (title != null) "title": title,
       if (content != null) "content": content?.toJson(),
       if (tagIds != null) "tagIds": tagIds,
-      if (audioUrl != null) "audioUrl": audioUrl,
       if (userId != null) "userId": userId,
     };
   }
