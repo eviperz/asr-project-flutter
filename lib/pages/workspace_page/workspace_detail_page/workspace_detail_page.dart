@@ -37,6 +37,7 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
     super.initState();
     Future.microtask(() {
       ref.read(workspaceIdProvider.notifier).state = widget.workspace.id;
+      ref.read(diaryFoldersProvider.notifier).fetchData();
     });
 
     _workspace = widget.workspace;
@@ -68,42 +69,33 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
 
   void _addFolder() async {
     String uniqueName = _generateUniqueFolderName("New Folder", 0);
-    DiaryFolderDetail diaryFolderDetail =
-        DiaryFolderDetail(folderName: uniqueName);
+    DiaryFolderDetail diaryFolderDetail = DiaryFolderDetail(name: uniqueName);
 
-    String? responseMessage = await ref
+    String responseMessage = await ref
         .read(diaryFoldersProvider.notifier)
         .createDiaryFolder(diaryFolderDetail);
 
     if (!mounted) return;
-    if (responseMessage != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(responseMessage)),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to create diary folder")),
-      );
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(responseMessage)),
+    );
   }
 
   void _updateFolderName(String id, String name) async {
     DiaryFolderDetail diaryFolderDetail = DiaryFolderDetail(
-      folderName: name,
+      name: name,
     );
 
     try {
-      String? responseMessage = await ref
+      String responseMessage = await ref
           .read(diaryFoldersProvider.notifier)
-          .updateDiaryFolder(id, diaryFolderDetail);
+          .updateDiaryFolderName(id, diaryFolderDetail);
       log(responseMessage.toString());
 
       if (!mounted) return;
-      if (responseMessage != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(responseMessage)),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(responseMessage)),
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Failed to update name of diary folder")),
@@ -232,23 +224,18 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
                       _searchFocusNode.unfocus();
                     }),
                 diaryFoldersAsync.when(
-                  data: (diaryFolders) => Column(
-                    children: [
-                      DiaryFolderBlocks(
-                        folders: diaryFolders,
-                        onCreateFolder: _addFolder,
-                        onUpdateFolderName: _updateFolderName,
-                        onCreateDiary: _addDiaryInFolder,
-                        onDeleteFolder: _deleteFolder,
-                        creatingFolderMode: creatingFolderMode,
-                      ),
-                    ],
+                  data: (diaryFolders) => DiaryFolderBlocks(
+                    folders: diaryFolders,
+                    onCreateFolder: _addFolder,
+                    onUpdateFolderName: _updateFolderName,
+                    onCreateDiary: _addDiaryInFolder,
+                    onDeleteFolder: _deleteFolder,
+                    creatingFolderMode: creatingFolderMode,
                   ),
-                  loading: () => const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                  error: (error, stackTrace) => Center(
-                    child: Text("Error: $error"),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator.adaptive()),
+                  error: (error, stack) => Center(
+                    child: Text("Error loading diary folders: $error"),
                   ),
                 ),
               ],
