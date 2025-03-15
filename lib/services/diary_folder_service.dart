@@ -121,9 +121,11 @@ class DiaryFolderService {
 
       if (response.statusCode == 200) {
         return Diary.fromMap(jsonDecode(response.body));
+      } else {
+        throw Exception("Fail to add diary to folder: ${response.statusCode}");
       }
     } catch (e) {
-      log("Error updating diary folders: $e");
+      log("Error to add diary to folder: $e");
     }
     return null;
   }

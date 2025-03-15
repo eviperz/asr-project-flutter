@@ -104,11 +104,20 @@ class DiaryDetail {
 
   Map<String, dynamic> toJson() {
     return {
-      if (title != null) "title": title ?? 'Untitled',
+      if (title != null) "title": title,
       if (content != null) "content": content?.toJson(),
       if (tagIds != null) "tagIds": tagIds,
       if (audioUrl != null) "audioUrl": audioUrl,
       if (userId != null) "userId": userId,
     };
+  }
+
+  static DiaryDetail createDiary() {
+    return DiaryDetail(
+      title: 'Untitled',
+      content: Delta()..insert("\n"),
+      tagIds: [],
+      userId: AppConfig.userId,
+    );
   }
 }

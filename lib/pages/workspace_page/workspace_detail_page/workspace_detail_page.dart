@@ -120,7 +120,7 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
   }
 
   Future<void> _addDiaryInFolder(String folderId) async {
-    DiaryDetail diaryDetail = DiaryDetail();
+    DiaryDetail diaryDetail = DiaryDetail.createDiary();
     Diary? diary = await ref
         .read(diaryFoldersProvider.notifier)
         .addDiaryToFolder(folderId, diaryDetail);
