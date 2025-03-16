@@ -95,31 +95,37 @@ class DiaryFolderService {
     return null;
   }
 
-  Future<String?> deleteDiaryFolder(String id) async {
+  Future<bool> deleteDiaryFolder(String id) async {
     try {
       final response =
           await http.delete(Uri.parse("$baseUrl/$id"), headers: headers);
 
       if (response.statusCode == 200) {
-        return id;
+        return true;
       } else {
         throw Exception("Fail to delete diary folder: ${response.statusCode}");
       }
     } catch (e) {
       log("Error deleting diary folders: $e");
     }
-    return null;
+    return false;
   }
 
   Future<Diary?> addDiaryToFolder(String id, DiaryDetail diaryDetail) async {
     try {
-      final response = await http.post(Uri.parse("$baseUrl/$id/diary"),
-          headers: headers, body: jsonEncode(diaryDetail));
+      final response = await http.post(
+        Uri.parse("$baseUrl/$id/diary"),
+        headers: headers,
+        body: jsonEncode(diaryDetail),
+      );
+
       if (response.statusCode == 200) {
         return Diary.fromMap(jsonDecode(response.body));
+      } else {
+        throw Exception("Fail to add diary to folder: ${response.statusCode}");
       }
     } catch (e) {
-      log("Error updating diary folders: $e");
+      log("Error to add diary to folder: $e");
     }
     return null;
   }

@@ -29,6 +29,10 @@ class _WorkspacePageState extends ConsumerState<WorkspacePage> {
     super.initState();
     _searchTextEditingController.addListener(() => setState(() {}));
     _searchFocusNode.addListener(() => setState(() {}));
+
+    Future.microtask(() {
+      ref.read(workspaceProvider.notifier).fetchData();
+    });
   }
 
   @override
@@ -38,9 +42,8 @@ class _WorkspacePageState extends ConsumerState<WorkspacePage> {
     _searchFocusNode.dispose();
   }
 
-  List<Workspace> _filterWorkspace() {
-    List<Workspace> filtered =
-        (ref.read(workspaceProvider).value ?? []).where((workspace) {
+  List<Workspace> _filterWorkspace(List<Workspace> workspaces) {
+    List<Workspace> filtered = workspaces.where((workspace) {
       bool matchesSearch = _searchTextEditingController.text.isEmpty ||
           workspace.name
               .toLowerCase()
@@ -63,7 +66,7 @@ class _WorkspacePageState extends ConsumerState<WorkspacePage> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Workspace> workspaces = ref.watch(workspaceProvider).value ?? [];
+    final workspacesAsync = ref.watch(workspaceProvider);
     final User? user = ref.watch(userProvider).value;
 
     return Scaffold(
@@ -101,17 +104,25 @@ class _WorkspacePageState extends ConsumerState<WorkspacePage> {
                   iconData: Icons.search,
                 ),
               ),
-              if (starredWorkspace.isNotEmpty)
-                StarredWorkspaceList(
-                  workspaces: workspaces,
-                  starredWorkspace: starredWorkspace,
-                  toggleStarred: _toggleStarredWorkspace,
+              workspacesAsync.when(
+                data: (workspaces) => Column(
+                  children: [
+                    if (starredWorkspace.isNotEmpty)
+                      StarredWorkspaceList(
+                        workspaces: workspaces,
+                        starredWorkspace: starredWorkspace,
+                        toggleStarred: _toggleStarredWorkspace,
+                      ),
+                    WorkspaceList(
+                      workspaces: _filterWorkspace(workspaces),
+                      starredWorkspace: starredWorkspace,
+                      toggleStarred: _toggleStarredWorkspace,
+                    ),
+                  ],
                 ),
-              WorkspaceList(
-                // workspaces: filteredWorkspaces,
-                workspaces: _filterWorkspace(),
-                starredWorkspace: starredWorkspace,
-                toggleStarred: _toggleStarredWorkspace,
+                loading: () =>
+                    const Center(child: CircularProgressIndicator.adaptive()),
+                error: (error, stack) => Center(child: Text('Error: $error')),
               ),
             ],
           ),

@@ -40,4 +40,8 @@ class User {
 
     return user;
   }
+
+  static User? userFromCache(String id) {
+    return _cache[id];
+  }
 }

@@ -20,9 +20,9 @@ class DiaryFolderModel {
     );
   }
 
-  DiaryFolderModel copyWith({String? id, String? name, List<Diary>? diaries}) {
+  DiaryFolderModel copyWith({String? name, List<Diary>? diaries}) {
     return DiaryFolderModel(
-      id: id ?? this.id,
+      id: id,
       name: name ?? this.name,
       diaries: diaries ?? this.diaries,
     );
@@ -30,14 +30,14 @@ class DiaryFolderModel {
 }
 
 class DiaryFolderDetail {
-  final String? folderName;
+  final String? name;
   final List<String>? diaryIds;
 
-  DiaryFolderDetail({this.folderName, this.diaryIds});
+  DiaryFolderDetail({this.name, this.diaryIds});
 
   Map<String, dynamic> toJson() {
     return {
-      if (folderName != null) "folderName": folderName,
+      if (name != null) "folderName": name,
       if (diaryIds != null) "diaryIds": diaryIds,
     };
   }

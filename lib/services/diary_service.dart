@@ -65,7 +65,6 @@ class DiaryService {
     try {
       final response =
           await http.delete(Uri.parse("$baseUrl/$id"), headers: headers);
-      
       Diary.removeCache(id);
 
       return response.statusCode == 200;

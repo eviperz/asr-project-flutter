@@ -7,156 +7,187 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // StateNotifier Provider
 final diaryFoldersProvider =
-    AsyncNotifierProvider<PersonalDiaryFoldersNotifier, List<DiaryFolderModel>>(
-        () {
-  return PersonalDiaryFoldersNotifier();
-});
+    AsyncNotifierProvider<DiaryFoldersNotifier, List<DiaryFolderModel>>(
+        DiaryFoldersNotifier.new);
 
 // Notifier Class
-class PersonalDiaryFoldersNotifier
-    extends AsyncNotifier<List<DiaryFolderModel>> {
+class DiaryFoldersNotifier extends AsyncNotifier<List<DiaryFolderModel>> {
   final DiaryFolderService _diaryFolderService = DiaryFolderService();
   final DiaryService _diaryService = DiaryService();
 
   @override
   Future<List<DiaryFolderModel>> build() async {
-    final String? workspaceId = getWorkspaceId;
-    return workspaceId == null
-        ? _diaryFolderService.getAllPersonalDiaryFoldersWithDiaries()
-        : _diaryFolderService
-            .getAllWorkspaceDiaryFoldersWithDiaries(workspaceId);
+    return await fetchData();
   }
 
-  Future<void> _fetchData() async {
-    final String? workspaceId = getWorkspaceId;
-
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => workspaceId == null
-        ? _diaryFolderService.getAllPersonalDiaryFoldersWithDiaries()
-        : _diaryFolderService
-            .getAllWorkspaceDiaryFoldersWithDiaries(workspaceId));
+  Future<List<DiaryFolderModel>> fetchData() async {
+    state = AsyncLoading();
+    final String? workspaceId = ref.read(workspaceIdProvider);
+    if (workspaceId == null) {
+      state = AsyncData(
+          await _diaryFolderService.getAllPersonalDiaryFoldersWithDiaries());
+    } else {
+      state = AsyncData(await _diaryFolderService
+          .getAllWorkspaceDiaryFoldersWithDiaries(workspaceId));
+    }
+    return state.value ?? [];
   }
 
-  void _updateState(List<DiaryFolderModel> updatedFolders) {
-    state = AsyncValue.data(updatedFolders);
+  Future<String> createDiaryFolder(DiaryFolderDetail diaryFolderDetail) async {
+    try {
+      final String? workspaceId = ref.read(workspaceIdProvider);
+      final DiaryFolderModel? diaryFolderModel = (workspaceId == null)
+          ? await _diaryFolderService
+              .createPersonalDiaryFolder(diaryFolderDetail)
+          : await _diaryFolderService.createWorkspaceDiaryFolder(
+              workspaceId, diaryFolderDetail);
+
+      if (diaryFolderModel != null) {
+        state = AsyncData([...state.value ?? [], diaryFolderModel]);
+        return "Success to create Diary Folder";
+      } else {
+        return "Failed to create Diary Folder";
+      }
+    } catch (e) {
+      state = AsyncError(e, StackTrace.current);
+      return "Failed to create Diary Folder";
+    }
   }
 
-  Future<String?> createDiaryFolder(DiaryFolderDetail diaryFolderDetail) async {
-    final String? workspaceId = getWorkspaceId;
-    final result = await AsyncValue.guard(() => workspaceId == null
-        ? _diaryFolderService.createPersonalDiaryFolder(diaryFolderDetail)
-        : _diaryFolderService.createWorkspaceDiaryFolder(
-            workspaceId,
-            diaryFolderDetail,
-          ));
+  Future<String> updateDiaryFolderName(
+      String id, DiaryFolderDetail diaryFolderName) async {
+    try {
+      final DiaryFolderModel? diaryFolderModel =
+          await _diaryFolderService.updateDiaryFolder(id, diaryFolderName);
 
-    return result.when(
-      data: (diaryFolderModel) {
-        if (diaryFolderModel != null) {
-          _updateState([...(state.value ?? []), diaryFolderModel]);
-          return "Success to create Diary Folder";
-        }
-        return null;
-      },
-      loading: () => null,
-      error: (_, __) => "Failed to create Diary Folder",
-    );
-  }
-
-  Future<String?> updateDiaryFolder(
-      String id, DiaryFolderDetail diaryFolderDetail) async {
-    final result = await AsyncValue.guard(
-        () => _diaryFolderService.updateDiaryFolder(id, diaryFolderDetail));
-
-    return result.when(
-      data: (diaryFolderModel) {
-        if (diaryFolderModel != null) {
-          _updateState((state.value ?? []).map((folder) {
-            return folder.id == id ? diaryFolderModel : folder;
-          }).toList());
-          return "Success to update Diary Folder";
-        }
-        return null;
-      },
-      loading: () => null,
-      error: (_, __) => "Failed to update Diary Folder",
-    );
+      if (diaryFolderModel != null) {
+        state = AsyncData(state.value!.map((item) {
+          if (item.id == id) {
+            return item.copyWith(name: diaryFolderModel.name);
+          }
+          return item;
+        }).toList());
+        return "Success to update Diary Folder";
+      } else {
+        return "Fail to update Diary Folder";
+      }
+    } catch (e) {
+      state = AsyncError(e, StackTrace.current);
+      return "Fail to update Diary Folder";
+    }
   }
 
   Future<String?> deleteDiaryFolder(String folderId) async {
-    final result = await AsyncValue.guard(
-        () => _diaryFolderService.deleteDiaryFolder(folderId));
-    return result.when(
-      data: (id) {
-        if (id != null) {
-          _updateState(
-              (state.value ?? []).where((folder) => folder.id != id).toList());
-          return "Success to delete Diary Folder";
-        }
-        return null;
-      },
-      loading: () => null,
-      error: (_, __) => "Failed to delete Diary Folder",
-    );
+    try {
+      final bool status = await _diaryFolderService.deleteDiaryFolder(folderId);
+
+      if (status) {
+        state = AsyncData(
+            state.value!.where((item) => item.id != folderId).toList());
+        return "Success to delete Diary Folder";
+      } else {
+        return "Failed to delete Diary Folder";
+      }
+    } catch (e) {
+      state = AsyncError(e, StackTrace.current);
+      return "Failed to delete Diary Folder";
+    }
   }
 
   Future<Diary?> addDiaryToFolder(
       String folderId, DiaryDetail diaryDetail) async {
-    final result = await AsyncValue.guard(
-        () => _diaryFolderService.addDiaryToFolder(folderId, diaryDetail));
-    return result.when(
-      data: (diary) {
-        if (diary != null) {
-          final updatedFolders = (state.value ?? []).map((folder) {
-            if (folder.id == folderId) {
-              return folder.copyWith(
-                diaries: [...?folder.diaries, diary],
-              );
-            }
-            return folder;
-          }).toList();
-          _updateState(updatedFolders);
-        }
+    try {
+      final Diary? diary =
+          await _diaryFolderService.addDiaryToFolder(folderId, diaryDetail);
+
+      if (diary != null) {
+        state = AsyncData(state.value!.map((item) {
+          if (item.id == folderId) {
+            return item.copyWith(diaries: [...(item.diaries ?? []), diary]);
+          }
+          return item;
+        }).toList());
         return diary;
-      },
-      loading: () => null,
-      error: (_, __) => null,
-    );
-  }
-
-  Future<Diary?> updateDiary(String diaryId, DiaryDetail diaryDetail) async {
-    final diary = await _diaryService.updateDiary(diaryId, diaryDetail);
-    if (diary != null) {
-      await _fetchData();
-      return diary;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      state = AsyncError(e, StackTrace.current);
+      return null;
     }
-    return null;
   }
 
-  Future<void> deleteDiary(String diaryId) async {
-    await _diaryService.deleteDiary(diaryId);
-    await _fetchData();
+  Future<String> updateDiary(String diaryId, DiaryDetail diaryDetail) async {
+    try {
+      final Diary? updatedDiary =
+          await _diaryService.updateDiary(diaryId, diaryDetail);
+
+      if (updatedDiary != null) {
+        state = AsyncData(state.value!.map((folder) {
+          if ((folder.diaries ?? []).any((diary) => diary.id == diaryId)) {
+            return folder.copyWith(
+              diaries: (folder.diaries ?? []).map((diary) {
+                return diary.id == diaryId
+                    ? diary.copyWith(
+                        title: updatedDiary.title,
+                        content: updatedDiary.content,
+                        tagIds: updatedDiary.tagIds,
+                        updatedAt: updatedDiary.updatedAt,
+                      )
+                    : diary;
+              }).toList(),
+            );
+          }
+          return folder;
+        }).toList());
+
+        return "Success to update diary";
+      } else {
+        return "Fail to update diary";
+      }
+    } catch (e) {
+      state = AsyncError(e, StackTrace.current);
+      return "Fail to update diary";
+    }
+  }
+
+  Future<String> deleteDiary(String diaryId) async {
+    try {
+      final bool status = await _diaryService.deleteDiary(diaryId);
+
+      if (status) {
+        state = AsyncData(state.value!.map((folder) {
+          if ((folder.diaries ?? []).any((diary) => diary.id == diaryId)) {
+            return folder.copyWith(
+              diaries: (folder.diaries ?? [])
+                  .where((diary) => diary.id != diaryId)
+                  .toList(),
+            );
+          }
+          return folder;
+        }).toList());
+        return "Success to delete diary";
+      } else {
+        return "Fail to delete diary";
+      }
+    } catch (e) {
+      state = AsyncError(e, StackTrace.current);
+      return "Fail to delete diary";
+    }
   }
 
   DiaryFolderModel? diaryFolderById(String folderId) =>
       state.value?.firstWhere((item) => item.id == folderId);
-
-  String? get getWorkspaceId => ref.watch(workspaceIdProvider);
 
   List<Diary> get allDiariesInFolders => (state.value ?? [])
       .expand((folder) => folder.diaries as List<Diary>)
       .toList();
 
   List<String> get diaryIds =>
-      state.value?.map((item) => item.id).toList() ?? [];
+      (state.value ?? []).map((item) => item.id).toList();
 
-  String get getDefaultFolderId =>
-      state.value
-          ?.firstWhere(
-            (item) => item.name == "Default",
-            orElse: () =>
-                DiaryFolderModel(id: "", name: "Default", diaries: []),
-          )
-          .id ??
-      "";
+  String get getDefaultFolderId => (state.value ?? [])
+      .firstWhere((item) => item.name == "Default",
+          orElse: () => DiaryFolderModel(id: "", name: "Default", diaries: []))
+      .id;
 }
