@@ -1,15 +1,16 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:audioplayers/audioplayers.dart' as audioplayers;
 import 'package:flutter/material.dart';
 import 'package:asr_project/services/asr_service.dart';
+import 'package:flutter/services.dart';
 
 class AudioPlayerWidget extends StatefulWidget {
   final String audioName;
+  final String transcribe;
   final AsrService _asrService = AsrService();
-  AudioPlayerWidget({
-    super.key,
-    required this.audioName,
-  });
+
+  AudioPlayerWidget({super.key, required this.audioName, this.transcribe = ""});
 
   @override
   State<AudioPlayerWidget> createState() => _AudioPlayerWidgetState();
@@ -23,31 +24,35 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   bool _isPlaying = false;
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
-  String? _audioUrl; // Store fetched URL
+  String? _audioUrl; // Store URL for reuse
+  String _transcribeResult = "";
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     _audioPlayer = audioplayers.AudioPlayer();
 
-    _playerStateSubscription = _audioPlayer.onPlayerStateChanged
-        .listen((audioplayers.PlayerState state) {
+    _playerStateSubscription =
+        _audioPlayer.onPlayerStateChanged.listen((state) {
       setState(() {
         _isPlaying = state == audioplayers.PlayerState.playing;
       });
     });
 
-    _durationSubscription = _audioPlayer.onDurationChanged.listen((Duration d) {
+    _durationSubscription = _audioPlayer.onDurationChanged.listen((d) {
       setState(() {
         _duration = d;
       });
     });
 
-    _positionSubscription = _audioPlayer.onPositionChanged.listen((Duration p) {
+    _positionSubscription = _audioPlayer.onPositionChanged.listen((p) {
       setState(() {
         _position = p;
       });
     });
+
+    _fetchAudioUrl(); // Get URL on init
   }
 
   @override
@@ -59,27 +64,43 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     super.dispose();
   }
 
-  Future<void> _play() async {
+  /// **Fetch audio URL only once**
+  Future<void> _fetchAudioUrl() async {
     try {
-      if (_audioUrl == null) {
-        String url = await widget._asrService.getFileUrl(widget.audioName);
-        if (url.isEmpty) {
-          throw Exception("Invalid audio URL");
-        }
+      log("Fetching audio URL...");
+      String url = await widget._asrService.getFileUrl(widget.audioName);
+      if (url.isNotEmpty) {
         setState(() {
           _audioUrl = url;
         });
+        log("Audio URL: $_audioUrl");
+      } else {
+        throw Exception("Invalid URL");
       }
+    } catch (e) {
+      log("Error fetching audio URL: $e");
+    }
+  }
+
+  /// **Play or Resume Audio**
+  Future<void> _play() async {
+    if (_audioUrl == null) {
+      log("No URL available, waiting...");
+      return;
+    }
+
+    try {
       await _audioPlayer.setSourceUrl(_audioUrl!);
       await _audioPlayer.resume();
       setState(() {
         _isPlaying = true;
       });
     } catch (e) {
-      print("Error playing audio: $e");
+      log("Error playing audio: $e");
     }
   }
 
+  /// **Pause Audio**
   Future<void> _pause() async {
     await _audioPlayer.pause();
     setState(() {
@@ -87,10 +108,30 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     });
   }
 
+  /// **Seek in Audio**
   void _seek(double value) {
     final position =
         Duration(milliseconds: (value * _duration.inMilliseconds).toInt());
     _audioPlayer.seek(position);
+  }
+
+  Future<void> _transcribeAudio() async {
+    setState(() {
+      _isLoading = true; // Start loading when the request is made
+    });
+
+    try {
+      final result = await widget._asrService.transcribeText(widget.audioName);
+      setState(() {
+        _transcribeResult = result;
+        _isLoading = false; // Stop loading when transcription is done
+      });
+    } catch (e) {
+      setState(() {
+        _transcribeResult = "Error: $e";
+        _isLoading = false; // Stop loading even if there's an error
+      });
+    }
   }
 
   @override
@@ -147,22 +188,50 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                       ),
                     ),
                   ),
-                  TextButton(
-                    onPressed: () {},
-                    child: const Wrap(
-                      spacing: 8,
-                      children: [
-                        Text("Edit ASR Text"),
-                        Icon(Icons.arrow_forward_outlined),
-                      ],
-                    ),
-                  ),
                 ],
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 20.0),
-                child: Text(
-                  widget.audioName,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text("Audio: "),
+                        Expanded(
+                          child: Text(widget.audioName),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.copy),
+                          onPressed: () {
+                            if (_audioUrl != null) {
+                              Clipboard.setData(
+                                  ClipboardData(text: _audioUrl!));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text("URL copied!")),
+                              );
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    ElevatedButton(
+                      onPressed: _transcribeAudio, // Call the new method
+                      child: Text("Transcribe Audio"),
+                    ),
+                    // Display the transcription result as a Text widget
+                    SizedBox(height: 20),
+                    _isLoading
+                        ? Center(child: CircularProgressIndicator())
+                        : Text(
+                            _transcribeResult.isNotEmpty
+                                ? "Transcription: $_transcribeResult"
+                                : "No transcription available",
+                            style: TextStyle(
+                                fontSize: 16, fontStyle: FontStyle.italic),
+                          ),
+                  ],
                 ),
               ),
             ],

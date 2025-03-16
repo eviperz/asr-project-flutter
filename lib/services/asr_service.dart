@@ -6,7 +6,6 @@ import 'package:http_parser/http_parser.dart';
 import 'package:path/path.dart' as path;
 
 class AsrService {
-  final String diaryId = "test";
   final String baseUrl = "${AppConfig.baseUrl}/minio";
   final Map<String, String> headers = {
     'Authorization': AppConfig.basicAuth,
@@ -67,16 +66,39 @@ class AsrService {
   Future<String> getFileUrl(String fileName) async {
     try {
       final response = await http.get(
-        Uri.parse("$baseUrl/download/$fileName"),
+        Uri.parse("$baseUrl/downloadByUrl/$fileName"),
         headers: headers,
       );
 
       if (response.statusCode == 200) {
-        return response.body;
+        String presignedUrl = response.body.trim();
+        log("Fetched audio URL: $presignedUrl check1");
+        return presignedUrl;
+      } else {
+        throw Exception("Failed to fetch audio URL: ${response.statusCode}");
       }
-      throw Exception("Fail to fetch audio file: ${response.statusCode}");
     } catch (e) {
-      log("Error fetching audio file: $e");
+      log("Error fetching audio file URL: $e");
+      return "";
+    }
+  }
+
+  Future<String> transcribeText(String fileName) async {
+    try {
+      final response = await http.get(
+        Uri.parse("$baseUrl/transcribe/$fileName"),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        String transcribe = response.body.trim();
+        log("transcribe: $transcribe");
+        return transcribe;
+      } else {
+        throw Exception("Failed to transcribe audio: ${response.statusCode}");
+      }
+    } catch (e) {
+      log("Error transcribing audio: $e");
       return "";
     }
   }

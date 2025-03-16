@@ -81,13 +81,11 @@ class DiaryDetail {
   final String? title;
   final Delta? content;
   final List<String>? tagIds;
-  final String? audioUrl;
 
   DiaryDetail({
     this.title,
     this.content,
     this.tagIds,
-    this.audioUrl,
   });
 
   Map<String, dynamic> toJson() {
@@ -95,7 +93,6 @@ class DiaryDetail {
       "title": title ?? 'Untitled',
       "content": content?.toJson(),
       "tagIds": tagIds,
-      "audioUrl": audioUrl,
     };
   }
 }

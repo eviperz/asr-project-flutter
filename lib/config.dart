@@ -9,5 +9,5 @@ class AppConfig {
   static final String basicAuth =
       'Basic ${base64Encode(utf8.encode('$username:$password'))}';
 
-  static const String userId = "67c969e1ab1448250fd408fb";
+  static const String userId = "67d450a063094576e4149aed";
 }

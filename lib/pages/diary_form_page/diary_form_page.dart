@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:asr_project/providers/diary_folder_provider.dart';
 import 'package:asr_project/providers/tag_provider.dart';
 import 'package:asr_project/widgets/asr/asr_dialog.dart';
@@ -66,7 +67,6 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
     super.dispose();
   }
 
-  // Update _saveDiary to accept audioUrl as a parameter
   Future<void> _saveDiary() async {
     final DiaryDetail diaryDetail = DiaryDetail(
       title: _titleController.text.trim().isEmpty
@@ -75,6 +75,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
       content: _controller.document.toDelta(),
       tagIds: _tags.map((tag) => tag.id).toList(),
     );
+    log(_controller.document.toDelta().toJson().toString());
 
     await ref
         .read(diaryFoldersProvider.notifier)

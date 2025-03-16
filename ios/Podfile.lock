@@ -40,10 +40,10 @@ PODS:
   - Flutter (1.0.0)
   - flutter_keyboard_visibility_temp_fork (0.0.1):
     - Flutter
-  - flutter_sound (9.25.7):
+  - flutter_sound (9.25.9):
     - Flutter
-    - flutter_sound_core (= 9.25.7)
-  - flutter_sound_core (9.25.7)
+    - flutter_sound_core (= 9.25.9)
+  - flutter_sound_core (9.25.9)
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -119,8 +119,8 @@ SPEC CHECKSUMS:
   file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_keyboard_visibility_temp_fork: 95b2d534bacf6ac62e7fcbe5c2a9e2c2a17ce06f
-  flutter_sound: a461105630641bafa9846715c026e498f90834c3
-  flutter_sound_core: 81860da8dc799d2d3bfdcb53cc87203f3bf3d18d
+  flutter_sound: 2bead07b631c61661b22f281fdb84069f1b5c62b
+  flutter_sound_core: 6ae5ae83a325c555c6618780b0b43ab9ad4ec0f4
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
   quill_native_bridge_ios: f47af4b14e7757968486641656c5d23250cee521
