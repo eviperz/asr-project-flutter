@@ -7,7 +7,7 @@ import 'package:asr_project/pages/event_page/event_page.dart';
 import 'package:asr_project/pages/record_voice_page.dart';
 import 'package:asr_project/pages/workspace_page/workspace_detail_page/workspace_detail_page.dart';
 import 'package:asr_project/pages/workspace_page/workspace_detail_page/workspace_setting/workspace_setting_page.dart';
-import 'package:asr_project/pages/workspace_page/workspace_page.dart';
+import 'package:asr_project/pages/workspace_page/workspace_page/workspace_page.dart';
 import 'package:asr_project/providers/theme_provider.dart';
 import 'package:asr_project/widgets/custom_bottom_navbar.dart';
 import 'package:asr_project/pages/home_page/home_page.dart';

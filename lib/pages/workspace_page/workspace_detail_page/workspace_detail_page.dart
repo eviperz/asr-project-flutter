@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/diary_folder.dart';
+import 'package:asr_project/models/enum/workspace_member_status.dart';
 import 'package:asr_project/models/enum/workspace_permission.dart';
 import 'package:asr_project/models/user.dart';
 import 'package:asr_project/models/workspace.dart';
@@ -153,13 +154,18 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
     final AsyncValue diaryFoldersAsync = ref.watch(diaryFoldersProvider);
     final List<Diary> diaries =
         ref.read(diaryFoldersProvider.notifier).allDiariesInFolders;
-    final User owner = _workspace.members.entries
-        .firstWhere((entry) => entry.value == WorkspacePermission.owner)
-        .key;
 
-    final List<User> memberWithoutOwner = Map.fromEntries(
-      _workspace.members.entries.where((entry) => entry.key != owner),
-    ).keys.toList();
+    final User owner = _workspace.members
+        .firstWhere(
+            (member) => member.item2.permission == WorkspacePermission.owner)
+        .item1!;
+
+    final List<User> memberWithoutOwner = _workspace.members
+        .where((member) =>
+            member.item2.permission != WorkspacePermission.owner &&
+            member.item2.status == WorkspaceMemberStatus.accepted)
+        .map((member) => member.item1!)
+        .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -177,27 +183,42 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      spacing: 20,
-                      children: [
-                        WorkspaceIcon(
-                          workspaceIconEnum: _workspace.icon.iconEnum,
-                          colorEnum: _workspace.icon.colorEnum,
-                          size: 80,
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _workspace.name,
-                              style: Theme.of(context).textTheme.headlineLarge,
+                    Expanded(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 20,
+                        children: [
+                          WorkspaceIcon(
+                            workspaceIconEnum: _workspace.icon.iconEnum,
+                            colorEnum: _workspace.icon.colorEnum,
+                            size: 80,
+                          ),
+                          Expanded(
+                            child: SizedBox(
+                              height: 85,
+                              child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  FittedBox(
+                                    child: Text(
+                                      _workspace.name,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headlineLarge,
+                                      softWrap: true,
+                                    ),
+                                  ),
+                                  WorkspaceMemberDisplay(
+                                      memberWithoutOwner: memberWithoutOwner,
+                                      owner: owner),
+                                ],
+                              ),
                             ),
-                            WorkspaceMemberDisplay(
-                                memberWithoutOwner: memberWithoutOwner,
-                                owner: owner),
-                          ],
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
                     IconButton(
                       onPressed: _navigatorSetting,

@@ -1,3 +1,4 @@
+import 'package:asr_project/models/enum/workspace_member_status.dart';
 import 'package:asr_project/models/enum/workspace_permission.dart';
 import 'package:asr_project/models/user.dart';
 import 'package:asr_project/models/workspace.dart';
@@ -20,13 +21,17 @@ class WorkspaceTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final User owner = workspace.members.entries
-        .firstWhere((entry) => entry.value == WorkspacePermission.owner)
-        .key;
+    final User owner = workspace.members
+        .firstWhere(
+            (member) => member.item2.permission == WorkspacePermission.owner)
+        .item1!;
 
-    final List<User> memberWithoutOwner = Map.fromEntries(
-      workspace.members.entries.where((entry) => entry.key != owner),
-    ).keys.toList();
+    final List<User> memberWithoutOwner = workspace.members
+        .where((member) =>
+            member.item2.permission != WorkspacePermission.owner &&
+            member.item2.status == WorkspaceMemberStatus.accepted)
+        .map((member) => member.item1!)
+        .toList();
 
     return Column(
       children: [

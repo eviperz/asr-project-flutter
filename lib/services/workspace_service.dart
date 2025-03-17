@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:asr_project/config.dart';
 import 'package:asr_project/models/workspace.dart';
+import 'package:asr_project/models/workspace_member.dart';
 import 'package:http/http.dart' as http;
 
 class WorkspaceService {
@@ -85,16 +86,34 @@ class WorkspaceService {
     return false;
   }
 
-  Future<bool> removeMember(
-      String id, Map<String, String> removedUserId) async {
+  Future<Workspace?> inviteMembers(
+      String id, List<WorkspaceMemberInviting> workspaceMemberInvitings) async {
     try {
-      final response = await http.delete(
-        Uri.parse("$baseUrl/$id/members"),
+      final response = await http.post(
+        Uri.parse("$baseUrl/$id/invite"),
         headers: headers,
-        body: jsonEncode(removedUserId),
+        body: jsonEncode(
+            workspaceMemberInvitings.map((e) => e.toJson()).toList()),
       );
 
-      if (response.statusCode == 204) {
+      if (response.statusCode == 200) {
+        return Workspace.fromJson(jsonDecode(response.body));
+      }
+      throw Exception("Fail to invite member: ${response.statusCode}");
+    } catch (e) {
+      log("Error invite member: $e");
+    }
+    return null;
+  }
+
+  Future<bool> removeMember(String workspaceMemberId) async {
+    try {
+      final response = await http.delete(
+        Uri.parse("$baseUrl/members/$workspaceMemberId"),
+        headers: headers,
+      );
+
+      if (response.statusCode == 204 || response.statusCode == 200) {
         return true;
       }
       throw Exception("Fail to remove member: ${response.statusCode}");

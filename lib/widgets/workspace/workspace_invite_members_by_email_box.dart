@@ -1,12 +1,14 @@
+import 'package:asr_project/models/enum/workspace_permission.dart';
+import 'package:asr_project/models/workspace_member.dart';
 import 'package:asr_project/providers/user_provider.dart';
 import 'package:asr_project/providers/workspace_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class WorkspaceInviteMembersByEmailBox extends ConsumerStatefulWidget {
-  final List<String> invitedMemberEmails;
-  final Function(String) addEmail;
-  final Function(String) removeEmail;
+  final List<WorkspaceMemberInviting> invitedMemberEmails;
+  final Function(WorkspaceMemberInviting) addEmail;
+  final Function(WorkspaceMemberInviting) removeEmail;
   final Function? inviteByEmails;
   const WorkspaceInviteMembersByEmailBox({
     super.key,
@@ -24,7 +26,7 @@ class WorkspaceInviteMembersByEmailBox extends ConsumerStatefulWidget {
 class _WorkspaceAddModalState
     extends ConsumerState<WorkspaceInviteMembersByEmailBox> {
   final TextEditingController _textEditingController = TextEditingController();
-  final List<String> _invitedMemberEmails = [];
+  final List<WorkspaceMemberInviting> _invitedMemberEmails = [];
   final FocusNode _focusNode = FocusNode();
   late bool _checkError = false;
 
@@ -64,9 +66,8 @@ class _WorkspaceAddModalState
           );
 
       if (workspace != null) {
-        isExistEmails = workspace.members.keys.any(
-          (member) => member.email == _textEditingController.text,
-        );
+        isExistEmails = workspace.members
+            .any((member) => member.item2.email == _textEditingController.text);
       } else {
         isExistEmails = false;
       }
@@ -110,13 +111,14 @@ class _WorkspaceAddModalState
                   height: 100,
                   decoration: BoxDecoration(),
                   child: Wrap(spacing: 8.0, children: [
-                    ..._invitedMemberEmails.map((email) {
+                    ..._invitedMemberEmails.map((workspaceMemberInviting) {
                       return Chip(
-                        label: Text(email),
+                        label: Text(workspaceMemberInviting.email),
                         onDeleted: () {
-                          widget.removeEmail(email);
+                          widget.removeEmail(workspaceMemberInviting);
                           setState(() {
-                            _invitedMemberEmails.remove(email);
+                            _invitedMemberEmails
+                                .remove(workspaceMemberInviting);
                           });
                         },
                       );
@@ -140,10 +142,15 @@ class _WorkspaceAddModalState
                               !_checkError &&
                               !isCurrentUserEmail &&
                               !isExistEmails) {
-                            widget.addEmail(value);
+                            WorkspaceMemberInviting workspaceMemberInviting =
+                                WorkspaceMemberInviting(
+                              email: value,
+                              permission: WorkspacePermission.viewer,
+                            );
+                            widget.addEmail(workspaceMemberInviting);
 
                             setState(() {
-                              _invitedMemberEmails.add(value);
+                              _invitedMemberEmails.add(workspaceMemberInviting);
                             });
 
                             _focusNode.requestFocus();

@@ -108,27 +108,34 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
                     _buildTagInputField(),
                   ],
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 8.0,
-                  children: [
-                    Text(
-                      "Select or Create Tag",
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    Container(
-                      width: double.maxFinite,
-                      color: Theme.of(context).colorScheme.secondary,
-                      child: Column(
-                        children: [
-                          if (!checkExists())
-                            _buildCreateTagButton(filteredTags),
-                          SingleChildScrollView(
-                              child: _buildFilteredTagList(filteredTags)),
-                        ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 8.0,
+                    children: [
+                      Text(
+                        "Select or Create Tag",
+                        style: Theme.of(context).textTheme.headlineSmall,
                       ),
-                    ),
-                  ],
+                      Expanded(
+                        child: Container(
+                          width: double.maxFinite,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
+                          child: Column(
+                            children: [
+                              if (!checkExists())
+                                _buildCreateTagButton(filteredTags),
+                              SingleChildScrollView(
+                                  child: _buildFilteredTagList(filteredTags)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -251,42 +258,39 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
   }
 
   Widget _buildFilteredTagList(List<Tag> filteredTags) {
-    return SizedBox(
-      height: 300,
-      child: ListView.separated(
-          shrinkWrap: true,
-          itemCount: filteredTags.length,
-          itemBuilder: (context, index) {
-            final Tag tag = filteredTags[index];
-            return ListTile(
-              title: Align(
-                alignment: Alignment.centerLeft,
-                child: Chip(
-                  label: Text(tag.name),
-                  backgroundColor: tag.colorEnum.color,
+    return ListView.separated(
+        shrinkWrap: true,
+        itemCount: filteredTags.length,
+        itemBuilder: (context, index) {
+          final Tag tag = filteredTags[index];
+          return ListTile(
+            title: Align(
+              alignment: Alignment.centerLeft,
+              child: Chip(
+                label: Text(tag.name),
+                backgroundColor: tag.colorEnum.color,
+              ),
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  onPressed: () => _showTagEditModal(tag),
+                  icon: const Icon(Icons.edit),
                 ),
-              ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    onPressed: () => _showTagEditModal(tag),
-                    icon: const Icon(Icons.edit),
-                  ),
-                  IconButton(
-                    onPressed: () => _deleteTag(tag.id),
-                    icon: const Icon(Icons.delete),
-                  )
-                ],
-              ),
-              onTap: () {
-                _addTag(tag);
-              },
-            );
-          },
-          separatorBuilder: (context, index) {
-            return Divider();
-          }),
-    );
+                IconButton(
+                  onPressed: () => _deleteTag(tag.id),
+                  icon: const Icon(Icons.delete),
+                )
+              ],
+            ),
+            onTap: () {
+              _addTag(tag);
+            },
+          );
+        },
+        separatorBuilder: (context, index) {
+          return Divider();
+        });
   }
 }

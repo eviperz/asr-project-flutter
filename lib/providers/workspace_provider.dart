@@ -1,6 +1,11 @@
+import 'package:asr_project/models/enum/workspace_permission.dart';
+import 'package:asr_project/models/user.dart';
 import 'package:asr_project/models/workspace.dart';
+import 'package:asr_project/models/workspace_member.dart';
+import 'package:asr_project/services/workspace_member_service.dart';
 import 'package:asr_project/services/workspace_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tuple/tuple.dart';
 
 final workspaceIdProvider = StateProvider<String?>((ref) {
   return null;
@@ -15,6 +20,8 @@ final workspaceProvider =
 // Notifier Class
 class WorkspaceNotifier extends AsyncNotifier<List<Workspace>> {
   final WorkspaceService _workspaceService = WorkspaceService();
+  final WorkspaceMemberService _workspaceMemberService =
+      WorkspaceMemberService();
 
   @override
   Future<List<Workspace>> build() async {
@@ -63,18 +70,65 @@ class WorkspaceNotifier extends AsyncNotifier<List<Workspace>> {
     return false;
   }
 
-  Future<bool> removeMember(
-      String id, Map<String, String> removedUserId) async {
+  Future<Workspace?> inviteMembers(
+      String id, List<WorkspaceMemberInviting> workspaceMemberInvitings) async {
+    final Workspace? workspace =
+        await _workspaceService.inviteMembers(id, workspaceMemberInvitings);
+
+    if (workspace != null) {
+      state = AsyncData((state.value ?? []).map((item) {
+        if (item.id != id) {
+          return item;
+        } else {
+          return workspace;
+        }
+      }).toList());
+    }
+    return workspace;
+  }
+
+  Future<List<Tuple2<User?, WorkspaceMember>>?> updatePermission(
+      String workspaceId,
+      String workspaceMemberId,
+      WorkspacePermission permission) async {
+    final bool response = await _workspaceMemberService.updatePermission(
+        workspaceMemberId, permission);
+
+    if (response) {
+      state = AsyncData((state.value ?? []).map((workspace) {
+        if (workspace.id == workspaceId) {
+          final List<Tuple2<User?, WorkspaceMember>> updatedMembers =
+              workspace.members.map((member) {
+            if (member.item2.id == workspaceMemberId) {
+              return Tuple2(
+                  member.item1, member.item2.copyWith(permission: permission));
+            }
+            return member;
+          }).toList();
+
+          return workspace.copyWith(members: updatedMembers);
+        } else {
+          return workspace;
+        }
+      }).toList());
+      return state.value?.firstWhere((w) => w.id == workspaceId).members ?? [];
+    } else {
+      return null;
+    }
+  }
+
+  Future<bool> removeMember(String id, String workspaceMemberId) async {
     final bool response =
-        await _workspaceService.removeMember(id, removedUserId);
+        await _workspaceMemberService.reject(workspaceMemberId);
 
     if (response) {
       state = AsyncData(
         (state.value ?? []).map((w) {
           if (w.id != id) return w;
 
-          final updatedMembers = Map.of(w.members)
-            ..removeWhere((key, value) => removedUserId.containsKey(key));
+          final List<Tuple2<User?, WorkspaceMember>> updatedMembers = w.members
+              .where((member) => member.item2.id != workspaceMemberId)
+              .toList();
 
           return w.copyWith(members: updatedMembers);
         }).toList(),
