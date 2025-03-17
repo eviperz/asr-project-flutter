@@ -12,15 +12,15 @@ import 'package:record/record.dart';
 
 class AsrDialog extends StatefulWidget {
   final quill.QuillController controller;
-  final AsrService _asrService = AsrService();
 
-  AsrDialog({super.key, required this.controller});
+  const AsrDialog({super.key, required this.controller});
 
   @override
-  _ASRDialogState createState() => _ASRDialogState();
+  State<AsrDialog> createState() => _ASRDialogState();
 }
 
 class _ASRDialogState extends State<AsrDialog> {
+  final AsrService _asrService = AsrService();
   bool _isRecording = false;
   late Record audioRecord;
   String? audioPath;
@@ -100,21 +100,21 @@ class _ASRDialogState extends State<AsrDialog> {
       builder: (_) => const UploadingDialog(),
     );
 
-    String? uploadedUrl = await widget._asrService.uploadFile(file);
+    String uploadedUrl = await _asrService.uploadFile(file);
 
+    if (!mounted) return;
     Navigator.pop(context);
 
-    if (uploadedUrl != null) {
-      showDialog(
-        context: context,
-        builder: (_) => const UploadSuccessDialog(),
-      );
+    showDialog(
+      context: context,
+      builder: (_) => const UploadSuccessDialog(),
+    );
 
-      Future.delayed(const Duration(seconds: 1), () {
-        Navigator.pop(context);
-        _insertAudio(uploadedUrl);
-      });
-    }
+    Future.delayed(const Duration(seconds: 1), () {
+      if (!mounted) return;
+      Navigator.pop(context);
+      _insertAudio(uploadedUrl);
+    });
   }
 
   Future<void> _pickAudioFile() async {

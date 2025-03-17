@@ -7,15 +7,22 @@ import 'package:flutter/services.dart';
 
 class AudioPlayerWidget extends StatefulWidget {
   final String audioName;
-  final AsrService _asrService = AsrService();
+  final String initialTranscribe;
+  final Function(String) onTranscribe;
 
-  AudioPlayerWidget({super.key, required this.audioName});
+  const AudioPlayerWidget({
+    super.key,
+    required this.audioName,
+    required this.initialTranscribe,
+    required this.onTranscribe,
+  });
 
   @override
   State<AudioPlayerWidget> createState() => _AudioPlayerWidgetState();
 }
 
 class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
+  final AsrService _asrService = AsrService();
   late audioplayers.AudioPlayer _audioPlayer;
   late StreamSubscription _playerStateSubscription;
   late StreamSubscription _durationSubscription;
@@ -51,6 +58,8 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
       });
     });
 
+    _transcribeResult = widget.initialTranscribe;
+
     _fetchAudioUrl(); // Get URL on init
   }
 
@@ -67,7 +76,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   Future<void> _fetchAudioUrl() async {
     try {
       log("Fetching audio URL...");
-      String url = await widget._asrService.getFileUrl(widget.audioName);
+      String url = await _asrService.getFileUrl(widget.audioName);
       if (url.isNotEmpty) {
         setState(() {
           _audioUrl = url;
@@ -120,11 +129,12 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     });
 
     try {
-      final result = await widget._asrService.transcribeText(widget.audioName);
+      final String result = await _asrService.transcribeText(widget.audioName);
       setState(() {
         _transcribeResult = result;
         _isLoading = false; // Stop loading when transcription is done
       });
+      widget.onTranscribe(result);
     } catch (e) {
       setState(() {
         _transcribeResult = "Error: $e";
