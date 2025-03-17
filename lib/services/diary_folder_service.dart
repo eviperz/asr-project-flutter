@@ -22,6 +22,7 @@ class DiaryFolderService {
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = jsonDecode(response.body);
+        log("Diary folders: $jsonData");
         return jsonData.map((data) => DiaryFolderModel.fromJson(data)).toList();
       }
       throw Exception("Fail to fetch diary folders: ${response.statusCode}");
@@ -113,6 +114,8 @@ class DiaryFolderService {
 
   Future<Diary?> addDiaryToFolder(String id, DiaryDetail diaryDetail) async {
     try {
+      // log(id);
+      // log(diaryDetail.toJson().toString());
       final response = await http.post(
         Uri.parse("$baseUrl/$id/diary"),
         headers: headers,

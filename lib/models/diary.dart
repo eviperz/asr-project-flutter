@@ -17,12 +17,13 @@ class Diary {
   Diary({
     required this.id,
     required this.title,
-    required this.content,
+    Delta? content,
     required this.tagIds,
     this.owner,
     required this.createdAt,
-    required this.updatedAt,
-  });
+    DateTime? updatedAt,
+  })  : content = content ?? Delta(),
+        updatedAt = updatedAt ?? createdAt;
 
   String get formatDate {
     return DateFormat("dd MMM yyyy").format(updatedAt);

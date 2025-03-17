@@ -1,6 +1,6 @@
-import 'package:asr_project/editor/embeds/audio_embed_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:asr_project/editor/embeds/audio_embed_builder.dart';
 
 class DiaryEditor extends StatefulWidget {
   final quill.QuillController controller;
