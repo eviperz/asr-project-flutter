@@ -2,6 +2,7 @@ import 'package:asr_project/models/enum/workspace_member_status.dart';
 import 'package:asr_project/models/enum/workspace_permission.dart';
 import 'package:asr_project/models/user.dart';
 import 'package:asr_project/models/workspace.dart';
+import 'package:asr_project/providers/workspace_provider.dart';
 import 'package:asr_project/widgets/workspace/workspace_member_display.dart';
 import 'package:asr_project/widgets/workspace_icon.dart';
 import 'package:flutter/material.dart';
@@ -37,6 +38,7 @@ class WorkspaceTile extends ConsumerWidget {
       children: [
         ListTile(
           onTap: () {
+            ref.read(workspaceIdProvider.notifier).state = workspace.id;
             Navigator.pushNamed(
               context,
               "/workspace/detail",

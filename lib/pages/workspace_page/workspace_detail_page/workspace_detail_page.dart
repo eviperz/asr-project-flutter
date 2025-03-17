@@ -16,8 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class WorkspaceDetailPage extends ConsumerStatefulWidget {
-  final Workspace workspace;
-  const WorkspaceDetailPage({super.key, required this.workspace});
+  const WorkspaceDetailPage({super.key});
 
   @override
   ConsumerState<WorkspaceDetailPage> createState() =>
@@ -37,7 +36,6 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      ref.read(workspaceIdProvider.notifier).state = widget.workspace.id;
       ref.read(diaryFoldersProvider.notifier).fetchData();
     });
 
@@ -139,8 +137,7 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
   void _navigatorSetting() async {
     final Workspace workspace =
         ref.read(workspaceProvider.notifier).workspaceByIdProvider;
-    Navigator.pushNamed(context, "/workspace/setting",
-        arguments: workspace);
+    Navigator.pushNamed(context, "/workspace/setting", arguments: workspace);
   }
 
   @override

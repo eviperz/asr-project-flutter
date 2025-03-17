@@ -50,10 +50,9 @@ class MyApp extends ConsumerWidget {
                 builder: (context) => WorkspaceInvitation());
 
           case "/workspace/detail":
-            Workspace workspace = settings.arguments as Workspace;
             return MaterialPageRoute(
                 builder: (context) =>
-                    WorkspaceDetailPage(workspace: workspace));
+                    WorkspaceDetailPage());
 
           case "/workspace/setting":
             Workspace workspace = settings.arguments as Workspace;
