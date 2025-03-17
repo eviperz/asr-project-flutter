@@ -13,6 +13,7 @@ class DiaryFolderService {
   final Map<String, String> headers = {
     'Authorization': AppConfig.basicAuth,
     'Content-Type': 'application/json',
+    'Accept-Charset': 'utf-8',
   };
 
   Future<List<DiaryFolderModel>> getAllPersonalDiaryFoldersWithDiaries() async {
