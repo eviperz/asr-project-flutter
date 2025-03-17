@@ -32,16 +32,18 @@ class WorkspaceSettingPage extends ConsumerStatefulWidget {
 }
 
 class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
-  // late Workspace _workspace;
   final TextEditingController _nameTextEditingController =
       TextEditingController();
+  final FocusNode _nameFocusNode = FocusNode();
+
   final TextEditingController _descriptionTextEditingController =
       TextEditingController();
+  final FocusNode _descriptionFocusNode = FocusNode();
+
   late List<Tuple2<User?, WorkspaceMember>> _members = [];
   final List<WorkspaceMemberInviting> _invitedMemberEmails = [];
   late WorkspaceIconEnum _workspaceIconEnum;
   late ColorPalette _colorEnum;
-  late bool _isEdit = false;
 
   @override
   void initState() {
@@ -51,13 +53,30 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
     _members = widget.workspace.members;
     _workspaceIconEnum = widget.workspace.icon.iconEnum;
     _colorEnum = widget.workspace.icon.colorEnum;
+
+    _nameFocusNode.addListener(() {
+      setState(() {});
+      if (!_nameFocusNode.hasFocus) {
+        _updateWorkspaceName(_nameTextEditingController.text.trim());
+      }
+    });
+
+    _descriptionFocusNode.addListener(() {
+      setState(() {});
+      if (!_descriptionFocusNode.hasFocus) {
+        _updateWorkspaceDescription(
+            _descriptionTextEditingController.text.trim());
+      }
+    });
   }
 
   @override
   void dispose() {
     super.dispose();
     _nameTextEditingController.dispose();
+    _nameFocusNode.dispose();
     _descriptionTextEditingController.dispose();
+    _descriptionFocusNode.dispose();
   }
 
   void _updateWorkspace(WorkspaceDetail workspaceDetail) async {
@@ -70,10 +89,6 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Failed to update workspace")),
       );
-    } else {
-      setState(() {
-        _isEdit = true;
-      });
     }
   }
 
@@ -116,7 +131,6 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
     if (workspace != null) {
       setState(() {
         _members = workspace.members;
-        _isEdit = true;
       });
 
       _invitedMemberEmails.clear();
@@ -133,7 +147,6 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
     setState(() {
       _workspaceIconEnum = iconEnum;
       _colorEnum = colorEnum;
-      _isEdit = true;
     });
   }
 
@@ -145,7 +158,6 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
       _members = _members
           .where((member) => member.item2.id != workspaceMemberId)
           .toList();
-      _isEdit = true;
     });
   }
 
@@ -188,7 +200,9 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(
-          onPressed: () => Navigator.pop(context, _isEdit),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
         title: Text("Workspace Setting"),
       ),
@@ -243,10 +257,10 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
               ),
               WorkspaceNameAndDescriptionTextField(
                 nameTextEditingController: _nameTextEditingController,
+                nameFocusNode: _nameFocusNode,
                 descriptionTextEditingController:
                     _descriptionTextEditingController,
-                updateName: _updateWorkspaceName,
-                updateDescription: _updateWorkspaceDescription,
+                descriptionFocusNode: _descriptionFocusNode,
                 reload: () {
                   setState(() {});
                 },
@@ -383,6 +397,7 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
                 height: 60,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.error,
                     alignment: Alignment.centerLeft,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0),
@@ -393,7 +408,8 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
                   },
                   child: Text(
                     "Delete Workspace",
-                    style: TextStyle(color: Colors.red),
+                    style:
+                        TextStyle(color: Theme.of(context).colorScheme.onError),
                   ),
                 ),
               ),

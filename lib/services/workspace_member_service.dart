@@ -34,6 +34,23 @@ class WorkspaceMemberService {
     return false;
   }
 
+  Future<bool> accept(String id) async {
+    try {
+      final response = await http.patch(
+        Uri.parse("$baseUrl/$id/accept"),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        return true;
+      }
+      throw Exception("Fail to accept member: ${response.statusCode}");
+    } catch (e) {
+      log("Error accept member: $e");
+    }
+    return false;
+  }
+
   Future<bool> reject(String id) async {
     try {
       final response = await http.delete(

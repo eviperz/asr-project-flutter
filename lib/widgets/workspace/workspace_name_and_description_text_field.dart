@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 class WorkspaceNameAndDescriptionTextField extends StatefulWidget {
   final TextEditingController nameTextEditingController;
   final TextEditingController descriptionTextEditingController;
-  final Function(String)? updateName;
-  final Function(String)? updateDescription;
+  final FocusNode nameFocusNode;
+  final FocusNode descriptionFocusNode;
   final Function reload;
 
   const WorkspaceNameAndDescriptionTextField({
     super.key,
     required this.nameTextEditingController,
     required this.descriptionTextEditingController,
-    this.updateName,
-    this.updateDescription,
+    required this.nameFocusNode,
+    required this.descriptionFocusNode,
     required this.reload,
   });
 
@@ -23,35 +23,6 @@ class WorkspaceNameAndDescriptionTextField extends StatefulWidget {
 
 class _WorkspaceNameAndDescriptionTextFieldState
     extends State<WorkspaceNameAndDescriptionTextField> {
-  final FocusNode _nameFocusNode = FocusNode();
-  final FocusNode _descriptionFocusNode = FocusNode();
-
-  @override
-  void initState() {
-    super.initState();
-
-    _nameFocusNode.addListener(() {
-      setState(() {});
-      if (!_nameFocusNode.hasFocus && widget.updateName != null) {
-        widget.updateName!(widget.nameTextEditingController.text.trim());
-      }
-    });
-
-    _descriptionFocusNode.addListener(() {
-      setState(() {});
-      if (!_descriptionFocusNode.hasFocus && widget.updateDescription != null) {
-        widget.updateDescription!(
-            widget.descriptionTextEditingController.text.trim());
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _nameFocusNode.dispose();
-    _descriptionFocusNode.dispose();
-  }
 
   bool _validateWorkspaceName() {
     if (widget.nameTextEditingController.text.isNotEmpty) {
@@ -89,7 +60,7 @@ class _WorkspaceNameAndDescriptionTextFieldState
                     style: Theme.of(context).textTheme.labelLarge!.copyWith(
                           color: !_validateWorkspaceName()
                               ? Theme.of(context).colorScheme.error
-                              : _nameFocusNode.hasFocus
+                              : widget.nameFocusNode.hasFocus
                                   ? Theme.of(context).colorScheme.primary
                                   : Theme.of(context).colorScheme.onSecondary,
                         ),
@@ -97,7 +68,7 @@ class _WorkspaceNameAndDescriptionTextFieldState
                   TextField(
                     autocorrect: false,
                     controller: widget.nameTextEditingController,
-                    focusNode: _nameFocusNode,
+                    focusNode: widget.nameFocusNode,
                     decoration: InputDecoration(
                       border: InputBorder.none,
                       hintText: "Enter name",
@@ -110,7 +81,7 @@ class _WorkspaceNameAndDescriptionTextFieldState
                       widget.reload();
                     },
                     onTapOutside: (event) {
-                      _nameFocusNode.unfocus();
+                      widget.nameFocusNode.unfocus();
                     },
                   ),
                 ],
@@ -125,7 +96,7 @@ class _WorkspaceNameAndDescriptionTextFieldState
                   Text(
                     "Description",
                     style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                          color: _descriptionFocusNode.hasFocus
+                          color: widget.descriptionFocusNode.hasFocus
                               ? Theme.of(context).colorScheme.primary
                               : Theme.of(context).colorScheme.onSecondary,
                         ),
@@ -138,7 +109,7 @@ class _WorkspaceNameAndDescriptionTextFieldState
                       maxLines: null,
                       expands: true,
                       textAlignVertical: TextAlignVertical.top,
-                      focusNode: _descriptionFocusNode,
+                      focusNode: widget.descriptionFocusNode,
                       decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: "Enter Description",
@@ -148,7 +119,7 @@ class _WorkspaceNameAndDescriptionTextFieldState
                         labelStyle: Theme.of(context).textTheme.labelMedium,
                       ),
                       onTapOutside: (event) {
-                        _descriptionFocusNode.unfocus();
+                        widget.descriptionFocusNode.unfocus();
                       },
                     ),
                   ),

@@ -1,13 +1,10 @@
-import 'package:asr_project/models/user.dart';
+import 'package:asr_project/config.dart';
+import 'package:asr_project/models/enum/workspace_member_status.dart';
 import 'package:asr_project/models/workspace.dart';
 import 'package:asr_project/pages/workspace_page/starred_workspace_list.dart';
-import 'package:asr_project/pages/workspace_page/workspace_create_form.dart';
 import 'package:asr_project/pages/workspace_page/workspace_page/workspace_search_bar.dart';
-import 'package:asr_project/providers/user_provider.dart';
-import 'package:asr_project/widgets/custom_drawer.dart';
 import 'package:asr_project/widgets/workspace/workspace_list.dart';
 import 'package:asr_project/providers/workspace_provider.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -67,22 +64,8 @@ class _WorkspacePageState extends ConsumerState<WorkspacePage> {
   @override
   Widget build(BuildContext context) {
     final workspacesAsync = ref.watch(workspaceProvider);
-    final User? user = ref.watch(userProvider).value;
 
     return Scaffold(
-      drawer: CustomDrawer(name: user?.name ?? "Guest"),
-      appBar: AppBar(
-        actions: [
-          IconButton(
-            onPressed: () => showCupertinoModalPopup(
-              context: context,
-              barrierDismissible: true,
-              builder: (_) => WorkspaceCreateForm(),
-            ),
-            icon: Icon(Icons.add),
-          ),
-        ],
-      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
@@ -99,25 +82,33 @@ class _WorkspacePageState extends ConsumerState<WorkspacePage> {
                 searchFocusNode: _searchFocusNode,
               ),
               workspacesAsync.when(
-                data: (workspaces) => Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        if (starredWorkspace.isNotEmpty)
-                          StarredWorkspaceList(
-                            workspaces: workspaces,
+                data: (workspaces) {
+                  workspaces = workspaces
+                      .where((workspace) => workspace.members.any((member) =>
+                          member.item1?.id == AppConfig.userId &&
+                          member.item2.status ==
+                              WorkspaceMemberStatus.accepted))
+                      .toList();
+                  return Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          if (starredWorkspace.isNotEmpty)
+                            StarredWorkspaceList(
+                              workspaces: workspaces,
+                              starredWorkspace: starredWorkspace,
+                              toggleStarred: _toggleStarredWorkspace,
+                            ),
+                          WorkspaceList(
+                            workspaces: _filterWorkspace(workspaces),
                             starredWorkspace: starredWorkspace,
                             toggleStarred: _toggleStarredWorkspace,
                           ),
-                        WorkspaceList(
-                          workspaces: _filterWorkspace(workspaces),
-                          starredWorkspace: starredWorkspace,
-                          toggleStarred: _toggleStarredWorkspace,
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
                 loading: () =>
                     const Center(child: CircularProgressIndicator.adaptive()),
                 error: (error, stack) => Center(child: Text('Error: $error')),

@@ -1,5 +1,7 @@
 import 'package:asr_project/models/workspace.dart';
+import 'package:asr_project/pages/workspace_page/workspace_create_form.dart';
 import 'package:asr_project/widgets/workspace/workspace_tile.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class WorkspaceList extends StatelessWidget {
@@ -20,11 +22,23 @@ class WorkspaceList extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          "All Workspace",
-          style: Theme.of(context).textTheme.headlineMedium,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "All Workspace",
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            IconButton(
+              onPressed: () => showCupertinoModalPopup(
+                context: context,
+                barrierDismissible: true,
+                builder: (_) => WorkspaceCreateForm(),
+              ),
+              icon: Icon(Icons.add),
+            ),
+          ],
         ),
-        SizedBox(height: 8.0),
         if (workspaces.isNotEmpty)
           ListView.separated(
             itemCount: workspaces.length,

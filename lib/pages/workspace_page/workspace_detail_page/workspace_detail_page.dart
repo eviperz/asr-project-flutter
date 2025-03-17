@@ -25,7 +25,7 @@ class WorkspaceDetailPage extends ConsumerStatefulWidget {
 }
 
 class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
-  late Workspace _workspace;
+  // late Workspace workspace;
   late bool creatingFolderMode = false;
   List<DiaryFolderModel> filteredDiaryFolders = [];
 
@@ -41,7 +41,7 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
       ref.read(diaryFoldersProvider.notifier).fetchData();
     });
 
-    _workspace = widget.workspace;
+    // workspace = widget.workspace;
     _searchTextEditingController.addListener(() => setState(() {}));
     _searchFocusNode.addListener(() => setState(() {}));
   }
@@ -137,30 +137,32 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
   }
 
   void _navigatorSetting() async {
-    final bool? isEdit = await Navigator.pushNamed<bool?>(
-        context, "/workspace/setting",
-        arguments: _workspace);
-
-    if (isEdit != null && isEdit) {
-      setState(() {
-        _workspace = ref.read(workspaceProvider.notifier).workspaceByIdProvider;
-        log(_workspace.icon.colorEnum.hexCode.toString());
-      });
-    }
+    final Workspace workspace =
+        ref.read(workspaceProvider.notifier).workspaceByIdProvider;
+    Navigator.pushNamed(context, "/workspace/setting",
+        arguments: workspace);
   }
 
   @override
   Widget build(BuildContext context) {
+    final AsyncValue workspacesAsync = ref.watch(workspaceProvider);
+    late Workspace workspace;
+    if (workspacesAsync.hasValue) {
+      final List<Workspace> workspaces = workspacesAsync.value!;
+      workspace =
+          workspaces.firstWhere((ws) => ws.id == ref.read(workspaceIdProvider));
+    }
+
     final AsyncValue diaryFoldersAsync = ref.watch(diaryFoldersProvider);
     final List<Diary> diaries =
         ref.read(diaryFoldersProvider.notifier).allDiariesInFolders;
 
-    final User owner = _workspace.members
+    final User owner = workspace.members
         .firstWhere(
             (member) => member.item2.permission == WorkspacePermission.owner)
         .item1!;
 
-    final List<User> memberWithoutOwner = _workspace.members
+    final List<User> memberWithoutOwner = workspace.members
         .where((member) =>
             member.item2.permission != WorkspacePermission.owner &&
             member.item2.status == WorkspaceMemberStatus.accepted)
@@ -169,7 +171,7 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_workspace.name),
+        title: Text(workspace.name),
         centerTitle: false,
       ),
       body: SafeArea(
@@ -189,8 +191,8 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
                         spacing: 20,
                         children: [
                           WorkspaceIcon(
-                            workspaceIconEnum: _workspace.icon.iconEnum,
-                            colorEnum: _workspace.icon.colorEnum,
+                            workspaceIconEnum: workspace.icon.iconEnum,
+                            colorEnum: workspace.icon.colorEnum,
                             size: 80,
                           ),
                           Expanded(
@@ -203,7 +205,7 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
                                 children: [
                                   FittedBox(
                                     child: Text(
-                                      _workspace.name,
+                                      workspace.name,
                                       style: Theme.of(context)
                                           .textTheme
                                           .headlineLarge,

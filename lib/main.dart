@@ -1,4 +1,5 @@
 import 'package:asr_project/models/diary.dart';
+import 'package:asr_project/models/user.dart';
 import 'package:asr_project/models/workspace.dart';
 import 'package:asr_project/pages/authentication_page/sign_in_page.dart';
 import 'package:asr_project/pages/diary_form_page/diary_form_page.dart';
@@ -7,12 +8,17 @@ import 'package:asr_project/pages/event_page/event_page.dart';
 import 'package:asr_project/pages/record_voice_page.dart';
 import 'package:asr_project/pages/workspace_page/workspace_detail_page/workspace_detail_page.dart';
 import 'package:asr_project/pages/workspace_page/workspace_detail_page/workspace_setting/workspace_setting_page.dart';
+import 'package:asr_project/pages/workspace_page/workspace_invitation_page/workspace_invitation.dart';
 import 'package:asr_project/pages/workspace_page/workspace_page/workspace_page.dart';
 import 'package:asr_project/providers/theme_provider.dart';
+import 'package:asr_project/providers/user_provider.dart';
+import 'package:asr_project/providers/workspace_provider.dart';
 import 'package:asr_project/widgets/custom_bottom_navbar.dart';
 import 'package:asr_project/pages/home_page/home_page.dart';
+import 'package:asr_project/widgets/custom_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:badges/badges.dart' as badges;
 
 void main() {
   runApp(ProviderScope(child: const MyApp()));
@@ -39,6 +45,10 @@ class MyApp extends ConsumerWidget {
           case "/workspace":
             return MaterialPageRoute(builder: (context) => WorkspacePage());
 
+          case "/workspace/notification":
+            return MaterialPageRoute(
+                builder: (context) => WorkspaceInvitation());
+
           case "/workspace/detail":
             Workspace workspace = settings.arguments as Workspace;
             return MaterialPageRoute(
@@ -47,7 +57,7 @@ class MyApp extends ConsumerWidget {
 
           case "/workspace/setting":
             Workspace workspace = settings.arguments as Workspace;
-            return MaterialPageRoute<bool?>(
+            return MaterialPageRoute<Workspace>(
                 builder: (context) =>
                     WorkspaceSettingPage(workspace: workspace));
 
@@ -76,14 +86,14 @@ class MyApp extends ConsumerWidget {
   }
 }
 
-class MainScreen extends StatefulWidget {
+class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  ConsumerState<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends ConsumerState<MainScreen> {
   int _currentIndex = 0;
 
   void _onChange(int index) {
@@ -94,6 +104,15 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final workspacesAsync = ref.watch(workspaceProvider);
+    final User? user = ref.watch(userProvider).value;
+
+    late int workspacePendingLength = 0;
+    if (workspacesAsync.hasValue) {
+      workspacePendingLength =
+          ref.watch(workspaceProvider.notifier).workspacesPending.length;
+    }
+
     final List<Widget> pages = [
       HomePage(),
       WorkspacePage(),
@@ -101,6 +120,27 @@ class _MainScreenState extends State<MainScreen> {
     ];
 
     return Scaffold(
+      drawer: CustomDrawer(name: user?.name ?? "Guest"),
+      appBar: AppBar(
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: badges.Badge(
+              position: badges.BadgePosition.bottomEnd(bottom: -4, end: 0),
+              badgeContent: Text(
+                workspacePendingLength.toString(),
+                style: TextStyle(color: Colors.white),
+              ),
+              showBadge: workspacePendingLength != 0,
+              child: IconButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, "/workspace/notification");
+                  },
+                  icon: Icon(Icons.group_add)),
+            ),
+          )
+        ],
+      ),
       body: pages[_currentIndex],
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: _currentIndex,

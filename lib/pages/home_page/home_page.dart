@@ -4,7 +4,6 @@ import 'package:asr_project/providers/diary_folder_provider.dart';
 import 'package:asr_project/providers/tag_provider.dart';
 import 'package:asr_project/providers/user_provider.dart';
 import 'package:asr_project/providers/workspace_provider.dart';
-import 'package:asr_project/widgets/custom_drawer.dart';
 import 'package:asr_project/widgets/custom_textfield.dart';
 import 'package:asr_project/widgets/diary/diary_folder_blocks.dart';
 import 'package:asr_project/widgets/diary/diary_list_view_horizontal.dart';
@@ -133,8 +132,6 @@ class _HomePageState extends ConsumerState<HomePage> {
         ref.watch(diaryFoldersProvider);
 
     return Scaffold(
-      appBar: AppBar(),
-      drawer: CustomDrawer(name: name),
       body: diaryFoldersAsync.when(
         data: (diaryFolders) {
           final List<Diary> diaries =
@@ -205,13 +202,14 @@ class _HomePageState extends ConsumerState<HomePage> {
                     _searchFocusNode.unfocus();
                   }),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20.0),
-              child: DiaryListViewHorizontal(
-                title: "Recently",
-                diaryList: recentDiaries,
+            if (recentDiaries.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20.0),
+                child: DiaryListViewHorizontal(
+                  title: "Recently",
+                  diaryList: recentDiaries,
+                ),
               ),
-            ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: DiaryFolderBlocks(
