@@ -217,7 +217,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                     ),
                     SizedBox(height: 10),
                     ElevatedButton(
-                      onPressed: _transcribeAudio, // Call the new method
+                      onPressed: _transcribeAudio,
                       child: Text("Transcribe Audio"),
                     ),
                     // Display the transcription result as a Text widget
