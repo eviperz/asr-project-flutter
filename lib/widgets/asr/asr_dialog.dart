@@ -56,7 +56,7 @@ class _ASRDialogState extends State<AsrDialog> {
     final index = widget.controller.selection.baseOffset;
     widget.controller.document.insert(
       index,
-      quill.BlockEmbed.custom(AudioBlockEmbed(audioUrl, "")),
+      quill.BlockEmbed.custom(AudioBlockEmbed(audioUrl)),
     );
   }
 

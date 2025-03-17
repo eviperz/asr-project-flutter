@@ -7,10 +7,9 @@ import 'package:flutter/services.dart';
 
 class AudioPlayerWidget extends StatefulWidget {
   final String audioName;
-  final String transcribe;
   final AsrService _asrService = AsrService();
 
-  AudioPlayerWidget({super.key, required this.audioName, this.transcribe = ""});
+  AudioPlayerWidget({super.key, required this.audioName});
 
   @override
   State<AudioPlayerWidget> createState() => _AudioPlayerWidgetState();
