@@ -1,9 +1,11 @@
 import 'package:asr_project/models/enum/color_platte.dart';
 import 'package:asr_project/models/enum/workspace_icon.dart';
+import 'package:asr_project/models/enum/workspace_member_status.dart';
 import 'package:asr_project/models/enum/workspace_permission.dart';
 import 'package:asr_project/models/user.dart';
 import 'package:asr_project/models/workspace.dart';
 import 'package:asr_project/models/workspace_icon_model.dart';
+import 'package:asr_project/models/workspace_member.dart';
 import 'package:asr_project/widgets/workspace/workspace_icon_selector.dart';
 import 'package:asr_project/widgets/workspace/workspace_invite_members_by_email_box.dart';
 import 'package:asr_project/providers/workspace_provider.dart';
@@ -14,6 +16,7 @@ import 'package:asr_project/widgets/workspace_icon.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tuple/tuple.dart';
 
 class WorkspaceSettingPage extends ConsumerStatefulWidget {
   final Workspace workspace;
@@ -34,9 +37,8 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
       TextEditingController();
   final TextEditingController _descriptionTextEditingController =
       TextEditingController();
-  final List<String> _invitedMemberEmails = [];
-  late final User _owner;
-  late Map<User, WorkspacePermission> _memberWithoutOwner;
+  late List<Tuple2<User?, WorkspaceMember>> _members = [];
+  final List<WorkspaceMemberInviting> _invitedMemberEmails = [];
   late WorkspaceIconEnum _workspaceIconEnum;
   late ColorPalette _colorEnum;
   late bool _isEdit = false;
@@ -46,12 +48,7 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
     super.initState();
     _nameTextEditingController.text = widget.workspace.name;
     _descriptionTextEditingController.text = widget.workspace.description ?? "";
-    _owner = widget.workspace.members.entries
-        .firstWhere((entry) => entry.value == WorkspacePermission.owner)
-        .key;
-    _memberWithoutOwner = Map.fromEntries(
-      widget.workspace.members.entries.where((entry) => entry.key != _owner),
-    );
+    _members = widget.workspace.members;
     _workspaceIconEnum = widget.workspace.icon.iconEnum;
     _colorEnum = widget.workspace.icon.colorEnum;
   }
@@ -98,31 +95,27 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
     _updateWorkspace(workspaceDetail);
   }
 
-  void _addInvitedMemberEmails(String email) {
+  void _addInvitedMemberEmails(WorkspaceMemberInviting email) {
     setState(() {
       _invitedMemberEmails.add(email);
     });
   }
 
-  void _removeInvitedMemberEmails(String email) {
+  void _removeInvitedMemberEmails(WorkspaceMemberInviting email) {
     setState(() {
       _invitedMemberEmails.remove(email);
     });
   }
 
   void _inviteByEmails() async {
-    final WorkspaceDetail emails =
-        WorkspaceDetail(invitedMemberEmails: _invitedMemberEmails);
     final Workspace? workspace = await ref
         .read(workspaceProvider.notifier)
-        .updateWorkspace(widget.workspace.id, emails);
+        .inviteMembers(widget.workspace.id, _invitedMemberEmails);
 
     if (!mounted) return;
     if (workspace != null) {
       setState(() {
-        _memberWithoutOwner = Map.fromEntries(
-          workspace.members.entries.where((entry) => entry.key != _owner),
-        );
+        _members = workspace.members;
         _isEdit = true;
       });
 
@@ -144,21 +137,33 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
     });
   }
 
-  void _removeMember(User user) async {
+  void _removeMember(String workspaceMemberId) async {
     await ref
         .read(workspaceProvider.notifier)
-        .removeMember(widget.workspace.id, {"removedUserId": user.id});
+        .removeMember(widget.workspace.id, workspaceMemberId);
     setState(() {
-      _memberWithoutOwner.remove(user);
+      _members = _members
+          .where((member) => member.item2.id != workspaceMemberId)
+          .toList();
       _isEdit = true;
     });
   }
 
-  void _updateMember(User user) {
-    if (_owner.id != user.id) {
-      WorkspaceDetail workspaceDetail =
-          WorkspaceDetail(members: _memberWithoutOwner);
-      _updateWorkspace(workspaceDetail);
+  void _updatePermission(
+      String workspaceMemberId, WorkspacePermission permission) async {
+    List<Tuple2<User?, WorkspaceMember>>? members = await ref
+        .read(workspaceProvider.notifier)
+        .updatePermission(widget.workspace.id, workspaceMemberId, permission);
+
+    if (!mounted) return;
+    if (members != null) {
+      setState(() {
+        _members = members;
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Failed to update permission")),
+      );
     }
   }
 
@@ -276,50 +281,97 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
                     ],
                   ),
                   SizedBox(
-                    height: 150,
+                    height: 300,
                     child: ListView.separated(
-                        itemCount: _memberWithoutOwner.length + 1,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: _members.length,
                         itemBuilder: (context, index) {
-                          final User user =
-                              [_owner, ..._memberWithoutOwner.keys][index];
-                          return ListTile(
-                            leading: ProfileImage(),
-                            title: Text(user.name),
-                            subtitle: Container(
-                              alignment: Alignment.centerLeft,
-                              child: GestureDetector(
-                                onTapDown: (TapDownDetails details) =>
-                                    _updateMember(user),
-                                child: Chip(
-                                  padding: EdgeInsets.all(4.0),
-                                  label: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          permissionToString(user.id ==
-                                                  _owner.id
-                                              ? WorkspacePermission.owner
-                                              : _memberWithoutOwner[user] ??
-                                                  WorkspacePermission.viewer),
-                                        ),
-                                        if (_owner.id != user.id)
-                                          Icon(
-                                            Icons.arrow_drop_down_outlined,
-                                            size: 18,
-                                          )
-                                      ]),
-                                ),
-                              ),
-                            ),
-                            trailing: _owner.id != user.id
-                                ? IconButton(
+                          final User? user = _members[index].item1;
+                          final WorkspaceMember workspaceMember =
+                              _members[index].item2;
+                          return workspaceMember.status ==
+                                  WorkspaceMemberStatus.accepted
+                              ? ListTile(
+                                  leading: ProfileImage(),
+                                  title: Text(user!.name),
+                                  subtitle: Container(
+                                    alignment: Alignment.centerLeft,
+                                    child: GestureDetector(
+                                      onTapDown: (TapDownDetails details) =>
+                                          _updatePermission(
+                                              workspaceMember.id,
+                                              workspaceMember.permission ==
+                                                      WorkspacePermission.viewer
+                                                  ? WorkspacePermission.editor
+                                                  : WorkspacePermission.viewer),
+                                      child: Chip(
+                                        padding: EdgeInsets.all(4.0),
+                                        label: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                WorkspacePermission
+                                                    .toStringWorkspacePermission(
+                                                        workspaceMember
+                                                            .permission),
+                                              ),
+                                              if (workspaceMember.permission !=
+                                                  WorkspacePermission.owner)
+                                                Icon(
+                                                  Icons
+                                                      .arrow_drop_down_outlined,
+                                                  size: 18,
+                                                )
+                                            ]),
+                                      ),
+                                    ),
+                                  ),
+                                  trailing: workspaceMember.permission !=
+                                          WorkspacePermission.owner
+                                      ? IconButton(
+                                          onPressed: () {
+                                            _removeMember(workspaceMember.id);
+                                          },
+                                          icon: Icon(
+                                            Icons.remove_circle,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .error,
+                                          ),
+                                        )
+                                      : null,
+                                )
+                              : ListTile(
+                                  leading: ProfileImage(),
+                                  title: Text(workspaceMember.email),
+                                  subtitle: Container(
+                                    alignment: Alignment.centerLeft,
+                                    child: Chip(
+                                      backgroundColor: Theme.of(context)
+                                          .colorScheme
+                                          .tertiary,
+                                      padding: EdgeInsets.all(4.0),
+                                      label: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              WorkspaceMemberStatus
+                                                  .toStringWorkspaceMemberPermission(
+                                                      workspaceMember.status),
+                                            ),
+                                          ]),
+                                    ),
+                                  ),
+                                  trailing: IconButton(
                                     onPressed: () {
-                                      _removeMember(user);
+                                      _removeMember(workspaceMember.id);
                                     },
-                                    icon: Icon(Icons.remove),
-                                  )
-                                : null,
-                          );
+                                    icon: Icon(
+                                      Icons.remove_circle,
+                                      color:
+                                          Theme.of(context).colorScheme.error,
+                                    ),
+                                  ));
                         },
                         separatorBuilder: (context, index) => const Divider()),
                   ),

@@ -17,6 +17,7 @@ class WorkspaceList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -24,24 +25,25 @@ class WorkspaceList extends StatelessWidget {
           style: Theme.of(context).textTheme.headlineMedium,
         ),
         SizedBox(height: 8.0),
-        workspaces.isNotEmpty
-            ? ListView.separated(
-                itemCount: workspaces.length,
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  final Workspace workspace = workspaces[index];
-                  return WorkspaceTile(
-                    workspace: workspace,
-                    isStarred: starredWorkspace.contains(workspace.id),
-                    toggleStarred: toggleStarred,
-                  );
-                },
-                separatorBuilder: (context, index) {
-                  return Divider();
-                },
-              )
-            : Center(child: Text("No Workspace"))
+        if (workspaces.isNotEmpty)
+          ListView.separated(
+            itemCount: workspaces.length,
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemBuilder: (context, index) {
+              final Workspace workspace = workspaces[index];
+              return WorkspaceTile(
+                workspace: workspace,
+                isStarred: starredWorkspace.contains(workspace.id),
+                toggleStarred: toggleStarred,
+              );
+            },
+            separatorBuilder: (context, index) {
+              return Divider();
+            },
+          )
+        else
+          Center(child: Text("No Workspace"))
       ],
     );
   }

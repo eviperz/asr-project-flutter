@@ -19,7 +19,7 @@ class User {
               fit: BoxFit.cover,
             );
 
-  factory User.fromMap(Map<String, dynamic> map) {
+  factory User.fromJson(Map<String, dynamic> map) {
     if (_cache.containsKey(map['id'])) {
       User cachedUser = _cache[map['id']]!;
 

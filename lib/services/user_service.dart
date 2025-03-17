@@ -19,7 +19,7 @@ class UserService {
           await http.get(Uri.parse("$baseUrl/$id"), headers: headers);
 
       if (response.statusCode == 200) {
-        return User.fromMap(jsonDecode(response.body));
+        return User.fromJson(jsonDecode(response.body));
       }
       throw Exception("Fail to fetch user: ${response.statusCode}");
     } catch (e) {

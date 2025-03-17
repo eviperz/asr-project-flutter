@@ -13,31 +13,35 @@ class DefaultModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Center(
-        child: Card(
-          surfaceTintColor: Theme.of(context).colorScheme.primary,
-          child: Container(
-            padding: EdgeInsets.all(12.0),
-            width: 350,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    IconButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        icon: Icon(Icons.close)),
-                    Text(
-                      title,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    )
-                  ],
-                ),
-                child,
-              ],
+      child: Padding(
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: Center(
+          child: Card(
+            surfaceTintColor: Theme.of(context).colorScheme.primary,
+            child: Container(
+              padding: EdgeInsets.all(12.0),
+              width: 350,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      IconButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          icon: Icon(Icons.close)),
+                      Text(
+                        title,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      )
+                    ],
+                  ),
+                  child,
+                ],
+              ),
             ),
           ),
         ),

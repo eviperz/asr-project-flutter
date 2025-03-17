@@ -2,9 +2,9 @@ import 'package:asr_project/models/user.dart';
 import 'package:asr_project/models/workspace.dart';
 import 'package:asr_project/pages/workspace_page/starred_workspace_list.dart';
 import 'package:asr_project/pages/workspace_page/workspace_create_form.dart';
+import 'package:asr_project/pages/workspace_page/workspace_page/workspace_search_bar.dart';
 import 'package:asr_project/providers/user_provider.dart';
 import 'package:asr_project/widgets/custom_drawer.dart';
-import 'package:asr_project/widgets/custom_textfield.dart';
 import 'package:asr_project/widgets/workspace/workspace_list.dart';
 import 'package:asr_project/providers/workspace_provider.dart';
 import 'package:flutter/cupertino.dart';
@@ -85,40 +85,38 @@ class _WorkspacePageState extends ConsumerState<WorkspacePage> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
           child: Column(
+            mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 "Workspace",
                 style: Theme.of(context).textTheme.headlineLarge,
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20.0),
-                child: CustomTextfield(
-                  hintText: "Search Workspace",
-                  keyboardType: TextInputType.text,
-                  textEditController: _searchTextEditingController,
-                  focusNode: _searchFocusNode,
-                  canClear: true,
-                  iconData: Icons.search,
-                ),
+              WorkspaceSearchBar(
+                searchTextEditingController: _searchTextEditingController,
+                searchFocusNode: _searchFocusNode,
               ),
               workspacesAsync.when(
-                data: (workspaces) => Column(
-                  children: [
-                    if (starredWorkspace.isNotEmpty)
-                      StarredWorkspaceList(
-                        workspaces: workspaces,
-                        starredWorkspace: starredWorkspace,
-                        toggleStarred: _toggleStarredWorkspace,
-                      ),
-                    WorkspaceList(
-                      workspaces: _filterWorkspace(workspaces),
-                      starredWorkspace: starredWorkspace,
-                      toggleStarred: _toggleStarredWorkspace,
+                data: (workspaces) => Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        if (starredWorkspace.isNotEmpty)
+                          StarredWorkspaceList(
+                            workspaces: workspaces,
+                            starredWorkspace: starredWorkspace,
+                            toggleStarred: _toggleStarredWorkspace,
+                          ),
+                        WorkspaceList(
+                          workspaces: _filterWorkspace(workspaces),
+                          starredWorkspace: starredWorkspace,
+                          toggleStarred: _toggleStarredWorkspace,
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
                 loading: () =>
                     const Center(child: CircularProgressIndicator.adaptive()),

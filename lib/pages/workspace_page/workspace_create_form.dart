@@ -2,6 +2,7 @@ import 'package:asr_project/models/enum/color_platte.dart';
 import 'package:asr_project/models/enum/workspace_icon.dart';
 import 'package:asr_project/models/workspace.dart';
 import 'package:asr_project/models/workspace_icon_model.dart';
+import 'package:asr_project/models/workspace_member.dart';
 import 'package:asr_project/providers/workspace_provider.dart';
 import 'package:asr_project/widgets/workspace/workspace_icon_selector.dart';
 import 'package:asr_project/widgets/workspace/workspace_invite_members_by_email_box.dart';
@@ -26,7 +27,7 @@ class _WorkspaceCreateFormState extends ConsumerState<WorkspaceCreateForm> {
       TextEditingController();
   late WorkspaceIconEnum _workspaceIconEnum = WorkspaceIconEnum.business;
   late ColorPalette _workspaceColorEnum = ColorPalette.gray;
-  final List<String> _invitedMemberEmails = [];
+  final List<WorkspaceMemberInviting> _invitedMemberEmails = [];
 
   @override
   void initState() {
@@ -51,7 +52,7 @@ class _WorkspaceCreateFormState extends ConsumerState<WorkspaceCreateForm> {
           iconEnum: _workspaceIconEnum,
           colorEnum: _workspaceColorEnum,
         ),
-        invitedMemberEmails: _invitedMemberEmails,
+        members: _invitedMemberEmails,
       );
 
       final bool response = await ref
@@ -69,15 +70,17 @@ class _WorkspaceCreateFormState extends ConsumerState<WorkspaceCreateForm> {
     }
   }
 
-  void _addInvitedMemberEmails(String email) {
+  void _addInvitedMemberEmails(
+      WorkspaceMemberInviting workspaceMemberInviting) {
     setState(() {
-      _invitedMemberEmails.add(email);
+      _invitedMemberEmails.add(workspaceMemberInviting);
     });
   }
 
-  void _removeInvitedMemberEmails(String email) {
+  void _removeInvitedMemberEmails(
+      WorkspaceMemberInviting workspaceMemberInviting) {
     setState(() {
-      _invitedMemberEmails.remove(email);
+      _invitedMemberEmails.remove(workspaceMemberInviting);
     });
   }
 

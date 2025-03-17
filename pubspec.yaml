@@ -49,6 +49,7 @@ dependencies:
   uuid:
   http:
   collection:
+  tuple: ^2.0.2
 
 dev_dependencies:
   flutter_test:
