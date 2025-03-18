@@ -5,7 +5,7 @@ import 'package:asr_project/models/tag.dart';
 import 'package:http/http.dart' as http;
 
 class TagService {
-  final String userId = AppConfig.userId;
+  String? _userId;
   final String baseUrl = "${AppConfig.baseUrl}/tags";
   final Map<String, String> headers = {
     'Authorization': AppConfig.basicAuth,
@@ -13,8 +13,17 @@ class TagService {
     'Accept-Charset': 'utf-8',
   };
 
+  TagService() {
+    _initializeUserId();
+  }
+  Future<void> _initializeUserId() async {
+    _userId = await AppConfig.getUserId();
+    log("User ID Loaded TagService: $_userId");
+  }
+
   Future<List<Tag>> getAllPersonalTags() async {
     try {
+      final String? userId = await AppConfig.getUserId();
       final response = await http.get(
         Uri.parse("$baseUrl/personal/$userId"),
         headers: headers,
@@ -52,7 +61,7 @@ class TagService {
   Future<Tag?> createPersonalTag(TagDetail tagDetail) async {
     try {
       final response = await http.post(
-        Uri.parse("$baseUrl/personal/$userId"),
+        Uri.parse("$baseUrl/personal/$_userId"),
         headers: headers,
         body: jsonEncode(tagDetail.toJson()),
       );

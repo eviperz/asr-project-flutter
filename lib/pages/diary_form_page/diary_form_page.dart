@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:asr_project/config.dart';
 import 'package:asr_project/providers/diary_folder_provider.dart';
 import 'package:asr_project/providers/tag_provider.dart';
 import 'package:asr_project/widgets/asr/asr_dialog.dart';
@@ -28,9 +29,18 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
   final TextEditingController _titleController = TextEditingController();
   final quill.QuillController _controller = quill.QuillController.basic();
   late List<Tag> _tags;
+  String? _userId;
   late DateTime _updatedAt;
   bool _isEdited = false;
   bool _isKeyboardVisible = false;
+
+  _DiaryFormState() {
+    _initializeUserId();
+  }
+  Future<void> _initializeUserId() async {
+    _userId = await AppConfig.getUserId();
+    log("User ID Loaded DiaryForm: $_userId");
+  }
 
   @override
   void initState() {
@@ -74,6 +84,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
           : _titleController.text.trim(),
       content: _controller.document.toDelta(),
       tagIds: _tags.map((tag) => tag.id).toList(),
+      userId: _userId,
     );
     log(_controller.document.toDelta().toJson().toString());
 

@@ -1,5 +1,6 @@
 import 'package:asr_project/main.dart';
 import 'package:asr_project/pages/authentication_page/sign_up_page.dart';
+import 'package:asr_project/services/user_service.dart';
 import 'package:asr_project/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
 
@@ -11,6 +12,8 @@ class SignInPage extends StatefulWidget {
 }
 
 class _SignInPageState extends State<SignInPage> {
+  final UserService _userService = UserService();
+
   final TextEditingController _emailTextEditController =
       TextEditingController();
   final TextEditingController _passwordTextEditController =
@@ -66,17 +69,46 @@ class _SignInPageState extends State<SignInPage> {
     }
   }
 
-  void _signIn() {
+  void _signIn() async {
+    setState(() {
+      _isSubmit = true;
+    });
+
     if (_validateEmail() == null && _validatePassword() == null) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => MainScreen()),
-      );
-    } else {
-      setState(() {
-        _isSubmit = true;
-      });
+      final String email = _emailTextEditController.text;
+      final String password = _passwordTextEditController.text;
+
+      try {
+        final user = await _userService.login(email, password);
+
+        if (user != null) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => MainScreen()),
+          );
+        } else {
+          _showErrorDialog("Invalid email or password. Please try again.");
+        }
+      } catch (e) {
+        _showErrorDialog("An error occurred. Please try again.");
+      }
     }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Login Failed"),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("OK"),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

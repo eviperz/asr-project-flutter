@@ -6,7 +6,7 @@ import 'package:asr_project/models/workspace_member.dart';
 import 'package:http/http.dart' as http;
 
 class WorkspaceService {
-  final String userId = AppConfig.userId;
+  String? _userId;
   final String baseUrl = "${AppConfig.baseUrl}/workspaces";
   final Map<String, String> headers = {
     'Authorization': AppConfig.basicAuth,
@@ -14,10 +14,19 @@ class WorkspaceService {
     'Accept-Charset': 'utf-8',
   };
 
+  WorkspaceService() {
+    _initializeUserId();
+  }
+
+  Future<void> _initializeUserId() async {
+    _userId = await AppConfig.getUserId();
+    log("User ID Loaded WorkspaceService: $_userId");
+  }
+
   Future<List<Workspace>> getAllWorkspaces() async {
     try {
       final response =
-          await http.get(Uri.parse("$baseUrl/user/$userId"), headers: headers);
+          await http.get(Uri.parse("$baseUrl/user/$_userId"), headers: headers);
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = jsonDecode(response.body);
         return jsonData.map((data) => Workspace.fromJson(data)).toList();
@@ -32,7 +41,7 @@ class WorkspaceService {
   Future<Workspace?> createWorkspace(WorkspaceDetail workspaceDetail) async {
     try {
       final response = await http.post(
-        Uri.parse("$baseUrl/user/$userId"),
+        Uri.parse("$baseUrl/user/$_userId"),
         headers: headers,
         body: jsonEncode(
           workspaceDetail.toJson(),
