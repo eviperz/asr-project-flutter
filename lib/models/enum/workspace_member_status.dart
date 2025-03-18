@@ -13,7 +13,7 @@ enum WorkspaceMemberStatus {
     }
   }
 
-  static String toStringWorkspaceMemberPermission(
+  static String toStringWorkspaceMemberStatus(
       WorkspaceMemberStatus permission) {
     return permission.toString().split('.').last.toUpperCase();
   }

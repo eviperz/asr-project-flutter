@@ -210,7 +210,7 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
         child: Padding(
           padding: EdgeInsets.all(20.0),
           child: Column(
-            spacing: 16.0,
+            spacing: 8.0,
             children: [
               SizedBox(
                 height: 150,
@@ -303,12 +303,55 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
                           final User? user = _members[index].item1;
                           final WorkspaceMember workspaceMember =
                               _members[index].item2;
-                          return workspaceMember.status ==
-                                  WorkspaceMemberStatus.accepted
-                              ? ListTile(
-                                  leading: ProfileImage(),
-                                  title: Text(user!.name),
-                                  subtitle: Container(
+                          return ListTile(
+                            titleAlignment: ListTileTitleAlignment.top,
+                            leading: Padding(
+                              padding: const EdgeInsets.only(top: 10.0),
+                              child: ProfileImage(size: 45),
+                            ),
+                            title: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              spacing: 4.0,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 10.0),
+                                  child: Text(
+                                    workspaceMember.status ==
+                                            WorkspaceMemberStatus.accepted
+                                        ? user!.name
+                                        : workspaceMember.email,
+                                  ),
+                                ),
+                                workspaceMember.status ==
+                                        WorkspaceMemberStatus.pending
+                                    ? Text(
+                                        "Pending",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelLarge!
+                                            .copyWith(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .tertiary),
+                                      )
+                                    : Text(
+                                        workspaceMember.permission ==
+                                                WorkspacePermission.owner
+                                            ? "Owner"
+                                            : "Member",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelLarge!
+                                            .copyWith(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .tertiary),
+                                      ),
+                              ],
+                            ),
+                            subtitle: workspaceMember.permission !=
+                                    WorkspacePermission.owner
+                                ? Container(
                                     alignment: Alignment.centerLeft,
                                     child: GestureDetector(
                                       onTapDown: (TapDownDetails details) =>
@@ -320,72 +363,67 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
                                                   : WorkspacePermission.viewer),
                                       child: Chip(
                                         padding: EdgeInsets.all(4.0),
-                                        label: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Text(
-                                                WorkspacePermission
-                                                    .toStringWorkspacePermission(
-                                                        workspaceMember
-                                                            .permission),
-                                              ),
-                                              if (workspaceMember.permission !=
-                                                  WorkspacePermission.owner)
-                                                Icon(
-                                                  Icons
-                                                      .arrow_drop_down_outlined,
-                                                  size: 18,
-                                                )
-                                            ]),
+                                        label: SizedBox(
+                                          width: 70,
+                                          child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  WorkspacePermission
+                                                      .toStringWorkspacePermission(
+                                                          workspaceMember
+                                                              .permission),
+                                                ),
+                                                if (workspaceMember
+                                                        .permission !=
+                                                    WorkspacePermission.owner)
+                                                  Icon(
+                                                    Icons
+                                                        .arrow_drop_down_outlined,
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .onPrimary,
+                                                    size: 18,
+                                                  )
+                                              ]),
+                                        ),
+                                        labelStyle: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall!
+                                            .copyWith(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onPrimary),
                                       ),
                                     ),
-                                  ),
-                                  trailing: workspaceMember.permission !=
-                                          WorkspacePermission.owner
-                                      ? IconButton(
-                                          onPressed: () {
-                                            _removeMember(workspaceMember.id);
-                                          },
-                                          icon: Icon(
-                                            Icons.remove_circle,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .error,
-                                          ),
-                                        )
-                                      : null,
-                                )
-                              : ListTile(
-                                  leading: ProfileImage(),
-                                  title: Text(workspaceMember.email),
-                                  subtitle: Container(
-                                    alignment: Alignment.centerLeft,
-                                    child: Chip(
-                                      backgroundColor: Theme.of(context)
-                                          .colorScheme
-                                          .tertiary,
-                                      padding: EdgeInsets.all(4.0),
-                                      label: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              WorkspaceMemberStatus
-                                                  .toStringWorkspaceMemberPermission(
-                                                      workspaceMember.status),
-                                            ),
-                                          ]),
-                                    ),
-                                  ),
-                                  trailing: IconButton(
-                                    onPressed: () {
-                                      _removeMember(workspaceMember.id);
-                                    },
-                                    icon: Icon(
-                                      Icons.remove_circle,
-                                      color:
-                                          Theme.of(context).colorScheme.error,
-                                    ),
-                                  ));
+                                  )
+                                : null,
+                            trailing: workspaceMember.permission !=
+                                    WorkspacePermission.owner
+                                ? Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        onPressed: () {
+                                          _removeMember(workspaceMember.id);
+                                        },
+                                        icon: Icon(
+                                          Icons.person_remove,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .tertiary,
+                                          size: 24,
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : null,
+                            contentPadding:
+                                EdgeInsets.only(right: 0, bottom: 10),
+                          );
                         },
                         separatorBuilder: (context, index) => const Divider()),
                   ),
