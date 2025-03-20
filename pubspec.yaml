@@ -51,6 +51,8 @@ dependencies:
   http:
   collection:
   tuple: ^2.0.2
+  table_calendar: ^3.0.2
+  flutter_secure_storage: ^5.0.2
 
 dev_dependencies:
   flutter_test:
