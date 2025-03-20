@@ -7,17 +7,24 @@ import 'package:path/path.dart' as path;
 
 class AsrService {
   final String baseUrl = "${AppConfig.baseUrl}/minio";
-  final Map<String, String> headers = {
-    'Authorization': AppConfig.basicAuth,
-    'Content-Type': 'application/json',
-    'Accept-Charset': 'utf-8',
-  };
 
+  // Get headers with authorization token
+  Future<Map<String, String>> _getHeaders() async {
+    String? token = await AppConfig.getToken();
+    return {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+      'Accept-Charset': 'utf-8',
+    };
+  }
+
+  // Method to upload file
   Future<String> uploadFile(File file) async {
     try {
       String fileExtension = path.extension(file.path).toLowerCase();
-
       String mimeType;
+
+      // Set mime type based on file extension
       switch (fileExtension) {
         case '.wav':
           mimeType = 'audio/wav';
@@ -31,14 +38,16 @@ class AsrService {
         default:
           throw Exception("Unsupported file format: $fileExtension");
       }
+
       var request = http.MultipartRequest(
         'POST',
         Uri.parse("$baseUrl/upload"),
       );
-      request.headers.addAll(headers);
+      request.headers.addAll(await _getHeaders()); // Add headers
 
       var fileStream = http.ByteStream(file.openRead());
       var fileLength = await file.length();
+
       var multipartFile = http.MultipartFile(
         'audioFile',
         fileStream,
@@ -53,7 +62,6 @@ class AsrService {
 
       if (response.statusCode == 200) {
         var responseBody = await response.stream.bytesToString();
-
         return responseBody;
       } else {
         throw Exception("Failed to upload audio file: ${response.statusCode}");
@@ -64,8 +72,10 @@ class AsrService {
     }
   }
 
+  // Method to get file URL
   Future<String> getFileUrl(String fileName) async {
     try {
+      final headers = await _getHeaders(); // Get headers with auth
       final response = await http.get(
         Uri.parse("$baseUrl/downloadByUrl/$fileName"),
         headers: headers,
@@ -73,7 +83,7 @@ class AsrService {
 
       if (response.statusCode == 200) {
         String presignedUrl = response.body.trim();
-        log("Fetched audio URL: $presignedUrl check1");
+        log("Fetched audio URL: $presignedUrl");
         return presignedUrl;
       } else {
         throw Exception("Failed to fetch audio URL: ${response.statusCode}");
@@ -84,16 +94,19 @@ class AsrService {
     }
   }
 
+  // Method to transcribe audio
   Future<String> transcribeText(String fileName) async {
     try {
+      final headers = await _getHeaders();
       final response = await http.get(
         Uri.parse("$baseUrl/transcribe/$fileName"),
         headers: headers,
       );
 
+      // Check the response status
       if (response.statusCode == 200) {
         String transcribe = response.body.trim();
-        log("transcribe: $transcribe");
+        log("Transcription: $transcribe");
         return transcribe;
       } else {
         throw Exception("Failed to transcribe audio: ${response.statusCode}");

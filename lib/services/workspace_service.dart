@@ -8,11 +8,15 @@ import 'package:http/http.dart' as http;
 class WorkspaceService {
   String? _userId;
   final String baseUrl = "${AppConfig.baseUrl}/workspaces";
-  final Map<String, String> headers = {
-    'Authorization': AppConfig.basicAuth,
-    'Content-Type': 'application/json',
-    'Accept-Charset': 'utf-8',
-  };
+  Future<Map<String, String>> _getHeaders() async {
+    String? token = await AppConfig.getToken();
+
+    return {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+      'Accept-Charset': 'utf-8',
+    };
+  }
 
   WorkspaceService() {
     _initializeUserId();
@@ -25,6 +29,8 @@ class WorkspaceService {
 
   Future<List<Workspace>> getAllWorkspaces() async {
     try {
+      final headers = await _getHeaders();
+
       final response =
           await http.get(Uri.parse("$baseUrl/user/$_userId"), headers: headers);
       if (response.statusCode == 200) {
@@ -40,6 +46,8 @@ class WorkspaceService {
 
   Future<Workspace?> createWorkspace(WorkspaceDetail workspaceDetail) async {
     try {
+      final headers = await _getHeaders();
+
       final response = await http.post(
         Uri.parse("$baseUrl/user/$_userId"),
         headers: headers,
@@ -61,6 +69,8 @@ class WorkspaceService {
   Future<Workspace?> updateWorkspace(
       String id, WorkspaceDetail workspaceDetail) async {
     try {
+      final headers = await _getHeaders();
+
       final response = await http.patch(
         Uri.parse("$baseUrl/$id"),
         headers: headers,
@@ -81,6 +91,8 @@ class WorkspaceService {
 
   Future<bool> deleteWorkspace(String id) async {
     try {
+      final headers = await _getHeaders();
+
       final response = await http.delete(
         Uri.parse("$baseUrl/$id"),
         headers: headers,
@@ -99,6 +111,8 @@ class WorkspaceService {
   Future<Workspace?> inviteMembers(
       String id, List<WorkspaceMemberInviting> workspaceMemberInvitings) async {
     try {
+      final headers = await _getHeaders();
+
       final response = await http.post(
         Uri.parse("$baseUrl/$id/invite"),
         headers: headers,
@@ -118,6 +132,8 @@ class WorkspaceService {
 
   Future<bool> removeMember(String workspaceMemberId) async {
     try {
+      final headers = await _getHeaders();
+
       final response = await http.delete(
         Uri.parse("$baseUrl/members/$workspaceMemberId"),
         headers: headers,

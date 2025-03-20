@@ -1,6 +1,6 @@
 import 'package:asr_project/main.dart';
 import 'package:asr_project/pages/authentication_page/sign_up_page.dart';
-import 'package:asr_project/services/user_service.dart';
+import 'package:asr_project/services/auth_service.dart';
 import 'package:asr_project/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
 
@@ -12,7 +12,7 @@ class SignInPage extends StatefulWidget {
 }
 
 class _SignInPageState extends State<SignInPage> {
-  final UserService _userService = UserService();
+  final AuthService _authService = AuthService();
 
   final TextEditingController _emailTextEditController =
       TextEditingController();
@@ -79,7 +79,7 @@ class _SignInPageState extends State<SignInPage> {
       final String password = _passwordTextEditController.text;
 
       try {
-        final user = await _userService.login(email, password);
+        final user = await _authService.login(email, password);
 
         if (user != null) {
           Navigator.pushReplacement(

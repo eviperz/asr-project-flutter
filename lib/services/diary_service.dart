@@ -6,15 +6,37 @@ import 'package:http/http.dart' as http;
 
 class DiaryService {
   final String baseUrl = "${AppConfig.baseUrl}/diaries";
-  final Map<String, String> headers = {
-    'Authorization': AppConfig.basicAuth,
-    'Content-Type': 'application/json',
-    'Accept-Charset': 'utf-8',
-  };
+  Future<Map<String, String>> _getHeaders() async {
+    String? token = await AppConfig.getToken();
+
+    return {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+      'Accept-Charset': 'utf-8',
+    };
+  }
 
   Future<List<Diary>> fetchDiaries() async {
     try {
+      final headers = await _getHeaders();
+
       final response = await http.get(Uri.parse(baseUrl), headers: headers);
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = jsonDecode(response.body);
+        return jsonData.map((data) => Diary.fromMap(data)).toList();
+      }
+      throw Exception("Fail to fetch diaries: ${response.statusCode}");
+    } catch (e) {
+      log("Error fetching diaries: $e");
+      return [];
+    }
+  }
+
+  Future<List<Diary>> fetchDiariesByUserId(String id) async {
+    try {
+      final headers = await _getHeaders();
+      final response =
+          await http.get(Uri.parse("$baseUrl/$id"), headers: headers);
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = jsonDecode(response.body);
         return jsonData.map((data) => Diary.fromMap(data)).toList();
@@ -28,6 +50,8 @@ class DiaryService {
 
   Future<Diary?> addDiary(DiaryDetail diaryDetail) async {
     try {
+      final headers = await _getHeaders();
+
       final response = await http.post(
         Uri.parse(baseUrl),
         headers: headers,
@@ -46,6 +70,9 @@ class DiaryService {
 
   Future<Diary?> updateDiary(String id, DiaryDetail diaryDetail) async {
     try {
+      final headers = await _getHeaders();
+
+      log("diaryDetail: ${diaryDetail.toJson()}");
       final response = await http.patch(
         Uri.parse("$baseUrl/$id"),
         headers: headers,
@@ -64,6 +91,8 @@ class DiaryService {
 
   Future<bool> deleteDiary(String id) async {
     try {
+      final headers = await _getHeaders();
+
       final response =
           await http.delete(Uri.parse("$baseUrl/$id"), headers: headers);
       Diary.removeCache(id);

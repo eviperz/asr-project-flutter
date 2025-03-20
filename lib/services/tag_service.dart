@@ -7,11 +7,15 @@ import 'package:http/http.dart' as http;
 class TagService {
   String? _userId;
   final String baseUrl = "${AppConfig.baseUrl}/tags";
-  final Map<String, String> headers = {
-    'Authorization': AppConfig.basicAuth,
-    'Content-Type': 'application/json',
-    'Accept-Charset': 'utf-8',
-  };
+  Future<Map<String, String>> _getHeaders() async {
+    String? token = await AppConfig.getToken();
+
+    return {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+      'Accept-Charset': 'utf-8',
+    };
+  }
 
   TagService() {
     _initializeUserId();
@@ -23,6 +27,7 @@ class TagService {
 
   Future<List<Tag>> getAllPersonalTags() async {
     try {
+      final headers = await _getHeaders();
       final String? userId = await AppConfig.getUserId();
       final response = await http.get(
         Uri.parse("$baseUrl/personal/$userId"),
@@ -42,6 +47,7 @@ class TagService {
 
   Future<List<Tag>> getAllWorkspaceTags(String workspaceId) async {
     try {
+      final headers = await _getHeaders();
       final response = await http.get(
         Uri.parse("$baseUrl/workspace/$workspaceId"),
         headers: headers,
@@ -60,6 +66,7 @@ class TagService {
 
   Future<Tag?> createPersonalTag(TagDetail tagDetail) async {
     try {
+      final headers = await _getHeaders();
       final response = await http.post(
         Uri.parse("$baseUrl/personal/$_userId"),
         headers: headers,
@@ -79,6 +86,7 @@ class TagService {
   Future<Tag?> createWorkspaceTag(
       String workspaceId, TagDetail tagDetail) async {
     try {
+      final headers = await _getHeaders();
       final response = await http.post(
         Uri.parse("$baseUrl/workspace/$workspaceId"),
         headers: headers,
@@ -97,6 +105,7 @@ class TagService {
 
   Future<Tag?> updateTag(String id, TagDetail tagDetail) async {
     try {
+      final headers = await _getHeaders();
       final response = await http.patch(
         Uri.parse("$baseUrl/$id"),
         headers: headers,
@@ -115,6 +124,7 @@ class TagService {
 
   Future<bool> deleteTag(String id) async {
     try {
+      final headers = await _getHeaders();
       final response =
           await http.delete(Uri.parse("$baseUrl/$id"), headers: headers);
       return response.statusCode == 200;

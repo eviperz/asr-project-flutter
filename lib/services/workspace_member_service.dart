@@ -8,11 +8,16 @@ import 'package:http/http.dart' as http;
 class WorkspaceMemberService {
   String? _userId;
   final String baseUrl = "${AppConfig.baseUrl}/workspace_members";
-  final Map<String, String> headers = {
-    'Authorization': AppConfig.basicAuth,
-    'Content-Type': 'application/json',
-    'Accept-Charset': 'utf-8',
-  };
+  Future<Map<String, String>> _getHeaders() async {
+    String? token = await AppConfig.getToken();
+
+    return {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+      'Accept-Charset': 'utf-8',
+    };
+  }
+
   WorkspaceMemberService() {
     _initializeUserId();
   }
@@ -25,6 +30,8 @@ class WorkspaceMemberService {
   Future<bool> updatePermission(
       String id, WorkspacePermission permission) async {
     try {
+      final headers = await _getHeaders();
+
       final response = await http.patch(
           Uri.parse("$baseUrl/$id/update_permission"),
           headers: headers,
@@ -45,6 +52,8 @@ class WorkspaceMemberService {
 
   Future<bool> reject(String id) async {
     try {
+      final headers = await _getHeaders();
+
       final response = await http.delete(
         Uri.parse("$baseUrl/$id/reject"),
         headers: headers,
