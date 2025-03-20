@@ -37,7 +37,9 @@ class _DiaryEditorState extends State<DiaryEditor> {
       if (mounted) {
         setState(() {
           _isKeyboardVisible = _focusNode.hasFocus;
-          widget.onKeyboardVisibilityChanged!(_isKeyboardVisible);
+          if (widget.onKeyboardVisibilityChanged != null) {
+            widget.onKeyboardVisibilityChanged!(_isKeyboardVisible);
+          }
         });
       }
     });
@@ -63,6 +65,7 @@ class _DiaryEditorState extends State<DiaryEditor> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 }

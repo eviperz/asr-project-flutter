@@ -1,5 +1,8 @@
+import 'dart:developer';
+import 'package:asr_project/config.dart';
 import 'package:asr_project/providers/diary_folder_provider.dart';
 import 'package:asr_project/providers/tag_provider.dart';
+import 'package:asr_project/widgets/asr/asr_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,9 +29,18 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
   final TextEditingController _titleController = TextEditingController();
   final quill.QuillController _controller = quill.QuillController.basic();
   late List<Tag> _tags;
+  String? _userId;
   late DateTime _updatedAt;
   bool _isEdited = false;
   bool _isKeyboardVisible = false;
+
+  _DiaryFormState() {
+    _initializeUserId();
+  }
+  Future<void> _initializeUserId() async {
+    _userId = await AppConfig.getUserId();
+    log("User ID Loaded DiaryForm: $_userId");
+  }
 
   @override
   void initState() {
@@ -49,6 +61,15 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
     super.didChangeDependencies();
   }
 
+  void _showAsrDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AsrDialog(
+        controller: _controller,
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -63,7 +84,9 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
           : _titleController.text.trim(),
       content: _controller.document.toDelta(),
       tagIds: _tags.map((tag) => tag.id).toList(),
+      userId: _userId,
     );
+    log(_controller.document.toDelta().toJson().toString());
 
     await ref
         .read(diaryFoldersProvider.notifier)
@@ -83,6 +106,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
         cancelLabel: "Dismiss",
         onConfirm: () async {
           await _saveDiary();
+
           if (mounted) {
             Navigator.pop(context);
             Navigator.pop(context);
@@ -111,7 +135,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
           PopupMenuButton<String>(
             onSelected: (value) async {
               if (value == "save") {
-                await _saveDiary();
+                await _saveDiary(); // If no audio, pass an empty string
               } else if (value == "delete") {
                 showDialog(
                   context: context,
@@ -173,6 +197,10 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
                   setState(() => _isKeyboardVisible = isVisible),
             )
           : null,
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showAsrDialog,
+        child: const Icon(Icons.mic),
+      ),
     );
   }
 

@@ -1,3 +1,4 @@
+import 'package:asr_project/services/auth_service.dart';
 import 'package:asr_project/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
 
@@ -18,6 +19,8 @@ class _SignUpPageState extends State<SignUpPage> {
   final FocusNode _nameFocusNode = FocusNode();
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
+  final AuthService _authService = AuthService();
+  bool _isLoading = false; // Track the loading state
 
   late int _stepIndex;
 
@@ -65,18 +68,19 @@ class _SignUpPageState extends State<SignUpPage> {
     if (email.isEmpty) {
       return "Email is required";
     } else if (!emailRegex.hasMatch(email)) {
-      return "Please enter email form";
+      return "Please enter a valid email address";
     } else {
       return null;
     }
   }
 
   String? _validatePassword() {
-    // TODO validate password
     final String password = _passwordTextEditController.text;
 
     if (password.isEmpty) {
       return "Password is required";
+    } else if (password.length < 6) {
+      return "Password should be at least 6 characters";
     } else {
       return null;
     }
@@ -93,9 +97,41 @@ class _SignUpPageState extends State<SignUpPage> {
     return false;
   }
 
-  void _signUp() {
-    // TODO Sign up
-    Navigator.pop(context);
+  Future<void> _signUp() async {
+    final String name = _nameTextEditingController.text.trim();
+    final String email = _emailTextEditController.text.trim();
+    final String password = _passwordTextEditController.text.trim();
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final result = await _authService.signUp(name, email, password);
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (result != null) {
+        // Show success message and navigate back
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("Sign up successful!"),
+        ));
+        Navigator.pop(context);
+      } else {
+        // Handle failed sign-up
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("Sign up failed, please try again."),
+        ));
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Error: $e"),
+      ));
+    }
   }
 
   @override
@@ -106,7 +142,8 @@ class _SignUpPageState extends State<SignUpPage> {
       ),
       body: Padding(
         padding: EdgeInsets.all(20.0),
-        child: Stepper(
+        child: SingleChildScrollView(
+          child: Stepper(
             currentStep: _stepIndex,
             onStepTapped: (value) {
               if (_stepIndex >= value) {
@@ -140,8 +177,14 @@ class _SignUpPageState extends State<SignUpPage> {
                           child: Text('Continue'),
                         )
                       : ElevatedButton(
-                          onPressed: _isStepValid() ? _signUp : null,
-                          child: Text('Sign up'),
+                          onPressed:
+                              _isStepValid() && !_isLoading ? _signUp : null,
+                          child: _isLoading
+                              ? CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                                )
+                              : Text('Sign up'),
                         ),
                   if (_stepIndex != 0)
                     TextButton(
@@ -154,53 +197,46 @@ class _SignUpPageState extends State<SignUpPage> {
             steps: [
               Step(
                 title: Text("Step 1"),
-                content: SizedBox(
-                  height: 110,
-                  child: CustomTextfield(
-                    label: "Name",
-                    hintText: "Enter name",
-                    iconData: Icons.person,
-                    keyboardType: TextInputType.emailAddress,
-                    errorText: _validateName(),
-                    textEditController: _nameTextEditingController,
-                    focusNode: _nameFocusNode,
-                  ),
+                content: CustomTextfield(
+                  label: "Name",
+                  hintText: "Enter name",
+                  iconData: Icons.person,
+                  keyboardType: TextInputType.text,
+                  errorText: _validateName(),
+                  textEditController: _nameTextEditingController,
+                  focusNode: _nameFocusNode,
                 ),
                 isActive: true,
               ),
               Step(
                 title: Text("Step 2"),
-                content: SizedBox(
-                  height: 110,
-                  child: CustomTextfield(
-                    label: "Email",
-                    hintText: "Enter email",
-                    iconData: Icons.email,
-                    keyboardType: TextInputType.emailAddress,
-                    errorText: _validateEmail(),
-                    textEditController: _emailTextEditController,
-                    focusNode: _emailFocusNode,
-                  ),
+                content: CustomTextfield(
+                  label: "Email",
+                  hintText: "Enter email",
+                  iconData: Icons.email,
+                  keyboardType: TextInputType.emailAddress,
+                  errorText: _validateEmail(),
+                  textEditController: _emailTextEditController,
+                  focusNode: _emailFocusNode,
                 ),
                 isActive: _stepIndex > 0,
               ),
               Step(
                 title: Text("Step 3"),
-                content: SizedBox(
-                  height: 110,
-                  child: CustomTextfield(
-                    label: "Password",
-                    hintText: "Enter password",
-                    iconData: Icons.password,
-                    keyboardType: TextInputType.visiblePassword,
-                    errorText: _validatePassword(),
-                    textEditController: _passwordTextEditController,
-                    focusNode: _passwordFocusNode,
-                  ),
+                content: CustomTextfield(
+                  label: "Password",
+                  hintText: "Enter password",
+                  iconData: Icons.password,
+                  keyboardType: TextInputType.visiblePassword,
+                  errorText: _validatePassword(),
+                  textEditController: _passwordTextEditController,
+                  focusNode: _passwordFocusNode,
                 ),
                 isActive: _stepIndex > 1,
               ),
-            ]),
+            ],
+          ),
+        ),
       ),
     );
   }

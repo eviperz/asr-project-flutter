@@ -17,12 +17,13 @@ class Diary {
   Diary({
     required this.id,
     required this.title,
-    required this.content,
+    Delta? content,
     required this.tagIds,
     this.owner,
     required this.createdAt,
-    required this.updatedAt,
-  });
+    DateTime? updatedAt,
+  })  : content = content ?? Delta(),
+        updatedAt = updatedAt ?? createdAt;
 
   String get formatDate {
     return DateFormat("dd MMM yyyy").format(updatedAt);
@@ -94,22 +95,27 @@ class DiaryDetail {
   final String? userId;
 
   DiaryDetail({
-    String? title,
-    Delta? content,
-    List<String>? tagIds,
-    String? userId,
-  })  : title = title ?? 'Untitled',
-        content = content ?? Delta()
-          ..insert('\n'),
-        tagIds = tagIds ?? [],
-        userId = userId ?? AppConfig.userId;
+    this.title,
+    this.content,
+    this.tagIds,
+    this.userId,
+  });
 
   Map<String, dynamic> toJson() {
     return {
-      "title": title,
-      "content": content?.toJson(),
-      "tagIds": tagIds,
-      "userId": userId,
+      if (title != null) "title": title,
+      if (content != null) "content": content?.toJson(),
+      if (tagIds != null) "tagIds": tagIds,
+      if (userId != null) "userId": userId,
     };
+  }
+
+  static DiaryDetail createDiary() {
+    return DiaryDetail(
+      title: 'Untitled',
+      content: Delta()..insert("\n"),
+      tagIds: [],
+      userId: AppConfig.userId,
+    );
   }
 }

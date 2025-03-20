@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/diary_folder.dart';
 import 'package:asr_project/providers/workspace_provider.dart';
@@ -101,7 +99,6 @@ class DiaryFoldersNotifier extends AsyncNotifier<List<DiaryFolderModel>> {
     try {
       final Diary? diary =
           await _diaryFolderService.addDiaryToFolder(folderId, diaryDetail);
-      log(diary.toString());
 
       if (diary != null) {
         state = AsyncData(state.value!.map((item) {
