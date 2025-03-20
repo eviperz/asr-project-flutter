@@ -1,20 +1,24 @@
 import 'dart:async';
 import 'dart:developer';
+import 'package:asr_project/widgets/asr/edit_audio_widget.dart';
 import 'package:audioplayers/audioplayers.dart' as audioplayers;
 import 'package:flutter/material.dart';
 import 'package:asr_project/services/asr_service.dart';
 import 'package:flutter/services.dart';
+import 'package:path/path.dart' as path;
 
 class AudioPlayerWidget extends StatefulWidget {
   final String audioName;
   final String initialTranscribe;
   final Function(String) onTranscribe;
+  final Function(String) onAudioNameChange;
 
   const AudioPlayerWidget({
     super.key,
     required this.audioName,
     required this.initialTranscribe,
     required this.onTranscribe,
+    required this.onAudioNameChange,
   });
 
   @override
@@ -30,8 +34,9 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   bool _isPlaying = false;
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
-  String? _audioUrl; // Store URL for reuse
+  String? _audioUrl;
   String _transcribeResult = "";
+  late String _currentAudioName;
   bool _isLoading = false;
 
   @override
@@ -125,22 +130,31 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
   Future<void> _transcribeAudio() async {
     setState(() {
-      _isLoading = true; // Start loading when the request is made
+      _isLoading = true;
     });
 
     try {
       final String result = await _asrService.transcribeText(widget.audioName);
       setState(() {
         _transcribeResult = result;
-        _isLoading = false; // Stop loading when transcription is done
+        _isLoading = false;
       });
       widget.onTranscribe(result);
     } catch (e) {
       setState(() {
         _transcribeResult = "Error: $e";
-        _isLoading = false; // Stop loading even if there's an error
+        _isLoading = false;
       });
     }
+  }
+
+  String _truncateText(String text, int maxLength) {
+    if (text.length <= maxLength) return text;
+
+    int lastSpace = text.lastIndexOf(' ', maxLength);
+    if (lastSpace == -1) lastSpace = maxLength;
+
+    return text.substring(0, lastSpace) + '...';
   }
 
   @override
@@ -208,20 +222,37 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                       children: [
                         Text("Audio: "),
                         Expanded(
-                          child: Text(widget.audioName),
+                          child: Text(_currentAudioName),
                         ),
                         IconButton(
-                          icon: Icon(Icons.copy),
-                          onPressed: () {
-                            if (_audioUrl != null) {
-                              Clipboard.setData(
-                                  ClipboardData(text: _audioUrl!));
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text("URL copied!")),
-                              );
-                            }
-                          },
-                        ),
+                            icon: Icon(Icons.arrow_forward),
+                            onPressed: () async {
+                              if (_audioUrl != null) {
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => EditAudioWidget(
+                                      audioName:
+                                          _currentAudioName, // Use local state
+                                      initialTranscribe: _transcribeResult,
+                                    ),
+                                  ),
+                                );
+
+                                if (result != null &&
+                                    result is Map<String, String>) {
+                                  setState(() {
+                                    _currentAudioName = result["audioName"] ??
+                                        _currentAudioName;
+                                    _transcribeResult =
+                                        result["transcription"] ??
+                                            _transcribeResult;
+                                  });
+                                  widget.onAudioNameChange(_currentAudioName);
+                                  widget.onTranscribe(_transcribeResult);
+                                }
+                              }
+                            }),
                       ],
                     ),
                     SizedBox(height: 10),
@@ -235,7 +266,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                         ? Center(child: CircularProgressIndicator())
                         : Text(
                             _transcribeResult.isNotEmpty
-                                ? "Transcription: $_transcribeResult"
+                                ? "Transcription: ${_truncateText(_transcribeResult, 150)}"
                                 : "No transcription available",
                             style: TextStyle(
                                 fontSize: 16, fontStyle: FontStyle.italic),
