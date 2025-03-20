@@ -29,6 +29,27 @@ class AudioEmbedBuilder extends quill.EmbedBuilder {
       onTranscribe: (newTranscript) {
         _updateTranscript(controller, node, newTranscript);
       },
+      onAudioNameChange: (newAudioName) {
+        _updateAudioName(controller, node, newAudioName);
+      },
+    );
+  }
+
+  void _updateAudioName(
+      quill.QuillController controller, quill.Embed node, String audioName) {
+    final Map<String, dynamic> data = jsonDecode(node.value.data);
+    final updatedNode = quill.BlockEmbed.custom(
+      AudioBlockEmbed(audioName, data['transcribe']),
+    );
+
+    final nodeIndex = _findEmbedIndex(controller, node);
+    if (nodeIndex == -1) return;
+
+    controller.replaceText(
+      nodeIndex,
+      1,
+      updatedNode,
+      TextSelection.collapsed(offset: nodeIndex),
     );
   }
 
