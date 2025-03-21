@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/diary_folder.dart';
 import 'package:asr_project/providers/diary_folder_provider.dart';
@@ -110,7 +112,9 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Future<void> _addDiaryInFolder(String folderId) async {
-    DiaryDetail diaryDetail = DiaryDetail();
+    DiaryDetail diaryDetail = DiaryDetail.createDiary();
+    // log(folderId);
+    // log(diaryDetail.toJson().toString());
     Diary? diary = await ref
         .read(diaryFoldersProvider.notifier)
         .addDiaryToFolder(folderId, diaryDetail);

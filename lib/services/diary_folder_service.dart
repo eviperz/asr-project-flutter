@@ -8,20 +8,35 @@ import 'package:asr_project/models/diary_folder.dart';
 import 'package:http/http.dart' as http;
 
 class DiaryFolderService {
-  final String userId = AppConfig.userId;
+  String? _userId;
   final String baseUrl = "${AppConfig.baseUrl}/folders";
-  final Map<String, String> headers = {
-    'Authorization': AppConfig.basicAuth,
-    'Content-Type': 'application/json',
-  };
+  Future<Map<String, String>> _getHeaders() async {
+    String? token = await AppConfig.getToken();
+
+    return {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+      'Accept-Charset': 'utf-8',
+    };
+  }
+
+  DiaryFolderService() {
+    _initializeUserId();
+  }
+  Future<void> _initializeUserId() async {
+    _userId = await AppConfig.getUserId();
+    log("User ID Loaded DiaryFolderService: $_userId");
+  }
 
   Future<List<DiaryFolderModel>> getAllPersonalDiaryFoldersWithDiaries() async {
     try {
-      final response = await http.get(Uri.parse("$baseUrl/personal/$userId"),
+      final headers = await _getHeaders();
+      final response = await http.get(Uri.parse("$baseUrl/personal/$_userId"),
           headers: headers);
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = jsonDecode(response.body);
+        log("Diary folders: $jsonData");
         return jsonData.map((data) => DiaryFolderModel.fromJson(data)).toList();
       }
       throw Exception("Fail to fetch diary folders: ${response.statusCode}");
@@ -34,7 +49,8 @@ class DiaryFolderService {
   Future<DiaryFolderModel?> createPersonalDiaryFolder(
       DiaryFolderDetail diaryFolderDetail) async {
     try {
-      final response = await http.post(Uri.parse("$baseUrl/personal/$userId"),
+      final headers = await _getHeaders();
+      final response = await http.post(Uri.parse("$baseUrl/personal/$_userId"),
           headers: headers, body: jsonEncode(diaryFolderDetail.toJson()));
 
       if (response.statusCode == 200) {
@@ -49,6 +65,7 @@ class DiaryFolderService {
   Future<List<DiaryFolderModel>> getAllWorkspaceDiaryFoldersWithDiaries(
       String workspaceId) async {
     try {
+      final headers = await _getHeaders();
       final response = await http
           .get(Uri.parse("$baseUrl/workspace/$workspaceId"), headers: headers);
 
@@ -66,6 +83,7 @@ class DiaryFolderService {
   Future<DiaryFolderModel?> createWorkspaceDiaryFolder(
       String workspaceId, DiaryFolderDetail diaryFolderDetail) async {
     try {
+      final headers = await _getHeaders();
       final response = await http.post(
           Uri.parse("$baseUrl/workspace/$workspaceId"),
           headers: headers,
@@ -83,6 +101,7 @@ class DiaryFolderService {
   Future<DiaryFolderModel?> updateDiaryFolder(
       String id, DiaryFolderDetail diaryFolderDetail) async {
     try {
+      final headers = await _getHeaders();
       final response = await http.patch(Uri.parse("$baseUrl/$id"),
           headers: headers, body: jsonEncode(diaryFolderDetail));
 
@@ -97,6 +116,7 @@ class DiaryFolderService {
 
   Future<bool> deleteDiaryFolder(String id) async {
     try {
+      final headers = await _getHeaders();
       final response =
           await http.delete(Uri.parse("$baseUrl/$id"), headers: headers);
 
@@ -113,6 +133,9 @@ class DiaryFolderService {
 
   Future<Diary?> addDiaryToFolder(String id, DiaryDetail diaryDetail) async {
     try {
+      final headers = await _getHeaders();
+      // log(id);
+      // log(diaryDetail.toJson().toString());
       final response = await http.post(
         Uri.parse("$baseUrl/$id/diary"),
         headers: headers,
@@ -121,9 +144,11 @@ class DiaryFolderService {
 
       if (response.statusCode == 200) {
         return Diary.fromMap(jsonDecode(response.body));
+      } else {
+        throw Exception("Fail to add diary to folder: ${response.statusCode}");
       }
     } catch (e) {
-      log("Error updating diary folders: $e");
+      log("Error to add diary to folder: $e");
     }
     return null;
   }

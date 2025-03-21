@@ -12,7 +12,7 @@ class DiaryFolderModel {
     return DiaryFolderModel(
       id: json['diaryFolderModel']['diaryFolderId'] as String,
       name: json['diaryFolderModel']['folderName'] as String,
-      diaries: json.containsKey('diaries')
+      diaries: json.containsKey('diaries') && json['diaries'] != null
           ? (json['diaries'] as List<dynamic>)
               .map((item) => Diary.fromMap(item))
               .toList()

@@ -1,3 +1,4 @@
+import 'package:asr_project/config.dart';
 import 'package:asr_project/models/user.dart';
 import 'package:asr_project/services/user_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,10 +14,18 @@ class UserNotifier extends AsyncNotifier<User?> {
 
   @override
   Future<User?> build() async {
-    User? user = await _userService.getUserById();
-    if (user != null) {
-      return user;
+    String? userId = await AppConfig.getUserId();
+    try {
+      if (userId == null) {
+        throw Exception("User ID not found. Please log in.");
+      }
+      User? user = await _userService.getUserById(userId);
+      if (user != null) {
+        return user;
+      }
+    } catch (e) {
+      return null;
+      ;
     }
-    return null;
   }
 }
