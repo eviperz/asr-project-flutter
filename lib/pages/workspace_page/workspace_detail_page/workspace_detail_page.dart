@@ -91,12 +91,8 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
       String responseMessage = await ref
           .read(diaryFoldersProvider.notifier)
           .updateDiaryFolderName(id, diaryFolderDetail);
-      log(responseMessage.toString());
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(responseMessage)),
-      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Failed to update name of diary folder")),

@@ -62,8 +62,7 @@ class MyApp extends ConsumerWidget {
           case "/diary/search":
             final bool canEdit = settings.arguments as bool;
             return MaterialPageRoute(
-              builder: (context) =>
-                  DiarySearchPage(canEdit: canEdit),
+              builder: (context) => DiarySearchPage(canEdit: canEdit),
             );
 
           case "/diary/detail":

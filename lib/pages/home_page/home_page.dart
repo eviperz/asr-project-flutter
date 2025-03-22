@@ -83,9 +83,6 @@ class _HomePageState extends ConsumerState<HomePage> {
           .updateDiaryFolderName(id, diaryFolderDetail);
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(responseMessage)),
-      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Failed to update name of diary folder")),
