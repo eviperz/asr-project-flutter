@@ -19,9 +19,14 @@ class AsrSocketService {
     });
 
     _socket.on('audio_processed_chunk', (chunk) {
-      print('📩 Received text chunk: $chunk');
-      if (_onTranscriptionChunk != null) {
-        _onTranscriptionChunk!(chunk);
+      if (chunk is Map) {
+        String transcriptionChunk = chunk['enhanced_text_chunk'] ?? '';
+
+        if (transcriptionChunk.isNotEmpty) {
+          if (_onTranscriptionChunk != null) {
+            _onTranscriptionChunk!(transcriptionChunk);
+          }
+        }
       }
     });
 
@@ -38,14 +43,6 @@ class AsrSocketService {
     _onTranscriptionChunk = onChunkReceived;
     _socket.emit('process_audio', {'audioUrl': audioUrl});
   }
-
-  // void sendAudioForTranscription(
-  //     String audioUrl, Function(String) onTranscriptionChunk) {
-  //   _onTranscriptionChunk = onTranscriptionChunk;
-
-  //   // print('📤 Sending audio for transcription: $audioName');
-  //   _socket.emit('process_audio', {'audioUrl': audioUrl});
-  // }
 
   void disconnect() {
     print("🔌 Disconnecting socket...");

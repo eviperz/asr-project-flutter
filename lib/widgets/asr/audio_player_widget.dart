@@ -5,7 +5,6 @@ import 'package:asr_project/widgets/asr/edit_audio_widget.dart';
 import 'package:audioplayers/audioplayers.dart' as audioplayers;
 import 'package:flutter/material.dart';
 import 'package:asr_project/services/asr_service.dart';
-import 'package:flutter/services.dart';
 
 class AudioPlayerWidget extends StatefulWidget {
   final String audioName;
@@ -67,8 +66,8 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     _transcribeResult = widget.initialTranscribe;
     _currentAudioName = widget.audioName;
 
-    _fetchAudioUrl(); // Get URL on init
-    _asrSocketService.initSocket(); // Initialize Socket.IO connection
+    _fetchAudioUrl();
+    _asrSocketService.initSocket();
   }
 
   @override
@@ -131,23 +130,34 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   void eachChunk(dynamic chunk) {
     if (chunk is String) {
       setState(() {
-        _transcribeResult += chunk;
+        if (!_transcribeResult.contains(chunk)) {
+          _transcribeResult += chunk;
+        }
       });
     } else if (chunk is Map) {
       String transcriptionChunk = chunk['enhanced_text_chunk'] ?? '';
-      if (transcriptionChunk.isNotEmpty) {
+
+      print('Text in widget: $transcriptionChunk');
+
+      if (transcriptionChunk.isNotEmpty &&
+          !_transcribeResult.contains(transcriptionChunk)) {
         setState(() {
           _transcribeResult += transcriptionChunk;
         });
       }
     }
-    print(_transcribeResult); // Debugging print
+
+    // Debugging print for current transcription state
+    print("Current Transcription: $_transcribeResult");
+
+    // Call the widget callback to notify parent of updated transcription
     widget.onTranscribe(_transcribeResult);
   }
 
   Future<void> _transcribeAudio() async {
     setState(() {
       _isLoading = true;
+      _transcribeResult = "";
     });
 
     try {
@@ -275,7 +285,6 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                           ? CircularProgressIndicator()
                           : Text("Transcribe Audio"),
                     ),
-                    // Display the transcription result as a Text widget
                     SizedBox(height: 20),
                     _isLoading
                         ? Center(child: CircularProgressIndicator())
