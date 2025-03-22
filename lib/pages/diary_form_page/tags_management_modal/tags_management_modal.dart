@@ -126,7 +126,9 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
                           ),
                           child: Column(
                             children: [
-                              if (!checkExists())
+                              if (!filteredTags
+                                  .map((tag) => tag.name)
+                                  .contains(_controller.text))
                                 _buildCreateTagButton(filteredTags),
                               SingleChildScrollView(
                                   child: _buildFilteredTagList(filteredTags)),
