@@ -29,11 +29,11 @@ class DiaryFormPage extends ConsumerStatefulWidget {
 class _DiaryFormState extends ConsumerState<DiaryFormPage> {
   final TextEditingController _titleController = TextEditingController();
   final quill.QuillController _controller = quill.QuillController.basic();
+  final FocusNode _focusNode = FocusNode();
   late List<Tag> _tags;
   String? _userId;
   late DateTime _updatedAt;
   bool _isEdited = false;
-  bool _isKeyboardVisible = false;
 
   _DiaryFormState() {
     _initializeUserId();
@@ -46,6 +46,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
   void initState() {
     super.initState();
     _controller.addListener(() => setState(() => _isEdited = true));
+    _focusNode.addListener(() => setState(() {}));
   }
 
   @override
@@ -185,23 +186,26 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
                     ? () => setState(() => _isEdited = true)
                     : null,
               ),
-              Flexible(
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  minWidth: MediaQuery.of(context).size.width,
+                  minHeight: _focusNode.hasFocus
+                      ? MediaQuery.of(context).size.height * 0.20
+                      : MediaQuery.of(context).size.height * 0.55,
+                ),
                 child: DiaryEditor(
+                  focusNode: _focusNode,
                   controller: _controller,
                   enableInteractiveSelection: widget.canEdit,
-                  onKeyboardVisibilityChanged: (isVisible) =>
-                      setState(() => _isKeyboardVisible = isVisible),
                 ),
               ),
             ],
           ),
         ),
       ),
-      bottomSheet: _isKeyboardVisible
+      bottomSheet: _focusNode.hasFocus
           ? DiaryToolbar(
               controller: _controller,
-              onKeyboardVisibilityChanged: (isVisible) =>
-                  setState(() => _isKeyboardVisible = isVisible),
             )
           : null,
       floatingActionButton: FloatingActionButton(

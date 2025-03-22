@@ -7,7 +7,6 @@ class DiaryEditor extends StatefulWidget {
   final bool? checkBoxReadOnly;
   final bool? enableInteractiveSelection;
   final FocusNode? focusNode;
-  final ValueChanged<bool>? onKeyboardVisibilityChanged;
 
   const DiaryEditor({
     super.key,
@@ -15,7 +14,6 @@ class DiaryEditor extends StatefulWidget {
     this.focusNode,
     this.checkBoxReadOnly,
     this.enableInteractiveSelection,
-    this.onKeyboardVisibilityChanged,
   });
 
   @override
@@ -25,7 +23,6 @@ class DiaryEditor extends StatefulWidget {
 class _DiaryEditorState extends State<DiaryEditor> {
   late FocusNode _focusNode;
   late ScrollController _scrollController;
-  bool _isKeyboardVisible = false;
 
   @override
   void initState() {
@@ -33,16 +30,7 @@ class _DiaryEditorState extends State<DiaryEditor> {
     _focusNode = widget.focusNode ?? FocusNode();
     _scrollController = ScrollController();
 
-    _focusNode.addListener(() {
-      if (mounted) {
-        setState(() {
-          _isKeyboardVisible = _focusNode.hasFocus;
-          if (widget.onKeyboardVisibilityChanged != null) {
-            widget.onKeyboardVisibilityChanged!(_isKeyboardVisible);
-          }
-        });
-      }
-    });
+    _focusNode.addListener(() {});
   }
 
   @override

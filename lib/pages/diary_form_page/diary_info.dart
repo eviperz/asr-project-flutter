@@ -78,31 +78,53 @@ class DiaryInfo extends StatelessWidget {
     required String label,
     required Widget child,
   }) {
-    final labelStyle =
-        Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.grey);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Flexible(
-            flex: 1,
-            child: SizedBox(
-              height: 20,
-              child: Row(
-                children: [
-                  Icon(icon, color: Colors.grey, size: 16),
-                  const SizedBox(width: 8.0),
-                  Text(label, style: labelStyle),
-                ],
-              ),
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: SizedBox(
+        width: 120,
+        height: 40,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: Theme.of(context).colorScheme.tertiary,
             ),
-          ),
-          Expanded(flex: 2, child: child),
-        ],
+            SizedBox(width: 8),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                    color: Theme.of(context).colorScheme.tertiary,
+                  ),
+            ),
+          ],
+        ),
       ),
+      title: child,
     );
+
+    // return Padding(
+    //   padding: const EdgeInsets.symmetric(vertical: 5.0),
+    //   child: Row(
+    //     crossAxisAlignment: CrossAxisAlignment.start,
+    //     children: [
+    //       Flexible(
+    //         flex: 1,
+    //         child: SizedBox(
+    //           height: 20,
+    //           child: Row(
+    //             children: [
+    //               Icon(icon, color: Colors.grey, size: 16),
+    //               const SizedBox(width: 8.0),
+    //               Text(label, style: labelStyle),
+    //             ],
+    //           ),
+    //         ),
+    //       ),
+    //       Expanded(flex: 2, child: child),
+    //     ],
+    //   ),
+    // );
   }
 
   Widget _buildAddTagButton(BuildContext context) {

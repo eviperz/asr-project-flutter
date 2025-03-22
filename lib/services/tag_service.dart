@@ -106,6 +106,7 @@ class TagService {
   Future<Tag?> updateTag(String id, TagDetail tagDetail) async {
     try {
       final headers = await _getHeaders();
+
       final response = await http.patch(
         Uri.parse("$baseUrl/$id"),
         headers: headers,
@@ -115,6 +116,7 @@ class TagService {
       if (response.statusCode == 200) {
         return Tag.fromJson(jsonDecode(response.body));
       }
+
       throw Exception("Fail to update tag: ${response.statusCode}");
     } catch (e) {
       log("Error updating tag: $e");
