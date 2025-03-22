@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/diary_folder.dart';
 import 'package:asr_project/providers/diary_folder_provider.dart';
@@ -121,7 +119,8 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     if (!mounted) return;
     if (diary != null) {
-      Navigator.pushNamed(context, "/diary/detail", arguments: diary);
+      Navigator.pushNamed(context, "/diary/detail",
+          arguments: {'diary': diary, 'canEdit': true});
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Failed to create diary")),
@@ -202,21 +201,22 @@ class _HomePageState extends ConsumerState<HomePage> {
                   focusNode: _searchFocusNode,
                   onTap: () {
                     Navigator.pushNamed(context, "/diary/search",
-                        arguments: diaries);
+                        arguments: { 'canEdit': true, 'diaries': diaries });
                     _searchFocusNode.unfocus();
                   }),
             ),
             if (recentDiaries.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20.0),
+                padding: const EdgeInsets.fromLTRB(0, 20.0, 0, 10.0),
                 child: DiaryListViewHorizontal(
                   title: "Recently",
                   diaryList: recentDiaries,
                 ),
               ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              padding: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 30.0),
               child: DiaryFolderBlocks(
+                canEdit: true,
                 folders: diaryFolders,
                 onCreateFolder: _addFolder,
                 onUpdateFolderName: _updateFolderName,

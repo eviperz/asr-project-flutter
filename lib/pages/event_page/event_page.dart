@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/providers/diary_folder_provider.dart';
-import 'package:asr_project/providers/user_provider.dart';
 import 'package:asr_project/widgets/diary/diary_list_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -108,7 +107,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                         diariesForSelectedDay.length,
                         (index) {
                           final diary = diariesForSelectedDay[index];
-                          return DiaryListTile(diary: diary);
+                          return DiaryListTile(canEdit: true, diary: diary);
                         },
                       ),
                     ),

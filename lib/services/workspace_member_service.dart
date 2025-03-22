@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 class WorkspaceMemberService {
   String? _userId;
   final String baseUrl = "${AppConfig.baseUrl}/workspace_members";
+
   Future<Map<String, String>> _getHeaders() async {
     String? token = await AppConfig.getToken();
 
@@ -52,6 +53,8 @@ class WorkspaceMemberService {
 
   Future<bool> accept(String id) async {
     try {
+      final headers = await _getHeaders();
+
       final response = await http.patch(
         Uri.parse("$baseUrl/$id/accept"),
         headers: headers,

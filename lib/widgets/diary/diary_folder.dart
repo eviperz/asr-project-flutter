@@ -12,6 +12,7 @@ class DiaryFolder extends StatefulWidget {
   final Function onUpdateFolderName;
   final Function onCreateDiary;
   final Function onDeleteFolder;
+  final bool canEdit;
 
   const DiaryFolder({
     super.key,
@@ -22,6 +23,7 @@ class DiaryFolder extends StatefulWidget {
     required this.onUpdateFolderName,
     required this.onCreateDiary,
     required this.onDeleteFolder,
+    required this.canEdit,
   });
 
   @override
@@ -135,7 +137,7 @@ class _DiaryFolderState extends State<DiaryFolder> {
               ),
             ],
           ),
-          trailing: PopupMenuButton<String>(
+          trailing: widget.canEdit ? PopupMenuButton<String>(
             position: PopupMenuPosition.under,
             onSelected: (value) {
               switch (value) {
@@ -201,7 +203,7 @@ class _DiaryFolderState extends State<DiaryFolder> {
             ],
             padding: EdgeInsets.all(0),
             menuPadding: EdgeInsets.all(8.0),
-          ),
+          ) : null,
         ),
         if (_isOpen)
           Column(
@@ -216,7 +218,8 @@ class _DiaryFolderState extends State<DiaryFolder> {
                     final Diary diary = widget.diaries[index];
                     return Padding(
                       padding: const EdgeInsets.only(left: 40.0),
-                      child: DiaryListTile(diary: diary),
+                      child: DiaryListTile(
+                        canEdit: widget.canEdit, diary: diary),
                     );
                   },
                   separatorBuilder: (context, index) {

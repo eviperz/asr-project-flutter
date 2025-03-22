@@ -15,9 +15,11 @@ import 'package:asr_project/pages/diary_form_page/diary_info.dart';
 
 class DiaryFormPage extends ConsumerStatefulWidget {
   final Diary diary;
+  final bool canEdit;
 
   const DiaryFormPage({
     super.key,
+    required this.canEdit,
     required this.diary,
   });
 
@@ -39,7 +41,6 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
   }
   Future<void> _initializeUserId() async {
     _userId = await AppConfig.getUserId();
-    log("User ID Loaded DiaryForm: $_userId");
   }
 
   @override
@@ -132,7 +133,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
             ? _titleController.text
             : "Untitled"),
         actions: [
-          PopupMenuButton<String>(
+          if (widget.canEdit) PopupMenuButton<String>(
             onSelected: (value) async {
               if (value == "save") {
                 await _saveDiary(); // If no audio, pass an empty string
@@ -173,16 +174,17 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildTitleTextField(context),
+            _buildTitleTextField(context, widget.canEdit),
             DiaryInfo(
               owner: widget.diary.owner,
               tags: _tags,
               updatedAt: _updatedAt,
-              onChange: () => setState(() => _isEdited = true),
+              onChange: () => widget.canEdit ? setState(() => _isEdited = true) : null,
             ),
             Expanded(
               child: DiaryEditor(
                 controller: _controller,
+                checkBoxReadOnly: !widget.canEdit,
                 onKeyboardVisibilityChanged: (isVisible) =>
                     setState(() => _isKeyboardVisible = isVisible),
               ),
@@ -204,10 +206,11 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
     );
   }
 
-  Widget _buildTitleTextField(BuildContext context) {
+  Widget _buildTitleTextField(BuildContext context, bool canEdit) {
     return TextField(
       style: Theme.of(context).textTheme.headlineLarge,
       controller: _titleController,
+      readOnly: !canEdit,
       decoration: const InputDecoration(
         border: InputBorder.none,
         hintText: "Untitled",

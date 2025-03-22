@@ -51,8 +51,7 @@ class MyApp extends ConsumerWidget {
 
           case "/workspace/detail":
             return MaterialPageRoute(
-                builder: (context) =>
-                    WorkspaceDetailPage());
+                builder: (context) => WorkspaceDetailPage());
 
           case "/workspace/setting":
             Workspace workspace = settings.arguments as Workspace;
@@ -61,17 +60,24 @@ class MyApp extends ConsumerWidget {
                     WorkspaceSettingPage(workspace: workspace));
 
           case "/diary/search":
-            final List<Diary> diaries = settings.arguments as List<Diary>;
+            final Map<String, dynamic> args =
+                settings.arguments as Map<String, dynamic>;
+            final bool canEdit = args['canEdit'] as bool;
+            final List<Diary> diaries = args['diaries'] as List<Diary>;
             return MaterialPageRoute(
               builder: (context) =>
-                  DiarySearchPage(type: "personal", diaries: diaries),
+                  DiarySearchPage(canEdit: canEdit, diaries: diaries),
             );
 
           case "/diary/detail":
-            final Diary diary = settings.arguments as Diary;
+            final Map<String, dynamic> args =
+                settings.arguments as Map<String, dynamic>;
+            final Diary diary = args['diary'] as Diary;
+            final bool canEdit = args['canEdit'] as bool;
 
             return MaterialPageRoute(
-              builder: (context) => DiaryFormPage(diary: diary),
+              builder: (context) =>
+                  DiaryFormPage(canEdit: canEdit, diary: diary),
             );
 
           case "/record":

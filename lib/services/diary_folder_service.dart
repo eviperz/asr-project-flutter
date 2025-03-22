@@ -36,7 +36,6 @@ class DiaryFolderService {
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = jsonDecode(response.body);
-        log("Diary folders: $jsonData");
         return jsonData.map((data) => DiaryFolderModel.fromJson(data)).toList();
       }
       throw Exception("Fail to fetch diary folders: ${response.statusCode}");

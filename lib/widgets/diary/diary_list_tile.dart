@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 class DiaryListTile extends StatelessWidget {
   const DiaryListTile({
     super.key,
+    required this.canEdit,
     required this.diary,
   });
 
+  final bool canEdit;
   final Diary diary;
 
   @override
@@ -19,7 +21,7 @@ class DiaryListTile extends StatelessWidget {
         Navigator.pushNamed(
           context,
           "/diary/detail",
-          arguments: diary,
+          arguments: {'diary': diary, 'canEdit': canEdit},
         );
       },
     );

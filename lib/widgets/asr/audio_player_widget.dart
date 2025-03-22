@@ -5,7 +5,6 @@ import 'package:audioplayers/audioplayers.dart' as audioplayers;
 import 'package:flutter/material.dart';
 import 'package:asr_project/services/asr_service.dart';
 import 'package:flutter/services.dart';
-import 'package:path/path.dart' as path;
 
 class AudioPlayerWidget extends StatefulWidget {
   final String audioName;

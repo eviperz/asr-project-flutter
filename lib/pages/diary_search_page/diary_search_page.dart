@@ -1,13 +1,14 @@
 import 'package:asr_project/models/diary.dart';
+import 'package:asr_project/models/tag.dart';
 import 'package:asr_project/pages/diary_search_page/filter_menu.dart';
 import 'package:asr_project/widgets/custom_textfield.dart';
 import 'package:asr_project/widgets/diary/diary_list_tile.dart';
 import 'package:flutter/material.dart';
 
 class DiarySearchPage extends StatefulWidget {
-  final String type;
+  final bool canEdit;
   final List<Diary> diaries;
-  const DiarySearchPage({super.key, required this.type, required this.diaries});
+  const DiarySearchPage({super.key, required this.canEdit, required this.diaries});
 
   @override
   State<DiarySearchPage> createState() => _DiarySearchPageState();
@@ -20,7 +21,7 @@ class _DiarySearchPageState extends State<DiarySearchPage> {
   final List<Diary> _filteredDiaries = [];
   late bool _openFilterMenu = false;
   late bool _isAscending = true;
-  final Set<String> _activeTags = {};
+  final Set<Tag> _activeTags = {};
 
   @override
   void initState() {
@@ -45,7 +46,11 @@ class _DiarySearchPageState extends State<DiarySearchPage> {
               .toLowerCase()
               .contains(_searchTextEditingController.text.toLowerCase().trim());
 
-      return matchesSearch;
+      bool matchTagFilter = _activeTags.isNotEmpty
+          ? _activeTags.any((tag) => diary.tagIds.contains(tag.id))
+          : true;
+
+      return matchesSearch && matchTagFilter;
     }).toList();
 
     filtered.sort((a, b) {
@@ -63,12 +68,12 @@ class _DiarySearchPageState extends State<DiarySearchPage> {
     });
   }
 
-  void _updateFilterTags(String tagName) {
+  void _updateFilterTags(Tag tag) {
     setState(() {
-      if (_activeTags.contains(tagName)) {
-        _activeTags.remove(tagName);
+      if (_activeTags.contains(tag)) {
+        _activeTags.remove(tag);
       } else {
-        _activeTags.add(tagName);
+        _activeTags.add(tag);
       }
     });
   }
@@ -133,7 +138,8 @@ class _DiarySearchPageState extends State<DiarySearchPage> {
                         itemCount: _filterAndSortDiaries().length,
                         itemBuilder: (context, index) {
                           final Diary diary = _filterAndSortDiaries()[index];
-                          return DiaryListTile(diary: diary);
+                          return DiaryListTile(
+                              canEdit: widget.canEdit, diary: diary);
                         },
                         separatorBuilder: (context, index) {
                           return Divider();

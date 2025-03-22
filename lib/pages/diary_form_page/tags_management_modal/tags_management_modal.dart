@@ -8,7 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TagsManagementModal extends ConsumerStatefulWidget {
   final List<Tag> tags;
-  final Function() onChanged;
+  final Function()? onChanged;
 
   const TagsManagementModal({
     super.key,
@@ -50,7 +50,7 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
       widget.tags.add(tag);
     });
 
-    widget.onChanged.call();
+    widget.onChanged?.call();
   }
 
   void _deleteTag(String id) {

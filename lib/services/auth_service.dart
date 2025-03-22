@@ -79,7 +79,6 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        log("User ID: ${data}");
         return data['id'];
       }
       throw Exception("Failed to fetch user: ${response.statusCode}");

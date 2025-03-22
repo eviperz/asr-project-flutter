@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:asr_project/config.dart';
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/diary_folder.dart';
 import 'package:asr_project/models/enum/workspace_member_status.dart';
@@ -7,6 +8,7 @@ import 'package:asr_project/models/enum/workspace_permission.dart';
 import 'package:asr_project/models/user.dart';
 import 'package:asr_project/models/workspace.dart';
 import 'package:asr_project/providers/diary_folder_provider.dart';
+import 'package:asr_project/providers/user_provider.dart';
 import 'package:asr_project/providers/workspace_provider.dart';
 import 'package:asr_project/widgets/custom_textfield.dart';
 import 'package:asr_project/widgets/diary/diary_folder_blocks.dart';
@@ -124,9 +126,18 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
         .read(diaryFoldersProvider.notifier)
         .addDiaryToFolder(folderId, diaryDetail);
 
+    final User? user = ref.watch(userProvider).value;
+    final Workspace workspace =
+        ref.read(workspaceProvider.notifier).workspaceByIdProvider;
+
+    final bool canEdit = workspace.members.any((member) =>
+        member.item1?.id == user?.id &&
+        member.item2.permission != WorkspacePermission.viewer);
+
     if (!mounted) return;
     if (diary != null) {
-      Navigator.pushNamed(context, "/diary/detail", arguments: diary);
+      Navigator.pushNamed(context, "/diary/detail",
+          arguments: {'diary': diary, 'canEdit': canEdit});
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Failed to create diary")),
@@ -142,6 +153,7 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final User? user = ref.watch(userProvider).value;
     final AsyncValue workspacesAsync = ref.watch(workspaceProvider);
     late Workspace workspace;
     if (workspacesAsync.hasValue) {
@@ -165,6 +177,12 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
             member.item2.status == WorkspaceMemberStatus.accepted)
         .map((member) => member.item1!)
         .toList();
+
+    final bool canEdit = workspace.members.any((member) =>
+        member.item2.email == user?.email &&
+        member.item2.permission != WorkspacePermission.viewer);
+
+    log("canEdit: ${user?.email} $canEdit");
 
     return Scaffold(
       appBar: AppBar(
@@ -219,10 +237,11 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
                         ],
                       ),
                     ),
-                    IconButton(
-                      onPressed: _navigatorSetting,
-                      icon: Icon(Icons.edit),
-                    )
+                    if (owner.id == AppConfig.userId)
+                      IconButton(
+                        onPressed: _navigatorSetting,
+                        icon: Icon(Icons.edit),
+                      )
                   ],
                 ),
                 SizedBox(
@@ -239,12 +258,13 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
                       Navigator.pushNamed(
                         context,
                         "/diary/search",
-                        arguments: diaries,
+                        arguments: {'canEdit': canEdit, 'diaries': diaries},
                       );
                       _searchFocusNode.unfocus();
                     }),
                 diaryFoldersAsync.when(
                   data: (diaryFolders) => DiaryFolderBlocks(
+                    canEdit: canEdit,
                     folders: diaryFolders,
                     onCreateFolder: _addFolder,
                     onUpdateFolderName: _updateFolderName,

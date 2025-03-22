@@ -11,14 +11,14 @@ class DiaryInfo extends StatelessWidget {
   final User? owner;
   final DateTime updatedAt;
   final List<Tag> tags;
-  final VoidCallback onChange;
+  final VoidCallback? onChange;
 
   const DiaryInfo({
     super.key,
     this.owner,
     required this.tags,
     required this.updatedAt,
-    required this.onChange,
+    this.onChange,
   });
 
   @override
@@ -55,7 +55,7 @@ class DiaryInfo extends StatelessWidget {
             spacing: 8.0,
             children: [
               DiaryTagList(tags: tags, onChanged: onChange),
-              _buildAddTagButton(context),
+              if (onChange != null) _buildAddTagButton(context),
             ],
           ),
         ),
