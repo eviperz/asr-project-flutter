@@ -48,8 +48,8 @@ class WorkspaceList extends StatelessWidget {
               final Workspace workspace = workspaces[index];
               return WorkspaceTile(
                 workspace: workspace,
-                isStarred: starredWorkspace.contains(workspace.id),
-                toggleStarred: toggleStarred,
+                // isStarred: starredWorkspace.contains(workspace.id),
+                // toggleStarred: toggleStarred,
               );
             },
             separatorBuilder: (context, index) {

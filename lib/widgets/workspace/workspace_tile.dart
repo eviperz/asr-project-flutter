@@ -10,14 +10,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class WorkspaceTile extends ConsumerWidget {
   final Workspace workspace;
-  final bool isStarred;
-  final Function(String) toggleStarred;
+  // final bool isStarred;
+  // final Function(String) toggleStarred;
 
   const WorkspaceTile({
     super.key,
     required this.workspace,
-    required this.isStarred,
-    required this.toggleStarred,
+    // required this.isStarred,
+    // required this.toggleStarred,
   });
 
   @override
@@ -55,15 +55,15 @@ class WorkspaceTile extends ConsumerWidget {
           title: Text(workspace.name),
           subtitle: WorkspaceMemberDisplay(
               memberWithoutOwner: memberWithoutOwner, owner: owner),
-          trailing: IconButton(
-            onPressed: () {
-              toggleStarred(workspace.id);
-            },
-            icon: Icon(
-              isStarred ? Icons.star : Icons.star_border,
-              color: isStarred ? Colors.amber : null,
-            ),
-          ),
+          // trailing: IconButton(
+          //   onPressed: () {
+          //     toggleStarred(workspace.id);
+          //   },
+          //   icon: Icon(
+          //     isStarred ? Icons.star : Icons.star_border,
+          //     color: isStarred ? Colors.amber : null,
+          //   ),
+          // ),
         ),
       ],
     );

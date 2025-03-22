@@ -163,8 +163,6 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
     }
 
     final AsyncValue diaryFoldersAsync = ref.watch(diaryFoldersProvider);
-    final List<Diary> diaries =
-        ref.read(diaryFoldersProvider.notifier).allDiariesInFolders;
 
     final User owner = workspace.members
         .firstWhere(
@@ -194,6 +192,7 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
           child: Container(
             padding: EdgeInsets.all(20.0),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 16.0,
               children: [
                 Row(
@@ -244,8 +243,34 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
                       )
                   ],
                 ),
-                SizedBox(
-                  height: 10,
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Description",
+                        style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                            color: Theme.of(context).colorScheme.tertiary),
+                      ),
+                      if (workspace.description != null &&
+                          workspace.description!.isNotEmpty)
+                        Text(
+                          workspace.description ?? "",
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        )
+                      else
+                        Text(
+                          "No Description",
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyLarge!
+                              .copyWith(
+                                  color: Theme.of(context).colorScheme.tertiary)
+                              .copyWith(fontStyle: FontStyle.italic),
+                        ),
+                    ],
+                  ),
                 ),
                 Divider(),
                 CustomTextfield(
@@ -258,7 +283,7 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
                       Navigator.pushNamed(
                         context,
                         "/diary/search",
-                        arguments: {'canEdit': canEdit, 'diaries': diaries},
+                        arguments: canEdit,
                       );
                       _searchFocusNode.unfocus();
                     }),

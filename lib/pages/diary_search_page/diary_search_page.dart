@@ -1,20 +1,21 @@
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/tag.dart';
 import 'package:asr_project/pages/diary_search_page/filter_menu.dart';
+import 'package:asr_project/providers/diary_folder_provider.dart';
 import 'package:asr_project/widgets/custom_textfield.dart';
 import 'package:asr_project/widgets/diary/diary_list_tile.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class DiarySearchPage extends StatefulWidget {
+class DiarySearchPage extends ConsumerStatefulWidget {
   final bool canEdit;
-  final List<Diary> diaries;
-  const DiarySearchPage({super.key, required this.canEdit, required this.diaries});
+  const DiarySearchPage({super.key, required this.canEdit});
 
   @override
-  State<DiarySearchPage> createState() => _DiarySearchPageState();
+  ConsumerState<DiarySearchPage> createState() => _DiarySearchPageState();
 }
 
-class _DiarySearchPageState extends State<DiarySearchPage> {
+class _DiarySearchPageState extends ConsumerState<DiarySearchPage> {
   final TextEditingController _searchTextEditingController =
       TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
@@ -29,7 +30,6 @@ class _DiarySearchPageState extends State<DiarySearchPage> {
     _searchTextEditingController.addListener(() => setState(() {}));
     _searchFocusNode.addListener(() => setState(() {}));
     _searchFocusNode.requestFocus();
-    _filteredDiaries.addAll(widget.diaries);
   }
 
   @override
@@ -40,7 +40,7 @@ class _DiarySearchPageState extends State<DiarySearchPage> {
   }
 
   List<Diary> _filterAndSortDiaries() {
-    List<Diary> filtered = widget.diaries.where((diary) {
+    List<Diary> filtered = _filteredDiaries.where((diary) {
       bool matchesSearch = _searchTextEditingController.text.isEmpty ||
           diary.title
               .toLowerCase()
@@ -86,6 +86,11 @@ class _DiarySearchPageState extends State<DiarySearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    final AsyncValue diaryFolders = ref.watch(diaryFoldersProvider);
+    if (diaryFolders.hasValue) {
+      _filteredDiaries
+          .addAll(ref.watch(diaryFoldersProvider.notifier).allDiariesInFolders);
+    }
     return Scaffold(
       appBar: AppBar(
         title: CustomTextfield(

@@ -55,7 +55,16 @@ class DiaryInfo extends StatelessWidget {
             spacing: 8.0,
             children: [
               DiaryTagList(tags: tags, onChanged: onChange),
-              if (onChange != null) _buildAddTagButton(context),
+              if (onChange != null)
+                _buildAddTagButton(context)
+              else
+                Text(
+                  "No Tags",
+                  style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                        color: Theme.of(context).colorScheme.tertiary,
+                        fontStyle: FontStyle.italic,
+                      ),
+                )
             ],
           ),
         ),
@@ -75,18 +84,22 @@ class DiaryInfo extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5.0),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 130,
-            child: Row(
-              children: [
-                Icon(icon, color: Colors.grey, size: 16),
-                const SizedBox(width: 8.0),
-                Text(label, style: labelStyle),
-              ],
+          Flexible(
+            flex: 1,
+            child: SizedBox(
+              height: 20,
+              child: Row(
+                children: [
+                  Icon(icon, color: Colors.grey, size: 16),
+                  const SizedBox(width: 8.0),
+                  Text(label, style: labelStyle),
+                ],
+              ),
             ),
           ),
-          Expanded(child: child),
+          Expanded(flex: 2, child: child),
         ],
       ),
     );

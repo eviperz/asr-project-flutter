@@ -15,7 +15,7 @@ class EventPage extends ConsumerStatefulWidget {
 }
 
 class _EventPageState extends ConsumerState<EventPage> {
-  DateTime? selectedDay;
+  DateTime? selectedDay = DateTime.now();
 
   @override
   void initState() {
@@ -51,15 +51,19 @@ class _EventPageState extends ConsumerState<EventPage> {
     final DateTime focusedDay = now.isBefore(lastDay) ? now : lastDay;
 
     // Get the list of diaries from the provider
-    final List<Diary> diaries =
-        ref.watch(diaryFoldersProvider.notifier).allDiariesInFolders;
+    final AsyncValue diaryFoldersAsync = ref.watch(diaryFoldersProvider);
+    final List<Diary> diaries = [];
+    if (diaryFoldersAsync.hasValue) {
+      diaries
+          .addAll(ref.watch(diaryFoldersProvider.notifier).allDiariesInFolders);
+    }
 
     final List<Diary> diariesForSelectedDay = diaries.where((diary) {
       // Compare diary's createdAt date with the selected day
-      if (selectedDay != null && diary.createdAt != null) {
-        return diary.createdAt!.year == selectedDay?.year &&
-            diary.createdAt!.month == selectedDay?.month &&
-            diary.createdAt!.day == selectedDay?.day;
+      if (selectedDay != null) {
+        return diary.createdAt.year == selectedDay?.year &&
+            diary.createdAt.month == selectedDay?.month &&
+            diary.createdAt.day == selectedDay?.day;
       }
       return false;
     }).toList();
@@ -68,60 +72,101 @@ class _EventPageState extends ConsumerState<EventPage> {
     log("Diaries for selected day: ${diariesForSelectedDay.length}");
 
     return Scaffold(
-      appBar: AppBar(title: Text('Event Calendar')),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TableCalendar(
-              focusedDay: focusedDay,
-              firstDay: firstDay,
-              lastDay: lastDay,
-              selectedDayPredicate: (day) =>
-                  selectedDay != null && isSameDay(selectedDay, day),
-              onDaySelected: (selected, focused) {
-                setState(() {
-                  selectedDay = selected; // Update the selected day
-                });
-              },
+            Text(
+              'Event Calendar',
+              style: Theme.of(context).textTheme.headlineLarge,
             ),
-            SizedBox(height: 20),
-            Divider(color: Theme.of(context).colorScheme.primary, thickness: 2),
-            SizedBox(height: 10),
-            if (selectedDay != null)
-              Container(
-                padding: EdgeInsets.all(10),
-                child: Text(
-                  '${selectedDay?.day ?? 0} ${monthNames[selectedDay?.month ?? 1 - 1]} ${selectedDay?.year ?? 0}',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Center(
+              child: SizedBox(
+                width: 340,
+                height: 320,
+                child: TableCalendar(
+                  focusedDay: focusedDay,
+                  firstDay: firstDay,
+                  lastDay: lastDay,
+                  selectedDayPredicate: (day) =>
+                      selectedDay != null && isSameDay(selectedDay, day),
+                  onDaySelected: (selected, focused) {
+                    setState(() {
+                      selectedDay = selected; // Update the selected day
+                    });
+                  },
+                  rowHeight: 40,
+                  calendarStyle: CalendarStyle(
+                    todayDecoration: BoxDecoration(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primary
+                          .withAlpha((0.3 * 255).toInt()),
+                      shape: BoxShape.circle,
+                    ),
+                    selectedDecoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary,
+                      shape: BoxShape.circle,
+                    ),
+                    outsideDaysVisible: false,
+                  ),
                 ),
               ),
+            ),
+            SizedBox(height: 10),
+            Divider(
+              color: Theme.of(context)
+                  .colorScheme
+                  .primary
+                  .withAlpha((0.3 * 255).toInt()),
+              thickness: 1.5,
+            ),
+            SizedBox(height: 20),
+            Text(
+              '${selectedDay?.day ?? 0} ${monthNames[(selectedDay?.month ?? 1) - 1]} ${selectedDay?.year ?? 0}',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.only(right: 32.0),
+              child: Divider(
+                color: Theme.of(context)
+                    .colorScheme
+                    .primary
+                    .withAlpha((0.1 * 255).toInt()),
+              ),
+            ),
             if (diariesForSelectedDay.isNotEmpty)
               Expanded(
-                child: Container(
-                  color: Theme.of(context).scaffoldBackgroundColor,
-                  padding: EdgeInsets.all(10),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: List.generate(
-                        diariesForSelectedDay.length,
-                        (index) {
-                          final diary = diariesForSelectedDay[index];
-                          return DiaryListTile(canEdit: true, diary: diary);
-                        },
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: diariesForSelectedDay.length,
+                  itemBuilder: (context, index) {
+                    final Diary diary = diariesForSelectedDay[index];
+                    return DiaryListTile(canEdit: true, diary: diary);
+                  },
+                  separatorBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 32.0),
+                      child: Divider(
+                        color: Theme.of(context).colorScheme.secondary,
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
               )
             else
               // If no diaries for the selected day, show a message
               Expanded(
-                child: Text(
-                  selectedDay != null
-                      ? 'No diaries for ${selectedDay!.day} ${monthNames[selectedDay!.month - 1]} ${selectedDay!.year}'
-                      : 'Please select a day',
-                  style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+                child: Center(
+                  child: Text(
+                    selectedDay != null
+                        ? 'No diaries for ${selectedDay!.day} ${monthNames[selectedDay!.month - 1]} ${selectedDay!.year}'
+                        : 'Please select a day',
+                    style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+                  ),
                 ),
               ),
           ],

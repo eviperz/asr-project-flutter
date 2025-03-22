@@ -60,13 +60,10 @@ class MyApp extends ConsumerWidget {
                     WorkspaceSettingPage(workspace: workspace));
 
           case "/diary/search":
-            final Map<String, dynamic> args =
-                settings.arguments as Map<String, dynamic>;
-            final bool canEdit = args['canEdit'] as bool;
-            final List<Diary> diaries = args['diaries'] as List<Diary>;
+            final bool canEdit = settings.arguments as bool;
             return MaterialPageRoute(
               builder: (context) =>
-                  DiarySearchPage(canEdit: canEdit, diaries: diaries),
+                  DiarySearchPage(canEdit: canEdit),
             );
 
           case "/diary/detail":

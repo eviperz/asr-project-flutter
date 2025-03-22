@@ -36,8 +36,8 @@ class StarredWorkspaceList extends StatelessWidget {
 
             return WorkspaceTile(
               workspace: workspace,
-              isStarred: true,
-              toggleStarred: toggleStarred,
+              // isStarred: true,
+              // toggleStarred: toggleStarred,
             );
           },
         ),

@@ -111,8 +111,6 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   Future<void> _addDiaryInFolder(String folderId) async {
     DiaryDetail diaryDetail = DiaryDetail.createDiary();
-    // log(folderId);
-    // log(diaryDetail.toJson().toString());
     Diary? diary = await ref
         .read(diaryFoldersProvider.notifier)
         .addDiaryToFolder(folderId, diaryDetail);
@@ -200,8 +198,11 @@ class _HomePageState extends ConsumerState<HomePage> {
                   keyboardType: TextInputType.text,
                   focusNode: _searchFocusNode,
                   onTap: () {
-                    Navigator.pushNamed(context, "/diary/search",
-                        arguments: { 'canEdit': true, 'diaries': diaries });
+                    Navigator.pushNamed(
+                      context,
+                      "/diary/search",
+                      arguments: true,
+                    );
                     _searchFocusNode.unfocus();
                   }),
             ),

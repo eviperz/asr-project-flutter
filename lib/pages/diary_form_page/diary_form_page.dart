@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:asr_project/config.dart';
 import 'package:asr_project/providers/diary_folder_provider.dart';
 import 'package:asr_project/providers/tag_provider.dart';
@@ -87,7 +86,6 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
       tagIds: _tags.map((tag) => tag.id).toList(),
       userId: _userId,
     );
-    log(_controller.document.toDelta().toJson().toString());
 
     await ref
         .read(diaryFoldersProvider.notifier)
@@ -133,63 +131,68 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
             ? _titleController.text
             : "Untitled"),
         actions: [
-          if (widget.canEdit) PopupMenuButton<String>(
-            onSelected: (value) async {
-              if (value == "save") {
-                await _saveDiary(); // If no audio, pass an empty string
-              } else if (value == "delete") {
-                showDialog(
-                  context: context,
-                  builder: (context) => CustomDialog(
-                    title: "Delete Diary",
-                    content: "Are you sure you want to delete this diary?",
-                    onConfirm: () async {
-                      await ref
-                          .read(diaryFoldersProvider.notifier)
-                          .deleteDiary(widget.diary.id);
-                      Navigator.pop(context);
-                      Navigator.pop(context);
-                    },
-                    onCancel: () => Navigator.pop(context),
-                  ),
-                );
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'save',
-                child: ListTile(leading: Icon(Icons.save), title: Text('Save')),
-              ),
-              PopupMenuItem(
-                value: 'delete',
-                child: ListTile(
-                    leading: Icon(Icons.delete), title: Text('Delete')),
-              ),
-            ],
-          ),
+          if (widget.canEdit)
+            PopupMenuButton<String>(
+              onSelected: (value) async {
+                if (value == "save") {
+                  await _saveDiary(); // If no audio, pass an empty string
+                } else if (value == "delete") {
+                  showDialog(
+                    context: context,
+                    builder: (context) => CustomDialog(
+                      title: "Delete Diary",
+                      content: "Are you sure you want to delete this diary?",
+                      onConfirm: () async {
+                        await ref
+                            .read(diaryFoldersProvider.notifier)
+                            .deleteDiary(widget.diary.id);
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                      },
+                      onCancel: () => Navigator.pop(context),
+                    ),
+                  );
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'save',
+                  child:
+                      ListTile(leading: Icon(Icons.save), title: Text('Save')),
+                ),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: ListTile(
+                      leading: Icon(Icons.delete), title: Text('Delete')),
+                ),
+              ],
+            ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildTitleTextField(context, widget.canEdit),
-            DiaryInfo(
-              owner: widget.diary.owner,
-              tags: _tags,
-              updatedAt: _updatedAt,
-              onChange: () => widget.canEdit ? setState(() => _isEdited = true) : null,
-            ),
-            Expanded(
-              child: DiaryEditor(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildTitleTextField(context, widget.canEdit),
+              DiaryInfo(
+                owner: widget.diary.owner,
+                tags: _tags,
+                updatedAt: _updatedAt,
+                onChange: widget.canEdit
+                    ? () => setState(() => _isEdited = true)
+                    : null,
+              ),
+              DiaryEditor(
                 controller: _controller,
-                checkBoxReadOnly: !widget.canEdit,
+                enableInteractiveSelection: widget.canEdit,
                 onKeyboardVisibilityChanged: (isVisible) =>
                     setState(() => _isKeyboardVisible = isVisible),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       bottomSheet: _isKeyboardVisible
