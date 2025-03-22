@@ -6,10 +6,12 @@ class DiaryListTile extends StatelessWidget {
     super.key,
     required this.canEdit,
     required this.diary,
+    this.padding,
   });
 
   final bool canEdit;
   final Diary diary;
+  final EdgeInsetsGeometry? padding;
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +19,7 @@ class DiaryListTile extends StatelessWidget {
       leading: Icon(Icons.note),
       title: Text(diary.title),
       subtitle: Text(diary.formatDate),
+      contentPadding: padding,
       onTap: () {
         Navigator.pushNamed(
           context,

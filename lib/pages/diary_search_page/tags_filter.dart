@@ -41,7 +41,7 @@ class _TagsFilterState extends ConsumerState<TagsFilter> {
         children: [
           Icon(Icons.tag_outlined),
           Text(
-            "Tags: ${widget.activeTags.join(', ')}",
+            "Tags: ${widget.activeTags.map((tag) => tag.name).join(", ")}",
           ),
           Icon(Icons.keyboard_arrow_down_outlined)
         ],

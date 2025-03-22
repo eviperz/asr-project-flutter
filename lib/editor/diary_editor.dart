@@ -47,7 +47,7 @@ class _DiaryEditorState extends State<DiaryEditor> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: quill.QuillEditor(
         controller: widget.controller,

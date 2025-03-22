@@ -114,86 +114,87 @@ class _SignInPageState extends State<SignInPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Container(
-          padding: EdgeInsets.all(40),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            spacing: 32.0,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 32.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "ASR App",
-                      style:
-                          Theme.of(context).textTheme.headlineLarge!.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                    ),
-                    Text(
-                      "Sign in",
-                      style: Theme.of(context).textTheme.displaySmall,
-                    ),
-                  ],
-                ),
-              ),
-              CustomTextfield(
-                label: "Email",
-                hintText: "Enter Email",
-                iconData: Icons.email,
-                keyboardType: TextInputType.emailAddress,
-                errorText: _isSubmit ? _validateEmail() : null,
-                textEditController: _emailTextEditController,
-                focusNode: _emailFocusNode,
-              ),
-              Column(
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                spacing: 32.0,
                 children: [
-                  CustomTextfield(
-                    label: "Password",
-                    hintText: "Enter password",
-                    iconData: Icons.password,
-                    keyboardType: TextInputType.visiblePassword,
-                    errorText: _isSubmit ? _validatePassword() : null,
-                    textEditController: _passwordTextEditController,
-                    focusNode: _passwordFocusNode,
-                    subButton: TextButton(
-                        onPressed: () {}, child: Text("reset password")),
-                  ),
-                ],
-              ),
-              Column(
-                children: [
-                  SizedBox(
-                    width: double.maxFinite,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        _signIn();
-                      },
-                      child: Text("Sign in"),
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Already have an account?"),
-                      TextButton(
+                      Text(
+                        "ASR App",
+                        style:
+                            Theme.of(context).textTheme.headlineLarge!.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                      ),
+                      Text(
+                        "Sign in",
+                        style: Theme.of(context).textTheme.displaySmall,
+                      ),
+                    ],
+                  ),
+                  CustomTextfield(
+                    label: "Email",
+                    hintText: "Enter Email",
+                    iconData: Icons.email,
+                    keyboardType: TextInputType.emailAddress,
+                    errorText: _isSubmit ? _validateEmail() : null,
+                    textEditController: _emailTextEditController,
+                    focusNode: _emailFocusNode,
+                  ),
+                  Column(
+                    children: [
+                      CustomTextfield(
+                        label: "Password",
+                        hintText: "Enter password",
+                        iconData: Icons.password,
+                        keyboardType: TextInputType.visiblePassword,
+                        errorText: _isSubmit ? _validatePassword() : null,
+                        textEditController: _passwordTextEditController,
+                        focusNode: _passwordFocusNode,
+                        subButton: TextButton(
+                            onPressed: () {}, child: Text("reset password")),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      SizedBox(
+                        width: double.maxFinite,
+                        child: ElevatedButton(
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SignUpPage()),
-                            );
+                            _signIn();
                           },
-                          child: Text("Sign up")),
+                          child: Text("Sign in"),
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("Already have an account?"),
+                          TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => SignUpPage()),
+                                );
+                              },
+                              child: Text("Sign up")),
+                        ],
+                      )
                     ],
                   )
                 ],
-              )
-            ],
+              ),
+            ),
           ),
         ),
       ),

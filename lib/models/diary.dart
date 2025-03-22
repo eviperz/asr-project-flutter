@@ -26,7 +26,7 @@ class Diary {
         updatedAt = updatedAt ?? createdAt;
 
   String get formatDate {
-    return DateFormat("dd MMM yyyy").format(updatedAt);
+    return DateFormat("dd MMM yyyy HH:mm").format(updatedAt);
   }
 
   factory Diary.fromMap(Map<String, dynamic> map) {

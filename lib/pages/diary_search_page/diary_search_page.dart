@@ -88,6 +88,7 @@ class _DiarySearchPageState extends ConsumerState<DiarySearchPage> {
   Widget build(BuildContext context) {
     final AsyncValue diaryFolders = ref.watch(diaryFoldersProvider);
     if (diaryFolders.hasValue) {
+      _filteredDiaries.clear();
       _filteredDiaries
           .addAll(ref.watch(diaryFoldersProvider.notifier).allDiariesInFolders);
     }

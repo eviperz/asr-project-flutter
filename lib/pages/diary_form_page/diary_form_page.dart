@@ -185,11 +185,13 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
                     ? () => setState(() => _isEdited = true)
                     : null,
               ),
-              DiaryEditor(
-                controller: _controller,
-                enableInteractiveSelection: widget.canEdit,
-                onKeyboardVisibilityChanged: (isVisible) =>
-                    setState(() => _isKeyboardVisible = isVisible),
+              Flexible(
+                child: DiaryEditor(
+                  controller: _controller,
+                  enableInteractiveSelection: widget.canEdit,
+                  onKeyboardVisibilityChanged: (isVisible) =>
+                      setState(() => _isKeyboardVisible = isVisible),
+                ),
               ),
             ],
           ),
