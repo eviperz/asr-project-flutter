@@ -29,12 +29,13 @@ class DiaryFormPage extends ConsumerStatefulWidget {
 }
 
 class _DiaryFormState extends ConsumerState<DiaryFormPage> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  PersistentBottomSheetController? _bottomSheetController;
   final TextEditingController _titleController = TextEditingController();
   final FocusNode _titleFocusNode = FocusNode();
   final quill.QuillController _controller = quill.QuillController.basic();
   final FocusNode _focusNode = FocusNode();
+
+  bool _isToolbarVisible = false;
+
   late List<Tag> _tags;
   String? _userId;
   late DateTime _updatedAt;
@@ -53,13 +54,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
     _controller.addListener(() => setState(() => _isEdited = true));
     _focusNode.addListener(
       () {
-        if (_focusNode.hasFocus) {
-          _showBottomSheet();
-        } else {
-          _bottomSheetController?.close();
-          _bottomSheetController = null;
-          log(_bottomSheetController.toString());
-        }
+        _onFocusChange();
       },
     );
     _titleController.text = widget.diary.title;
@@ -72,10 +67,10 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
     _isEdited = false;
   }
 
-  void _showBottomSheet() {
-    _bottomSheetController = _scaffoldKey.currentState?.showBottomSheet(
-      (context) => DiaryToolbar(controller: _controller),
-    );
+  void _onFocusChange() {
+    setState(() {
+      _isToolbarVisible = _focusNode.hasFocus;
+    });
   }
 
   void _showAsrDialog() {
@@ -139,7 +134,6 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
       appBar: AppBar(
         leading: BackButton(
           onPressed: () => _isEdited ? _confirmSave() : Navigator.pop(context),
@@ -186,42 +180,48 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
             ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildTitleTextField(context, widget.canEdit),
-              DiaryInfo(
-                owner: widget.diary.owner,
-                tags: _tags,
-                updatedAt: _updatedAt,
-                onChange: widget.canEdit
-                    ? () => setState(() => _isEdited = true)
-                    : null,
-              ),
-              IntrinsicHeight(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minWidth: MediaQuery.of(context).size.width,
-                    minHeight: _focusNode.hasFocus
-                        ? MediaQuery.of(context).size.height * 0.20
-                        : MediaQuery.of(context).size.height * 0.55,
-                  ),
-                  child: DiaryEditor(
-                    focusNode: _focusNode,
-                    controller: _controller,
-                    enableInteractiveSelection: widget.canEdit,
-                    bottomSheetController: _bottomSheetController,
+      body: GestureDetector(
+        onTap: () {
+          _focusNode.unfocus();
+        },
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildTitleTextField(context, widget.canEdit),
+                DiaryInfo(
+                  owner: widget.diary.owner,
+                  tags: _tags,
+                  updatedAt: _updatedAt,
+                  onChange: widget.canEdit
+                      ? () => setState(() => _isEdited = true)
+                      : null,
+                ),
+                IntrinsicHeight(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minWidth: MediaQuery.of(context).size.width,
+                      minHeight: _focusNode.hasFocus
+                          ? MediaQuery.of(context).size.height * 0.20
+                          : MediaQuery.of(context).size.height * 0.55,
+                    ),
+                    child: DiaryEditor(
+                      focusNode: _focusNode,
+                      controller: _controller,
+                      enableInteractiveSelection: widget.canEdit,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
+      bottomSheet:
+          _isToolbarVisible ? DiaryToolbar(controller: _controller) : null,
       floatingActionButton: FloatingActionButton(
         onPressed: _showAsrDialog,
         child: const Icon(Icons.mic),
