@@ -251,45 +251,19 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Audio: "),
-                        Expanded(
-                          child: Text(_currentAudioName),
+                        Text("Audio:"),
+                        Text(
+                          _currentAudioName,
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        IconButton(
-                            icon: Icon(Icons.arrow_forward),
-                            onPressed: () async {
-                              if (_audioUrl != null) {
-                                final result = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => EditAudioWidget(
-                                      audioName: _currentAudioName,
-                                      initialTranscribe: _transcribeResult,
-                                    ),
-                                  ),
-                                );
-
-                                if (result != null &&
-                                    result is Map<String, String>) {
-                                  setState(() {
-                                    _currentAudioName = result["audioName"] ??
-                                        _currentAudioName;
-                                    _transcribeResult =
-                                        result["transcription"] ??
-                                            _transcribeResult;
-                                  });
-                                  widget.onAudioNameChange(_currentAudioName);
-                                  widget.onTranscribe(_transcribeResult);
-                                }
-                              }
-                            }),
                       ],
                     ),
                     SizedBox(height: 10),
                     Row(
-                      spacing: 20.0,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         ElevatedButton(
                           onPressed: _isLoading ? null : _transcribeAudio,
@@ -301,6 +275,34 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                             dimension: 20,
                             child: CircularProgressIndicator(),
                           ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.arrow_forward),
+                          onPressed: () async {
+                            if (_audioUrl != null) {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => EditAudioWidget(
+                                    audioName: _currentAudioName,
+                                    initialTranscribe: _transcribeResult,
+                                  ),
+                                ),
+                              );
+
+                              if (result != null &&
+                                  result is Map<String, String>) {
+                                setState(() {
+                                  _currentAudioName =
+                                      result["audioName"] ?? _currentAudioName;
+                                  _transcribeResult = result["transcription"] ??
+                                      _transcribeResult;
+                                });
+                                widget.onAudioNameChange(_currentAudioName);
+                                widget.onTranscribe(_transcribeResult);
+                              }
+                            }
+                          },
                         ),
                       ],
                     ),

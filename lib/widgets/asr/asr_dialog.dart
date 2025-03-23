@@ -64,7 +64,8 @@ class _ASRDialogState extends State<AsrDialog> {
     try {
       if (await audioRecord.hasPermission()) {
         final directory = await getApplicationDocumentsDirectory();
-        final filePath = '${directory.path}/recording_${DateTime.now()}.m4a';
+        final filePath =
+            '${directory.path}/recording_${DateTime.now().microsecondsSinceEpoch}.m4a';
 
         await _recorderController.record(path: filePath);
         setState(() {
@@ -114,6 +115,7 @@ class _ASRDialogState extends State<AsrDialog> {
       if (!mounted) return;
       Navigator.pop(context);
       _insertAudio(uploadedUrl);
+      Navigator.pop(context);
     });
   }
 

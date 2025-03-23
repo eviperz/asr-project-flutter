@@ -1,3 +1,4 @@
+import 'package:asr_project/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:audioplayers/audioplayers.dart' as audioplayers;
@@ -254,12 +255,12 @@ class _EditAudioWidgetState extends State<EditAudioWidget> {
               ),
             ),
             const SizedBox(height: 10),
-            TextField(
-              controller: _audioNameController,
-              decoration: const InputDecoration(
-                labelText: "Audio Name",
-                border: OutlineInputBorder(),
-              ),
+            CustomTextfield(
+              label: "Audio Name",
+              hintText: _audioNameController.text,
+              iconData: Icons.audiotrack,
+              keyboardType: TextInputType.text,
+              textEditController: _audioNameController,
             ),
             const SizedBox(height: 20),
             Text(
