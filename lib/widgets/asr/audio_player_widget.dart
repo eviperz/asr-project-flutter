@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:developer';
 import 'package:asr_project/services/asr_socket_service.dart';
 import 'package:asr_project/widgets/asr/edit_audio_widget.dart';
@@ -25,6 +26,8 @@ class AudioPlayerWidget extends StatefulWidget {
 }
 
 class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
+  late StreamController<String> _transcriptionStreamController =
+      StreamController.broadcast();
   final AsrService _asrService = AsrService();
   final AsrSocketService _asrSocketService = AsrSocketService();
   late audioplayers.AudioPlayer _audioPlayer;
@@ -127,47 +130,53 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     _audioPlayer.seek(position);
   }
 
-  void eachChunk(dynamic chunk) {
-    if (chunk is String) {
-      setState(() {
-        if (!_transcribeResult.contains(chunk)) {
-          _transcribeResult += chunk;
-        }
-      });
-    } else if (chunk is Map) {
-      String transcriptionChunk = chunk['enhanced_text_chunk'] ?? '';
+  final Queue<String> _chunkQueue = Queue<String>();
+  Completer<void>? _processingCompleter;
 
-      print('Text in widget: $transcriptionChunk');
+  Future<void> eachChunk(String chunk) async {
+    _chunkQueue.add(chunk);
 
-      if (transcriptionChunk.isNotEmpty &&
-          !_transcribeResult.contains(transcriptionChunk)) {
-        setState(() {
-          _transcribeResult += transcriptionChunk;
-        });
-      }
+    if (_processingCompleter != null && !_processingCompleter!.isCompleted) {
+      await _processingCompleter!.future;
     }
 
-    // Debugging print for current transcription state
-    print("Current Transcription: $_transcribeResult");
+    _processingCompleter = Completer<void>();
 
-    // Call the widget callback to notify parent of updated transcription
-    widget.onTranscribe(_transcribeResult);
+    while (_chunkQueue.isNotEmpty) {
+      String currentChunk = _chunkQueue.removeFirst();
+
+      if (!mounted) break;
+
+      setState(() {
+        _transcribeResult += "$currentChunk ";
+      });
+
+      if (!_transcriptionStreamController.isClosed) {
+        _transcriptionStreamController.add(_transcribeResult);
+      }
+
+      widget.onTranscribe(_transcribeResult);
+      await Future.delayed(Duration(seconds: 3));
+    }
+
+    _processingCompleter?.complete();
+    setState(() {
+      _isLoading = false;
+    });
   }
 
-  Future<void> _transcribeAudio() async {
+  void _transcribeAudio() {
     setState(() {
       _isLoading = true;
       _transcribeResult = "";
     });
 
     try {
+      _transcriptionStreamController.close();
+      _transcriptionStreamController = StreamController.broadcast();
       _asrSocketService.sendAudioForTranscription(_audioUrl!, eachChunk);
     } catch (e) {
       log("Error during transcription: $e");
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
     }
   }
 
@@ -279,22 +288,46 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                       ],
                     ),
                     SizedBox(height: 10),
-                    ElevatedButton(
-                      onPressed: _isLoading ? null : _transcribeAudio,
-                      child: _isLoading
-                          ? CircularProgressIndicator()
-                          : Text("Transcribe Audio"),
+                    Row(
+                      spacing: 20.0,
+                      children: [
+                        ElevatedButton(
+                          onPressed: _isLoading ? null : _transcribeAudio,
+                          child: Text("Transcribe Audio"),
+                        ),
+                        Visibility(
+                          visible: _isLoading,
+                          child: SizedBox.square(
+                            dimension: 20,
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
+                      ],
                     ),
                     SizedBox(height: 20),
-                    _isLoading
-                        ? Center(child: CircularProgressIndicator())
-                        : Text(
-                            _transcribeResult.isNotEmpty
-                                ? "Transcription: ${_truncateText(_transcribeResult, 150)}"
-                                : "No transcription available",
-                            style: TextStyle(
-                                fontSize: 16, fontStyle: FontStyle.italic),
-                          ),
+                    if (_isLoading)
+                      StreamBuilder<String>(
+                        stream: _transcriptionStreamController.stream,
+                        builder: (context, snapshot) {
+                          return Text(
+                            snapshot.data ?? "กำลังแปลงเสียง...",
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .copyWith(
+                                    fontStyle: FontStyle.italic,
+                                    color:
+                                        Theme.of(context).colorScheme.tertiary),
+                          );
+                        },
+                      )
+                    else
+                      Text(
+                        _truncateText(_transcribeResult, 150),
+                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                            fontStyle: FontStyle.italic,
+                            color: Theme.of(context).colorScheme.tertiary),
+                      ),
                   ],
                 ),
               ),
