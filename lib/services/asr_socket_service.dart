@@ -2,17 +2,19 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class AsrSocketService {
   late IO.Socket _socket;
-  Function(String)? _onTranscriptionChunk;
+  late Function(String) _onTranscribe;
 
   /// Initialize the Socket.IO connection
   void initSocket() {
     print("Initializing socket...");
 
-    _socket = IO.io('http://192.168.1.35:5114', <String, dynamic>{
-      'transports': ['websocket'],
-      'autoConnect': false,
-      'forceNew': true,
-    });
+    _socket = IO.io(
+        'https://ws-faster-minnesota-coordinates.trycloudflare.com/',
+        <String, dynamic>{
+          'transports': ['websocket'],
+          'autoConnect': false,
+          'forceNew': true,
+        });
 
     _socket.onConnect((_) {
       print('✅ Connected to Model Asr server');
@@ -23,9 +25,7 @@ class AsrSocketService {
         String transcriptionChunk = chunk['enhanced_text_chunk'] ?? '';
 
         if (transcriptionChunk.isNotEmpty) {
-          if (_onTranscriptionChunk != null) {
-            _onTranscriptionChunk!(transcriptionChunk);
-          }
+          _onTranscribe(transcriptionChunk);
         }
       }
     });
@@ -39,8 +39,8 @@ class AsrSocketService {
 
   /// Send audio file URL for transcription
   void sendAudioForTranscription(
-      String audioUrl, Function(String) onChunkReceived) {
-    _onTranscriptionChunk = onChunkReceived;
+      String audioUrl, Function(String) onChunkReceived) async {
+    _onTranscribe = onChunkReceived;
     _socket.emit('process_audio', {'audioUrl': audioUrl});
   }
 
