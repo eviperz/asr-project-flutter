@@ -30,7 +30,6 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
     super.initState();
     _controller.addListener(() => setState(() {}));
     _focusNode.addListener(() => setState(() {}));
-    _focusNode.requestFocus();
   }
 
   @override
@@ -55,11 +54,13 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
 
   void _deleteTag(String id) {
     try {
-      ref.watch(tagsProvider.notifier).removeTag(id);
+      ref.read(tagsProvider.notifier).removeTag(id);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Delete tag")),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Error delete tag")),
       );
@@ -190,7 +191,9 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
           hintStyle: TextStyle(
             color: Theme.of(context).colorScheme.onSecondary,
           ),
+          counterText: "",
         ),
+        maxLength: 20,
         controller: _controller,
         onTapOutside: (event) {
           _focusNode.unfocus();
@@ -239,7 +242,7 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
                 if (tag != null) {
                   _addTag(tag);
                 } else {
-                  if (!context.mounted) return;
+                  if (!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Error creating tag")),
                   );
@@ -249,8 +252,6 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
                   const SnackBar(content: Text("Tag already exists")),
                 );
               }
-            } else {
-              _focusNode.requestFocus();
             }
           },
         ),

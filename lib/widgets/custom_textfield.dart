@@ -11,6 +11,7 @@ class CustomTextfield extends StatefulWidget {
   final FocusNode? focusNode;
   final Function? onTap;
   final TextButton? subButton;
+  final int? maxLength;
 
   const CustomTextfield({
     super.key,
@@ -24,6 +25,7 @@ class CustomTextfield extends StatefulWidget {
     this.focusNode,
     this.onTap,
     this.subButton,
+    this.maxLength,
   }) : canClear = canClear ?? false;
 
   @override
@@ -55,7 +57,8 @@ class _CustomTextfieldState extends State<CustomTextfield> {
           focusNode: widget.focusNode ?? FocusNode(),
           autocorrect: false,
           keyboardType: widget.keyboardType,
-          obscureText: isPasswordField ? _isObscured : false, // Hide password
+          obscureText: isPasswordField ? _isObscured : false,
+          maxLength: widget.maxLength,
           decoration: InputDecoration(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.0),
@@ -99,6 +102,7 @@ class _CustomTextfieldState extends State<CustomTextfield> {
               color: Theme.of(context).colorScheme.onSecondary,
             ),
             errorText: widget.errorText,
+            counterText: "",
           ),
           onTapOutside: (_) => widget.focusNode?.unfocus(),
           onTap: () {

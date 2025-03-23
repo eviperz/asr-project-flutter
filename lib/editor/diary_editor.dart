@@ -7,6 +7,7 @@ class DiaryEditor extends StatefulWidget {
   final bool? checkBoxReadOnly;
   final bool? enableInteractiveSelection;
   final FocusNode? focusNode;
+  final PersistentBottomSheetController? bottomSheetController;
 
   const DiaryEditor({
     super.key,
@@ -14,6 +15,7 @@ class DiaryEditor extends StatefulWidget {
     this.focusNode,
     this.checkBoxReadOnly,
     this.enableInteractiveSelection,
+    this.bottomSheetController,
   });
 
   @override
@@ -42,10 +44,16 @@ class _DiaryEditorState extends State<DiaryEditor> {
         focusNode: _focusNode,
         scrollController: _scrollController,
         configurations: quill.QuillEditorConfigurations(
-          checkBoxReadOnly: widget.checkBoxReadOnly ?? false,
-          enableInteractiveSelection: widget.enableInteractiveSelection ?? true,
-          embedBuilders: [AudioEmbedBuilder()],
-        ),
+            checkBoxReadOnly: widget.checkBoxReadOnly ?? false,
+            enableInteractiveSelection:
+                widget.enableInteractiveSelection ?? true,
+            embedBuilders: [AudioEmbedBuilder()],
+            onTapOutside: (event, focusNode) {
+              if (widget.bottomSheetController != null) {
+                return;
+              }
+              _focusNode.unfocus();
+            }),
       ),
     );
   }
@@ -53,7 +61,9 @@ class _DiaryEditorState extends State<DiaryEditor> {
   @override
   void dispose() {
     _scrollController.dispose();
-    _focusNode.dispose();
+    if (widget.focusNode == null) {
+      _focusNode.dispose();
+    }
     super.dispose();
   }
 }

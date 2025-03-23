@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:asr_project/config.dart';
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/diary_folder.dart';
@@ -175,8 +173,6 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
     final bool canEdit = workspace.members.any((member) =>
         member.item2.email == user?.email &&
         member.item2.permission != WorkspacePermission.viewer);
-
-    log("canEdit: ${user?.email} $canEdit");
 
     return Scaffold(
       appBar: AppBar(

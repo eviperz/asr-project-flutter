@@ -23,7 +23,6 @@ class WorkspaceNameAndDescriptionTextField extends StatefulWidget {
 
 class _WorkspaceNameAndDescriptionTextFieldState
     extends State<WorkspaceNameAndDescriptionTextField> {
-
   bool _validateWorkspaceName() {
     if (widget.nameTextEditingController.text.isNotEmpty) {
       return true;
@@ -70,13 +69,25 @@ class _WorkspaceNameAndDescriptionTextFieldState
                     controller: widget.nameTextEditingController,
                     focusNode: widget.nameFocusNode,
                     decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: "Enter name",
-                      hintStyle: TextStyle(
-                        color: Theme.of(context).colorScheme.tertiary,
-                      ),
-                      labelStyle: Theme.of(context).textTheme.labelMedium,
-                    ),
+                        border: InputBorder.none,
+                        hintText: "Enter name",
+                        hintStyle: TextStyle(
+                          color: Theme.of(context).colorScheme.tertiary,
+                        ),
+                        labelStyle: Theme.of(context).textTheme.labelMedium,
+                        counterText: "",
+                        suffix: IconButton(
+                          onPressed: () {
+                            widget.nameTextEditingController.clear();
+                            widget.reload();
+                          },
+                          icon: Icon(
+                            Icons.clear,
+                            size: 16,
+                          ),
+                          padding: EdgeInsets.zero,
+                        )),
+                    maxLength: 30,
                     onChanged: (value) {
                       widget.reload();
                     },

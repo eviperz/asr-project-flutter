@@ -111,7 +111,9 @@ class _DiaryFolderState extends State<DiaryFolder> {
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: "Folder Name",
+                    counterText: "",
                   ),
+                  maxLength: 20,
                   focusNode: _focusNode,
                   controller: _textEditingController,
                   onSubmitted: (value) {

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:asr_project/config.dart';
 import 'package:asr_project/providers/diary_folder_provider.dart';
 import 'package:asr_project/providers/tag_provider.dart';
@@ -27,7 +29,10 @@ class DiaryFormPage extends ConsumerStatefulWidget {
 }
 
 class _DiaryFormState extends ConsumerState<DiaryFormPage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  PersistentBottomSheetController? _bottomSheetController;
   final TextEditingController _titleController = TextEditingController();
+  final FocusNode _titleFocusNode = FocusNode();
   final quill.QuillController _controller = quill.QuillController.basic();
   final FocusNode _focusNode = FocusNode();
   late List<Tag> _tags;
@@ -46,11 +51,17 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
   void initState() {
     super.initState();
     _controller.addListener(() => setState(() => _isEdited = true));
-    _focusNode.addListener(() => setState(() {}));
-  }
-
-  @override
-  void didChangeDependencies() {
+    _focusNode.addListener(
+      () {
+        if (_focusNode.hasFocus) {
+          _showBottomSheet();
+        } else {
+          _bottomSheetController?.close();
+          _bottomSheetController = null;
+          log(_bottomSheetController.toString());
+        }
+      },
+    );
     _titleController.text = widget.diary.title;
     _controller.document = quill.Document.fromDelta(widget.diary.content);
     _tags = (widget.diary.tagIds)
@@ -59,7 +70,12 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
         .toList();
     _updatedAt = widget.diary.updatedAt;
     _isEdited = false;
-    super.didChangeDependencies();
+  }
+
+  void _showBottomSheet() {
+    _bottomSheetController = _scaffoldKey.currentState?.showBottomSheet(
+      (context) => DiaryToolbar(controller: _controller),
+    );
   }
 
   void _showAsrDialog() {
@@ -75,6 +91,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
   void dispose() {
     _controller.dispose();
     _titleController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -95,7 +112,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
     setState(() => _isEdited = false);
   }
 
-  void _confirmSave(BuildContext context) {
+  void _confirmSave() {
     showDialog(
       context: context,
       builder: (context) => CustomDialog(
@@ -107,10 +124,9 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
         onConfirm: () async {
           await _saveDiary();
 
-          if (mounted) {
-            Navigator.pop(context);
-            Navigator.pop(context);
-          }
+          if (!mounted) return;
+          Navigator.pop(context);
+          Navigator.pop(context);
         },
         onCancel: () {
           Navigator.pop(context);
@@ -123,10 +139,10 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         leading: BackButton(
-          onPressed: () =>
-              _isEdited ? _confirmSave(context) : Navigator.pop(context),
+          onPressed: () => _isEdited ? _confirmSave() : Navigator.pop(context),
         ),
         title: Text(_titleController.text.isNotEmpty
             ? _titleController.text
@@ -136,7 +152,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
             PopupMenuButton<String>(
               onSelected: (value) async {
                 if (value == "save") {
-                  await _saveDiary(); // If no audio, pass an empty string
+                  await _saveDiary();
                 } else if (value == "delete") {
                   showDialog(
                     context: context,
@@ -186,28 +202,26 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
                     ? () => setState(() => _isEdited = true)
                     : null,
               ),
-              ConstrainedBox(
-                constraints: BoxConstraints(
-                  minWidth: MediaQuery.of(context).size.width,
-                  minHeight: _focusNode.hasFocus
-                      ? MediaQuery.of(context).size.height * 0.20
-                      : MediaQuery.of(context).size.height * 0.55,
-                ),
-                child: DiaryEditor(
-                  focusNode: _focusNode,
-                  controller: _controller,
-                  enableInteractiveSelection: widget.canEdit,
+              IntrinsicHeight(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minWidth: MediaQuery.of(context).size.width,
+                    minHeight: _focusNode.hasFocus
+                        ? MediaQuery.of(context).size.height * 0.20
+                        : MediaQuery.of(context).size.height * 0.55,
+                  ),
+                  child: DiaryEditor(
+                    focusNode: _focusNode,
+                    controller: _controller,
+                    enableInteractiveSelection: widget.canEdit,
+                    bottomSheetController: _bottomSheetController,
+                  ),
                 ),
               ),
             ],
           ),
         ),
       ),
-      bottomSheet: _focusNode.hasFocus
-          ? DiaryToolbar(
-              controller: _controller,
-            )
-          : null,
       floatingActionButton: FloatingActionButton(
         onPressed: _showAsrDialog,
         child: const Icon(Icons.mic),
@@ -219,6 +233,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
     return TextField(
       style: Theme.of(context).textTheme.headlineLarge,
       controller: _titleController,
+      focusNode: _titleFocusNode,
       readOnly: !canEdit,
       decoration: const InputDecoration(
         border: InputBorder.none,
@@ -228,6 +243,9 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
       autocorrect: false,
       maxLength: 20,
       onChanged: (_) => setState(() => _isEdited = true),
+      onTapOutside: (event) {
+        _titleFocusNode.unfocus();
+      },
     );
   }
 }

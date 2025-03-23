@@ -54,7 +54,7 @@ class _TagEditModalState extends ConsumerState<TagEditModal> {
         children: [
           Container(
             alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(vertical: 40.0),
+            padding: const EdgeInsets.symmetric(vertical: 24.0),
             child: Chip(
               label: Text(
                 _textEditingController.text.trim(),
@@ -66,12 +66,15 @@ class _TagEditModalState extends ConsumerState<TagEditModal> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: CustomTextfield(
-                label: "Tag",
-                hintText: "Enter name",
-                keyboardType: TextInputType.text,
-                textEditController: _textEditingController,
-                focusNode: _focusNode,
-                errorText: _validateName()),
+              label: "Tag",
+              hintText: "Enter name",
+              keyboardType: TextInputType.text,
+              textEditController: _textEditingController,
+              focusNode: _focusNode,
+              maxLength: 20,
+              errorText: _validateName(),
+              canClear: true,
+            ),
           ),
           ColorPaletteSelector(colorEnum: _currentColor, reload: _reloadColor),
           TextButton(

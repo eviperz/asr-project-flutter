@@ -13,6 +13,16 @@ class WorkspaceIconModel {
       colorEnum: ColorPalette.fromHex(json['colorCode']),
     );
   }
+
+  WorkspaceIconModel copyWith({
+    WorkspaceIconEnum? iconEnum,
+    ColorPalette? colorEnum,
+  }) {
+    return WorkspaceIconModel(
+      iconEnum: iconEnum ?? this.iconEnum,
+      colorEnum: colorEnum ?? this.colorEnum,
+    );
+  }
 }
 
 class WorkspaceIconDetail {

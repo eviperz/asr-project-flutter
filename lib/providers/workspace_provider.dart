@@ -57,7 +57,12 @@ class WorkspaceNotifier extends AsyncNotifier<List<Workspace>> {
           .map((item) => item.id == id
               ? item.copyWith(
                   name: workspaceDetail.name ?? item.name,
-                  description: workspaceDetail.description ?? item.description)
+                  description: workspaceDetail.description ?? item.description,
+                  workspaceIconName:
+                      workspaceDetail.icon?.iconEnum ?? item.icon.iconEnum,
+                  workspaceIconColor:
+                      workspaceDetail.icon?.colorEnum ?? item.icon.colorEnum,
+                )
               : item)
           .toList());
       return workspace;
