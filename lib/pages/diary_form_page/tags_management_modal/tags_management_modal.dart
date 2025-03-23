@@ -131,8 +131,16 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
                                   .map((tag) => tag.name)
                                   .contains(_controller.text))
                                 _buildCreateTagButton(filteredTags),
-                              SingleChildScrollView(
-                                  child: _buildFilteredTagList(filteredTags)),
+                              Flexible(
+                                child: _buildFilteredTagList(
+                                  _controller.text.isNotEmpty
+                                      ? filteredTags
+                                          .where((tag) => tag.name
+                                              .contains(_controller.text))
+                                          .toList()
+                                      : filteredTags,
+                                ),
+                              ),
                             ],
                           ),
                         ),
