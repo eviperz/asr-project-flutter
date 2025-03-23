@@ -1,6 +1,7 @@
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/user.dart';
 import 'package:asr_project/models/workspace.dart';
+import 'package:asr_project/pages/authentication_page/account_management_page.dart';
 import 'package:asr_project/pages/authentication_page/sign_in_page.dart';
 import 'package:asr_project/pages/diary_form_page/diary_form_page.dart';
 import 'package:asr_project/pages/diary_search_page/diary_search_page.dart';
@@ -38,6 +39,11 @@ class MyApp extends ConsumerWidget {
         switch (settings.name) {
           case "/signin":
             return MaterialPageRoute(builder: (context) => SignInPage());
+
+          case "/account":
+            return MaterialPageRoute(
+              builder: (context) => AccountManagementPage(),
+            );
 
           case "/home":
             return MaterialPageRoute(builder: (context) => HomePage());
