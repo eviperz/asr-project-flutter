@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TagsFilter extends ConsumerStatefulWidget {
-  final Function(String) onSelectTags;
+  final Function(Tag) onSelectTags;
   final Function() clearActiveTags;
-  final Set<String> activeTags;
+  final Set<Tag> activeTags;
 
   const TagsFilter({
     super.key,
@@ -41,7 +41,7 @@ class _TagsFilterState extends ConsumerState<TagsFilter> {
         children: [
           Icon(Icons.tag_outlined),
           Text(
-            "Tags: ${widget.activeTags.join(', ')}",
+            "Tags: ${widget.activeTags.map((tag) => tag.name).join(", ")}",
           ),
           Icon(Icons.keyboard_arrow_down_outlined)
         ],
@@ -51,9 +51,9 @@ class _TagsFilterState extends ConsumerState<TagsFilter> {
 }
 
 class TagFillterModal extends ConsumerStatefulWidget {
-  final Function(String) onSelectTag;
+  final Function(Tag) onSelectTag;
   final Function() clearActiveTags;
-  final Set<String> activeTags;
+  final Set<Tag> activeTags;
 
   const TagFillterModal({
     super.key,
@@ -91,6 +91,9 @@ class _TagFillterModalState extends ConsumerState<TagFillterModal> {
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: TextButton(
                     onPressed: () {
+                      setState(() {
+                        widget.activeTags.clear();
+                      });
                       widget.clearActiveTags();
                     },
                     child: Text(
@@ -117,10 +120,10 @@ class _TagFillterModalState extends ConsumerState<TagFillterModal> {
                             backgroundColor: tag.colorEnum.color,
                           ),
                         ),
-                        value: widget.activeTags.contains(tag.name),
+                        value: widget.activeTags.contains(tag),
                         onChanged: (bool? value) {
                           setState(() {});
-                          widget.onSelectTag(tag.name);
+                          widget.onSelectTag(tag);
                         },
                       );
                     }).toList(),

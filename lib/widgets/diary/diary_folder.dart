@@ -12,6 +12,7 @@ class DiaryFolder extends StatefulWidget {
   final Function onUpdateFolderName;
   final Function onCreateDiary;
   final Function onDeleteFolder;
+  final bool canEdit;
 
   const DiaryFolder({
     super.key,
@@ -22,6 +23,7 @@ class DiaryFolder extends StatefulWidget {
     required this.onUpdateFolderName,
     required this.onCreateDiary,
     required this.onDeleteFolder,
+    required this.canEdit,
   });
 
   @override
@@ -109,7 +111,9 @@ class _DiaryFolderState extends State<DiaryFolder> {
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: "Folder Name",
+                    counterText: "",
                   ),
+                  maxLength: 20,
                   focusNode: _focusNode,
                   controller: _textEditingController,
                   onSubmitted: (value) {
@@ -135,97 +139,125 @@ class _DiaryFolderState extends State<DiaryFolder> {
               ),
             ],
           ),
-          trailing: PopupMenuButton<String>(
-            position: PopupMenuPosition.under,
-            onSelected: (value) {
-              switch (value) {
-                case "add":
-                  widget.onCreateDiary(widget.folder.id);
+          trailing: widget.canEdit
+              ? PopupMenuButton<String>(
+                  position: PopupMenuPosition.under,
+                  onSelected: (value) {
+                    switch (value) {
+                      case "add":
+                        widget.onCreateDiary(widget.folder.id);
 
-                case "change":
-                  _focusNode.requestFocus();
-                  setState(() {
-                    _readOnly = false;
-                  });
+                      case "change":
+                        _focusNode.requestFocus();
+                        setState(() {
+                          _readOnly = false;
+                        });
 
-                case "delete":
-                  showDialog(
-                    context: context,
-                    builder: (context) => CustomDialog(
-                      title: "Delete",
-                      content: "Are you confirm for delete?",
-                      onConfirm: () async {
-                        try {
-                          widget.onDeleteFolder(widget.folder.id);
-                          Navigator.of(context).pop();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Delete Folder!")),
-                          );
-                        } catch (e) {
-                          if (!context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content: Text("Error delete diary folder: $e")),
-                          );
-                        }
-                      },
-                      onCancel: () => Navigator.pop(context),
+                      case "delete":
+                        showDialog(
+                          context: context,
+                          builder: (context) => CustomDialog(
+                            title: "Delete",
+                            content: "Are you confirm for delete?",
+                            onConfirm: () async {
+                              try {
+                                widget.onDeleteFolder(widget.folder.id);
+                                Navigator.of(context).pop();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text("Delete Folder!")),
+                                );
+                              } catch (e) {
+                                if (!context.mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(
+                                          "Error delete diary folder: $e")),
+                                );
+                              }
+                            },
+                            onCancel: () => Navigator.pop(context),
+                          ),
+                        );
+                    }
+                  },
+                  itemBuilder: (BuildContext context) => [
+                    PopupMenuItem<String>(
+                      value: 'add',
+                      child: ListTile(
+                        leading: Icon(Icons.note_add),
+                        title: Text('Diary'),
+                      ),
                     ),
-                  );
-              }
-            },
-            itemBuilder: (BuildContext context) => [
-              PopupMenuItem<String>(
-                value: 'add',
-                child: ListTile(
-                  leading: Icon(Icons.note_add),
-                  title: Text('Diary'),
-                ),
-              ),
-              if (widget.folder.name != "Default")
-                PopupMenuItem<String>(
-                  value: 'change',
-                  child: ListTile(
-                    leading: Icon(Icons.edit),
-                    title: Text('Edit Name'),
-                  ),
-                ),
-              if (widget.folder.name != "Default")
-                PopupMenuItem<String>(
-                  value: 'delete',
-                  child: ListTile(
-                    leading: Icon(Icons.delete),
-                    title: Text('Delete Folder'),
-                  ),
-                ),
-            ],
-            padding: EdgeInsets.all(0),
-            menuPadding: EdgeInsets.all(8.0),
-          ),
+                    if (widget.folder.name != "Default")
+                      PopupMenuItem<String>(
+                        value: 'change',
+                        child: ListTile(
+                          leading: Icon(Icons.edit),
+                          title: Text('Edit Name'),
+                        ),
+                      ),
+                    if (widget.folder.name != "Default")
+                      PopupMenuItem<String>(
+                        value: 'delete',
+                        child: ListTile(
+                          leading: Icon(Icons.delete),
+                          title: Text('Delete Folder'),
+                        ),
+                      ),
+                  ],
+                  padding: EdgeInsets.all(0),
+                  menuPadding: EdgeInsets.all(8.0),
+                )
+              : null,
         ),
         if (_isOpen)
           Column(
             children: [
-              Divider(),
-              SizedBox(
-                height: widget.diaries.isEmpty ? 0 : 270,
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  itemCount: widget.diaries.length,
-                  itemBuilder: (context, index) {
-                    final Diary diary = widget.diaries[index];
+              Padding(
+                padding: const EdgeInsets.only(left: 40.0),
+                child: Divider(),
+              ),
+              ListView.separated(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount:
+                    widget.diaries.isNotEmpty ? widget.diaries.length : 1,
+                itemBuilder: (context, index) {
+                  if (widget.diaries.isEmpty) {
                     return Padding(
-                      padding: const EdgeInsets.only(left: 40.0),
-                      child: DiaryListTile(diary: diary),
+                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      child: Center(
+                        child: Text(
+                          'Empty',
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelLarge!
+                              .copyWith(
+                                color: Theme.of(context).colorScheme.tertiary,
+                                fontStyle: FontStyle.italic,
+                              ),
+                        ),
+                      ),
                     );
-                  },
-                  separatorBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(left: 40.0),
-                      child: Divider(),
-                    );
-                  },
-                ),
+                  }
+                  final Diary diary = widget.diaries[index];
+                  return DiaryListTile(
+                      canEdit: widget.canEdit,
+                      diary: diary,
+                      padding: EdgeInsets.only(left: 56.0));
+                },
+                separatorBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 40.0),
+                    child: Divider(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .tertiary
+                          .withAlpha((0.05 * 255).toInt()),
+                    ),
+                  );
+                },
               )
             ],
           ),

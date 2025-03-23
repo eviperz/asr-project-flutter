@@ -23,8 +23,12 @@ class WorkspaceCreateForm extends ConsumerStatefulWidget {
 class _WorkspaceCreateFormState extends ConsumerState<WorkspaceCreateForm> {
   final TextEditingController _nameTextEditingController =
       TextEditingController();
+  final FocusNode _nameFocusNode = FocusNode();
+
   final TextEditingController _descriptionTextEditingController =
       TextEditingController();
+  final FocusNode _descriptionFocusNode = FocusNode();
+
   late WorkspaceIconEnum _workspaceIconEnum = WorkspaceIconEnum.business;
   late ColorPalette _workspaceColorEnum = ColorPalette.gray;
   final List<WorkspaceMemberInviting> _invitedMemberEmails = [];
@@ -33,7 +37,9 @@ class _WorkspaceCreateFormState extends ConsumerState<WorkspaceCreateForm> {
   void initState() {
     super.initState();
     _nameTextEditingController.addListener(() => setState(() {}));
+    _nameFocusNode.addListener(() => setState(() {}));
     _descriptionTextEditingController.addListener(() => setState(() {}));
+    _descriptionFocusNode.addListener(() => setState(() {}));
   }
 
   @override
@@ -149,8 +155,10 @@ class _WorkspaceCreateFormState extends ConsumerState<WorkspaceCreateForm> {
                   ),
                   WorkspaceNameAndDescriptionTextField(
                     nameTextEditingController: _nameTextEditingController,
+                    nameFocusNode: _nameFocusNode,
                     descriptionTextEditingController:
                         _descriptionTextEditingController,
+                    descriptionFocusNode: _descriptionFocusNode,
                     reload: () {
                       setState(() {});
                     },

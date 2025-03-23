@@ -9,7 +9,10 @@ final ThemeData darkTheme = ThemeData(
 final ThemeData lightTheme = ThemeData(
   brightness: Brightness.light,
   colorScheme: lightThemeColorScheme,
-  dividerTheme: DividerThemeData(color: Colors.black12, space: 0),
+  dividerTheme: DividerThemeData(
+    color: lightThemeColorScheme.tertiary.withAlpha((0.05 * 255).toInt()),
+    space: 0,
+  ),
   cardTheme: CardTheme(
       color: const Color.fromARGB(255, 245, 245, 245),
       shadowColor: Colors.transparent),

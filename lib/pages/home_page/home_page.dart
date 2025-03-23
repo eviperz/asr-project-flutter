@@ -1,12 +1,9 @@
-import 'dart:developer';
-
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/diary_folder.dart';
 import 'package:asr_project/providers/diary_folder_provider.dart';
 import 'package:asr_project/providers/tag_provider.dart';
 import 'package:asr_project/providers/user_provider.dart';
 import 'package:asr_project/providers/workspace_provider.dart';
-import 'package:asr_project/widgets/custom_drawer.dart';
 import 'package:asr_project/widgets/custom_textfield.dart';
 import 'package:asr_project/widgets/diary/diary_folder_blocks.dart';
 import 'package:asr_project/widgets/diary/diary_list_view_horizontal.dart';
@@ -86,9 +83,6 @@ class _HomePageState extends ConsumerState<HomePage> {
           .updateDiaryFolderName(id, diaryFolderDetail);
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(responseMessage)),
-      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Failed to update name of diary folder")),
@@ -114,15 +108,14 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   Future<void> _addDiaryInFolder(String folderId) async {
     DiaryDetail diaryDetail = DiaryDetail.createDiary();
-    // log(folderId);
-    // log(diaryDetail.toJson().toString());
     Diary? diary = await ref
         .read(diaryFoldersProvider.notifier)
         .addDiaryToFolder(folderId, diaryDetail);
 
     if (!mounted) return;
     if (diary != null) {
-      Navigator.pushNamed(context, "/diary/detail", arguments: diary);
+      Navigator.pushNamed(context, "/diary/detail",
+          arguments: {'diary': diary, 'canEdit': true});
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Failed to create diary")),
@@ -137,8 +130,6 @@ class _HomePageState extends ConsumerState<HomePage> {
         ref.watch(diaryFoldersProvider);
 
     return Scaffold(
-      appBar: AppBar(),
-      drawer: CustomDrawer(name: name),
       body: diaryFoldersAsync.when(
         data: (diaryFolders) {
           final List<Diary> diaries =
@@ -204,21 +195,26 @@ class _HomePageState extends ConsumerState<HomePage> {
                   keyboardType: TextInputType.text,
                   focusNode: _searchFocusNode,
                   onTap: () {
-                    Navigator.pushNamed(context, "/diary/search",
-                        arguments: diaries);
+                    Navigator.pushNamed(
+                      context,
+                      "/diary/search",
+                      arguments: true,
+                    );
                     _searchFocusNode.unfocus();
                   }),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20.0),
-              child: DiaryListViewHorizontal(
-                title: "Recently",
-                diaryList: recentDiaries,
+            if (recentDiaries.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 20.0, 0, 10.0),
+                child: DiaryListViewHorizontal(
+                  title: "Recently",
+                  diaryList: recentDiaries,
+                ),
               ),
-            ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              padding: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 30.0),
               child: DiaryFolderBlocks(
+                canEdit: true,
                 folders: diaryFolders,
                 onCreateFolder: _addFolder,
                 onUpdateFolderName: _updateFolderName,

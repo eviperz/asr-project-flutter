@@ -22,7 +22,10 @@ class _DiaryCardState extends State<DiaryCard> {
       onTap: () => Navigator.pushNamed(
         context,
         "/diary/detail",
-        arguments: widget.diary,
+        arguments: {
+          'diary': widget.diary,
+          'canEdit': true,
+        },
       ),
       child: Card(
         child: Container(

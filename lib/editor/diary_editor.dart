@@ -7,7 +7,6 @@ class DiaryEditor extends StatefulWidget {
   final bool? checkBoxReadOnly;
   final bool? enableInteractiveSelection;
   final FocusNode? focusNode;
-  final ValueChanged<bool>? onKeyboardVisibilityChanged;
 
   const DiaryEditor({
     super.key,
@@ -15,7 +14,6 @@ class DiaryEditor extends StatefulWidget {
     this.focusNode,
     this.checkBoxReadOnly,
     this.enableInteractiveSelection,
-    this.onKeyboardVisibilityChanged,
   });
 
   @override
@@ -23,35 +21,21 @@ class DiaryEditor extends StatefulWidget {
 }
 
 class _DiaryEditorState extends State<DiaryEditor> {
-  late FocusNode _focusNode;
   late ScrollController _scrollController;
-  bool _isKeyboardVisible = false;
 
   @override
   void initState() {
     super.initState();
-    _focusNode = widget.focusNode ?? FocusNode();
     _scrollController = ScrollController();
-
-    _focusNode.addListener(() {
-      if (mounted) {
-        setState(() {
-          _isKeyboardVisible = _focusNode.hasFocus;
-          if (widget.onKeyboardVisibilityChanged != null) {
-            widget.onKeyboardVisibilityChanged!(_isKeyboardVisible);
-          }
-        });
-      }
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: quill.QuillEditor(
+      child: quill.QuillEditor.basic(
         controller: widget.controller,
-        focusNode: _focusNode,
+        focusNode: widget.focusNode ?? FocusNode(),
         scrollController: _scrollController,
         configurations: quill.QuillEditorConfigurations(
           checkBoxReadOnly: widget.checkBoxReadOnly ?? false,
@@ -65,7 +49,6 @@ class _DiaryEditorState extends State<DiaryEditor> {
   @override
   void dispose() {
     _scrollController.dispose();
-    _focusNode.dispose();
     super.dispose();
   }
 }

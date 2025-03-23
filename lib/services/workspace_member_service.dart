@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 class WorkspaceMemberService {
   String? _userId;
   final String baseUrl = "${AppConfig.baseUrl}/workspace_members";
+
   Future<Map<String, String>> _getHeaders() async {
     String? token = await AppConfig.getToken();
 
@@ -46,6 +47,25 @@ class WorkspaceMemberService {
       throw Exception("Fail to update permission: ${response.statusCode}");
     } catch (e) {
       log("Error update permission: $e");
+    }
+    return false;
+  }
+
+  Future<bool> accept(String id) async {
+    try {
+      final headers = await _getHeaders();
+
+      final response = await http.patch(
+        Uri.parse("$baseUrl/$id/accept"),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        return true;
+      }
+      throw Exception("Fail to accept member: ${response.statusCode}");
+    } catch (e) {
+      log("Error accept member: $e");
     }
     return false;
   }

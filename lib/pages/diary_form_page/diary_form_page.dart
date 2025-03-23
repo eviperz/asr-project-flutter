@@ -1,4 +1,5 @@
 import 'dart:developer';
+
 import 'package:asr_project/config.dart';
 import 'package:asr_project/providers/diary_folder_provider.dart';
 import 'package:asr_project/providers/tag_provider.dart';
@@ -15,9 +16,11 @@ import 'package:asr_project/pages/diary_form_page/diary_info.dart';
 
 class DiaryFormPage extends ConsumerStatefulWidget {
   final Diary diary;
+  final bool canEdit;
 
   const DiaryFormPage({
     super.key,
+    required this.canEdit,
     required this.diary,
   });
 
@@ -27,29 +30,33 @@ class DiaryFormPage extends ConsumerStatefulWidget {
 
 class _DiaryFormState extends ConsumerState<DiaryFormPage> {
   final TextEditingController _titleController = TextEditingController();
+  final FocusNode _titleFocusNode = FocusNode();
   final quill.QuillController _controller = quill.QuillController.basic();
+  final FocusNode _focusNode = FocusNode();
+
+  bool _isToolbarVisible = false;
+
   late List<Tag> _tags;
   String? _userId;
   late DateTime _updatedAt;
   bool _isEdited = false;
-  bool _isKeyboardVisible = false;
 
   _DiaryFormState() {
     _initializeUserId();
   }
   Future<void> _initializeUserId() async {
     _userId = await AppConfig.getUserId();
-    log("User ID Loaded DiaryForm: $_userId");
   }
 
   @override
   void initState() {
     super.initState();
     _controller.addListener(() => setState(() => _isEdited = true));
-  }
-
-  @override
-  void didChangeDependencies() {
+    _focusNode.addListener(
+      () {
+        _onFocusChange();
+      },
+    );
     _titleController.text = widget.diary.title;
     _controller.document = quill.Document.fromDelta(widget.diary.content);
     _tags = (widget.diary.tagIds)
@@ -58,7 +65,12 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
         .toList();
     _updatedAt = widget.diary.updatedAt;
     _isEdited = false;
-    super.didChangeDependencies();
+  }
+
+  void _onFocusChange() {
+    setState(() {
+      _isToolbarVisible = _focusNode.hasFocus;
+    });
   }
 
   void _showAsrDialog() {
@@ -74,6 +86,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
   void dispose() {
     _controller.dispose();
     _titleController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -86,7 +99,6 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
       tagIds: _tags.map((tag) => tag.id).toList(),
       userId: _userId,
     );
-    log(_controller.document.toDelta().toJson().toString());
 
     await ref
         .read(diaryFoldersProvider.notifier)
@@ -95,7 +107,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
     setState(() => _isEdited = false);
   }
 
-  void _confirmSave(BuildContext context) {
+  void _confirmSave() {
     showDialog(
       context: context,
       builder: (context) => CustomDialog(
@@ -107,10 +119,9 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
         onConfirm: () async {
           await _saveDiary();
 
-          if (mounted) {
-            Navigator.pop(context);
-            Navigator.pop(context);
-          }
+          if (!mounted) return;
+          Navigator.pop(context);
+          Navigator.pop(context);
         },
         onCancel: () {
           Navigator.pop(context);
@@ -125,78 +136,92 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(
-          onPressed: () =>
-              _isEdited ? _confirmSave(context) : Navigator.pop(context),
+          onPressed: () => _isEdited ? _confirmSave() : Navigator.pop(context),
         ),
         title: Text(_titleController.text.isNotEmpty
             ? _titleController.text
             : "Untitled"),
         actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) async {
-              if (value == "save") {
-                await _saveDiary(); // If no audio, pass an empty string
-              } else if (value == "delete") {
-                showDialog(
-                  context: context,
-                  builder: (context) => CustomDialog(
-                    title: "Delete Diary",
-                    content: "Are you sure you want to delete this diary?",
-                    onConfirm: () async {
-                      await ref
-                          .read(diaryFoldersProvider.notifier)
-                          .deleteDiary(widget.diary.id);
-                      Navigator.pop(context);
-                      Navigator.pop(context);
-                    },
-                    onCancel: () => Navigator.pop(context),
-                  ),
-                );
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'save',
-                child: ListTile(leading: Icon(Icons.save), title: Text('Save')),
-              ),
-              PopupMenuItem(
-                value: 'delete',
-                child: ListTile(
-                    leading: Icon(Icons.delete), title: Text('Delete')),
-              ),
-            ],
-          ),
+          if (widget.canEdit)
+            PopupMenuButton<String>(
+              onSelected: (value) async {
+                if (value == "save") {
+                  await _saveDiary();
+                } else if (value == "delete") {
+                  showDialog(
+                    context: context,
+                    builder: (context) => CustomDialog(
+                      title: "Delete Diary",
+                      content: "Are you sure you want to delete this diary?",
+                      onConfirm: () async {
+                        await ref
+                            .read(diaryFoldersProvider.notifier)
+                            .deleteDiary(widget.diary.id);
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                      },
+                      onCancel: () => Navigator.pop(context),
+                    ),
+                  );
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'save',
+                  child:
+                      ListTile(leading: Icon(Icons.save), title: Text('Save')),
+                ),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: ListTile(
+                      leading: Icon(Icons.delete), title: Text('Delete')),
+                ),
+              ],
+            ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildTitleTextField(context),
-            DiaryInfo(
-              owner: widget.diary.owner,
-              tags: _tags,
-              updatedAt: _updatedAt,
-              onChange: () => setState(() => _isEdited = true),
+      body: GestureDetector(
+        onTap: () {
+          _focusNode.unfocus();
+        },
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildTitleTextField(context, widget.canEdit),
+                DiaryInfo(
+                  owner: widget.diary.owner,
+                  tags: _tags,
+                  updatedAt: _updatedAt,
+                  onChange: widget.canEdit
+                      ? () => setState(() => _isEdited = true)
+                      : null,
+                ),
+                IntrinsicHeight(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minWidth: MediaQuery.of(context).size.width,
+                      minHeight: _focusNode.hasFocus
+                          ? MediaQuery.of(context).size.height * 0.20
+                          : MediaQuery.of(context).size.height * 0.55,
+                    ),
+                    child: DiaryEditor(
+                      focusNode: _focusNode,
+                      controller: _controller,
+                      enableInteractiveSelection: widget.canEdit,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            Expanded(
-              child: DiaryEditor(
-                controller: _controller,
-                onKeyboardVisibilityChanged: (isVisible) =>
-                    setState(() => _isKeyboardVisible = isVisible),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
-      bottomSheet: _isKeyboardVisible
-          ? DiaryToolbar(
-              controller: _controller,
-              onKeyboardVisibilityChanged: (isVisible) =>
-                  setState(() => _isKeyboardVisible = isVisible),
-            )
-          : null,
+      bottomSheet:
+          _isToolbarVisible ? DiaryToolbar(controller: _controller) : null,
       floatingActionButton: FloatingActionButton(
         onPressed: _showAsrDialog,
         child: const Icon(Icons.mic),
@@ -204,10 +229,12 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
     );
   }
 
-  Widget _buildTitleTextField(BuildContext context) {
+  Widget _buildTitleTextField(BuildContext context, bool canEdit) {
     return TextField(
       style: Theme.of(context).textTheme.headlineLarge,
       controller: _titleController,
+      focusNode: _titleFocusNode,
+      readOnly: !canEdit,
       decoration: const InputDecoration(
         border: InputBorder.none,
         hintText: "Untitled",
@@ -216,6 +243,9 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
       autocorrect: false,
       maxLength: 20,
       onChanged: (_) => setState(() => _isEdited = true),
+      onTapOutside: (event) {
+        _titleFocusNode.unfocus();
+      },
     );
   }
 }

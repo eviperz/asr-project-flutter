@@ -1,5 +1,4 @@
-import 'dart:developer';
-
+import 'package:asr_project/config.dart';
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/diary_folder.dart';
 import 'package:asr_project/models/enum/workspace_member_status.dart';
@@ -7,6 +6,7 @@ import 'package:asr_project/models/enum/workspace_permission.dart';
 import 'package:asr_project/models/user.dart';
 import 'package:asr_project/models/workspace.dart';
 import 'package:asr_project/providers/diary_folder_provider.dart';
+import 'package:asr_project/providers/user_provider.dart';
 import 'package:asr_project/providers/workspace_provider.dart';
 import 'package:asr_project/widgets/custom_textfield.dart';
 import 'package:asr_project/widgets/diary/diary_folder_blocks.dart';
@@ -16,8 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class WorkspaceDetailPage extends ConsumerStatefulWidget {
-  final Workspace workspace;
-  const WorkspaceDetailPage({super.key, required this.workspace});
+  const WorkspaceDetailPage({super.key});
 
   @override
   ConsumerState<WorkspaceDetailPage> createState() =>
@@ -25,7 +24,7 @@ class WorkspaceDetailPage extends ConsumerStatefulWidget {
 }
 
 class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
-  late Workspace _workspace;
+  // late Workspace workspace;
   late bool creatingFolderMode = false;
   List<DiaryFolderModel> filteredDiaryFolders = [];
 
@@ -37,11 +36,10 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      ref.read(workspaceIdProvider.notifier).state = widget.workspace.id;
       ref.read(diaryFoldersProvider.notifier).fetchData();
     });
 
-    _workspace = widget.workspace;
+    // workspace = widget.workspace;
     _searchTextEditingController.addListener(() => setState(() {}));
     _searchFocusNode.addListener(() => setState(() {}));
   }
@@ -91,12 +89,8 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
       String responseMessage = await ref
           .read(diaryFoldersProvider.notifier)
           .updateDiaryFolderName(id, diaryFolderDetail);
-      log(responseMessage.toString());
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(responseMessage)),
-      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Failed to update name of diary folder")),
@@ -126,9 +120,18 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
         .read(diaryFoldersProvider.notifier)
         .addDiaryToFolder(folderId, diaryDetail);
 
+    final User? user = ref.watch(userProvider).value;
+    final Workspace workspace =
+        ref.read(workspaceProvider.notifier).workspaceByIdProvider;
+
+    final bool canEdit = workspace.members.any((member) =>
+        member.item1?.id == user?.id &&
+        member.item2.permission != WorkspacePermission.viewer);
+
     if (!mounted) return;
     if (diary != null) {
-      Navigator.pushNamed(context, "/diary/detail", arguments: diary);
+      Navigator.pushNamed(context, "/diary/detail",
+          arguments: {'diary': diary, 'canEdit': canEdit});
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Failed to create diary")),
@@ -137,39 +140,43 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
   }
 
   void _navigatorSetting() async {
-    final bool? isEdit = await Navigator.pushNamed<bool?>(
-        context, "/workspace/setting",
-        arguments: _workspace);
-
-    if (isEdit != null && isEdit) {
-      setState(() {
-        _workspace = ref.read(workspaceProvider.notifier).workspaceByIdProvider;
-        log(_workspace.icon.colorEnum.hexCode.toString());
-      });
-    }
+    final Workspace workspace =
+        ref.read(workspaceProvider.notifier).workspaceByIdProvider;
+    Navigator.pushNamed(context, "/workspace/setting", arguments: workspace);
   }
 
   @override
   Widget build(BuildContext context) {
-    final AsyncValue diaryFoldersAsync = ref.watch(diaryFoldersProvider);
-    final List<Diary> diaries =
-        ref.read(diaryFoldersProvider.notifier).allDiariesInFolders;
+    final User? user = ref.watch(userProvider).value;
+    final AsyncValue workspacesAsync = ref.watch(workspaceProvider);
+    late Workspace workspace;
+    if (workspacesAsync.hasValue) {
+      final List<Workspace> workspaces = workspacesAsync.value!;
+      workspace =
+          workspaces.firstWhere((ws) => ws.id == ref.read(workspaceIdProvider));
+    }
 
-    final User owner = _workspace.members
+    final AsyncValue diaryFoldersAsync = ref.watch(diaryFoldersProvider);
+
+    final User owner = workspace.members
         .firstWhere(
             (member) => member.item2.permission == WorkspacePermission.owner)
         .item1!;
 
-    final List<User> memberWithoutOwner = _workspace.members
+    final List<User> memberWithoutOwner = workspace.members
         .where((member) =>
             member.item2.permission != WorkspacePermission.owner &&
             member.item2.status == WorkspaceMemberStatus.accepted)
         .map((member) => member.item1!)
         .toList();
 
+    final bool canEdit = workspace.members.any((member) =>
+        member.item2.email == user?.email &&
+        member.item2.permission != WorkspacePermission.viewer);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(_workspace.name),
+        title: Text(workspace.name),
         centerTitle: false,
       ),
       body: SafeArea(
@@ -177,6 +184,7 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
           child: Container(
             padding: EdgeInsets.all(20.0),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 16.0,
               children: [
                 Row(
@@ -189,8 +197,8 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
                         spacing: 20,
                         children: [
                           WorkspaceIcon(
-                            workspaceIconEnum: _workspace.icon.iconEnum,
-                            colorEnum: _workspace.icon.colorEnum,
+                            workspaceIconEnum: workspace.icon.iconEnum,
+                            colorEnum: workspace.icon.colorEnum,
                             size: 80,
                           ),
                           Expanded(
@@ -203,7 +211,7 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
                                 children: [
                                   FittedBox(
                                     child: Text(
-                                      _workspace.name,
+                                      workspace.name,
                                       style: Theme.of(context)
                                           .textTheme
                                           .headlineLarge,
@@ -220,14 +228,41 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
                         ],
                       ),
                     ),
-                    IconButton(
-                      onPressed: _navigatorSetting,
-                      icon: Icon(Icons.edit),
-                    )
+                    if (owner.id == AppConfig.userId)
+                      IconButton(
+                        onPressed: _navigatorSetting,
+                        icon: Icon(Icons.edit),
+                      )
                   ],
                 ),
-                SizedBox(
-                  height: 10,
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Description",
+                        style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                            color: Theme.of(context).colorScheme.tertiary),
+                      ),
+                      if (workspace.description != null &&
+                          workspace.description!.isNotEmpty)
+                        Text(
+                          workspace.description ?? "",
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        )
+                      else
+                        Text(
+                          "No Description",
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyLarge!
+                              .copyWith(
+                                  color: Theme.of(context).colorScheme.tertiary)
+                              .copyWith(fontStyle: FontStyle.italic),
+                        ),
+                    ],
+                  ),
                 ),
                 Divider(),
                 CustomTextfield(
@@ -240,12 +275,13 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
                       Navigator.pushNamed(
                         context,
                         "/diary/search",
-                        arguments: diaries,
+                        arguments: canEdit,
                       );
                       _searchFocusNode.unfocus();
                     }),
                 diaryFoldersAsync.when(
                   data: (diaryFolders) => DiaryFolderBlocks(
+                    canEdit: canEdit,
                     folders: diaryFolders,
                     onCreateFolder: _addFolder,
                     onUpdateFolderName: _updateFolderName,

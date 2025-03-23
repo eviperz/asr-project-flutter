@@ -19,11 +19,6 @@ class UserService {
 
   Future<User?> getUserById(String userId) async {
     try {
-      // final String? userId = await AppConfig.getUserId();
-      if (userId == null) {
-        throw Exception("User ID not found. Please log in.");
-      }
-
       final headers = await _getHeaders();
       final response =
           await http.get(Uri.parse("$baseUrl/$userId"), headers: headers);

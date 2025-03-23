@@ -8,7 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TagsManagementModal extends ConsumerStatefulWidget {
   final List<Tag> tags;
-  final Function() onChanged;
+  final Function()? onChanged;
 
   const TagsManagementModal({
     super.key,
@@ -30,7 +30,6 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
     super.initState();
     _controller.addListener(() => setState(() {}));
     _focusNode.addListener(() => setState(() {}));
-    _focusNode.requestFocus();
   }
 
   @override
@@ -50,16 +49,18 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
       widget.tags.add(tag);
     });
 
-    widget.onChanged.call();
+    widget.onChanged?.call();
   }
 
   void _deleteTag(String id) {
     try {
-      ref.watch(tagsProvider.notifier).removeTag(id);
+      ref.read(tagsProvider.notifier).removeTag(id);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Delete tag")),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Error delete tag")),
       );
@@ -126,10 +127,20 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
                           ),
                           child: Column(
                             children: [
-                              if (!checkExists())
+                              if (!filteredTags
+                                  .map((tag) => tag.name)
+                                  .contains(_controller.text))
                                 _buildCreateTagButton(filteredTags),
-                              SingleChildScrollView(
-                                  child: _buildFilteredTagList(filteredTags)),
+                              Flexible(
+                                child: _buildFilteredTagList(
+                                  _controller.text.isNotEmpty
+                                      ? filteredTags
+                                          .where((tag) => tag.name
+                                              .contains(_controller.text))
+                                          .toList()
+                                      : filteredTags,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -188,7 +199,9 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
           hintStyle: TextStyle(
             color: Theme.of(context).colorScheme.onSecondary,
           ),
+          counterText: "",
         ),
+        maxLength: 20,
         controller: _controller,
         onTapOutside: (event) {
           _focusNode.unfocus();
@@ -237,7 +250,7 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
                 if (tag != null) {
                   _addTag(tag);
                 } else {
-                  if (!context.mounted) return;
+                  if (!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Error creating tag")),
                   );
@@ -247,8 +260,6 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
                   const SnackBar(content: Text("Tag already exists")),
                 );
               }
-            } else {
-              _focusNode.requestFocus();
             }
           },
         ),

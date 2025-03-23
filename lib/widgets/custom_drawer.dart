@@ -25,12 +25,26 @@ class CustomDrawer extends ConsumerWidget {
                 leading: ProfileImage(
                   size: 50,
                 ),
-                title: Text(
-                  name,
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineMedium!
-                      .copyWith(color: Colors.white),
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      name,
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineMedium!
+                          .copyWith(color: Colors.white),
+                      overflow: TextOverflow.fade,
+                    ),
+                    IconButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, "/account");
+                        },
+                        icon: Icon(
+                          Icons.edit,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ))
+                  ],
                 ),
               ),
             ),

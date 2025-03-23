@@ -1,3 +1,5 @@
+import 'package:asr_project/models/enum/color_platte.dart';
+import 'package:asr_project/models/enum/workspace_icon.dart';
 import 'package:asr_project/models/user.dart';
 import 'package:asr_project/models/workspace_icon_model.dart';
 import 'package:asr_project/models/workspace_member.dart';
@@ -42,12 +44,17 @@ class Workspace {
       {String? id,
       String? name,
       String? description,
+      WorkspaceIconEnum? workspaceIconName,
+      ColorPalette? workspaceIconColor,
       List<Tuple2<User?, WorkspaceMember>>? members}) {
     return Workspace(
       id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
-      icon: icon,
+      icon: icon.copyWith(
+        iconEnum: workspaceIconName ?? icon.iconEnum,
+        colorEnum: workspaceIconColor ?? icon.colorEnum,
+      ),
       members: members ?? this.members,
     );
   }

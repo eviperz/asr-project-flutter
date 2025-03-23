@@ -10,6 +10,7 @@ class DiaryFolderBlocks extends StatelessWidget {
   final Function onCreateDiary;
   final Function onDeleteFolder;
   final bool creatingFolderMode;
+  final bool canEdit;
 
   const DiaryFolderBlocks({
     super.key,
@@ -19,6 +20,7 @@ class DiaryFolderBlocks extends StatelessWidget {
     required this.onCreateDiary,
     required this.onDeleteFolder,
     required this.creatingFolderMode,
+    required this.canEdit,
   });
 
   @override
@@ -35,12 +37,13 @@ class DiaryFolderBlocks extends StatelessWidget {
               "All Diaries",
               style: Theme.of(context).textTheme.headlineMedium,
             ),
-            IconButton(
-              onPressed: () {
-                onCreateFolder();
-              },
-              icon: Icon(Icons.add),
-            ),
+            if (canEdit)
+              IconButton(
+                onPressed: () {
+                  onCreateFolder();
+                },
+                icon: Icon(Icons.add),
+              ),
           ],
         ),
         Card(
@@ -54,6 +57,7 @@ class DiaryFolderBlocks extends StatelessWidget {
               final FocusNode focusNode = FocusNode();
               focusNode.requestFocus();
               return DiaryFolder(
+                canEdit: canEdit,
                 folder: folder,
                 folders: folders,
                 diaries: diaries,

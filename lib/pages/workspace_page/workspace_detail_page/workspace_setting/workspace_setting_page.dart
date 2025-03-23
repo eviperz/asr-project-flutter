@@ -32,16 +32,18 @@ class WorkspaceSettingPage extends ConsumerStatefulWidget {
 }
 
 class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
-  // late Workspace _workspace;
   final TextEditingController _nameTextEditingController =
       TextEditingController();
+  final FocusNode _nameFocusNode = FocusNode();
+
   final TextEditingController _descriptionTextEditingController =
       TextEditingController();
+  final FocusNode _descriptionFocusNode = FocusNode();
+
   late List<Tuple2<User?, WorkspaceMember>> _members = [];
   final List<WorkspaceMemberInviting> _invitedMemberEmails = [];
   late WorkspaceIconEnum _workspaceIconEnum;
   late ColorPalette _colorEnum;
-  late bool _isEdit = false;
 
   @override
   void initState() {
@@ -51,13 +53,30 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
     _members = widget.workspace.members;
     _workspaceIconEnum = widget.workspace.icon.iconEnum;
     _colorEnum = widget.workspace.icon.colorEnum;
+
+    _nameFocusNode.addListener(() {
+      setState(() {});
+      if (!_nameFocusNode.hasFocus) {
+        _updateWorkspaceName(_nameTextEditingController.text.trim());
+      }
+    });
+
+    _descriptionFocusNode.addListener(() {
+      setState(() {});
+      if (!_descriptionFocusNode.hasFocus) {
+        _updateWorkspaceDescription(
+            _descriptionTextEditingController.text.trim());
+      }
+    });
   }
 
   @override
   void dispose() {
     super.dispose();
     _nameTextEditingController.dispose();
+    _nameFocusNode.dispose();
     _descriptionTextEditingController.dispose();
+    _descriptionFocusNode.dispose();
   }
 
   void _updateWorkspace(WorkspaceDetail workspaceDetail) async {
@@ -70,10 +89,6 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Failed to update workspace")),
       );
-    } else {
-      setState(() {
-        _isEdit = true;
-      });
     }
   }
 
@@ -116,7 +131,6 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
     if (workspace != null) {
       setState(() {
         _members = workspace.members;
-        _isEdit = true;
       });
 
       _invitedMemberEmails.clear();
@@ -133,7 +147,6 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
     setState(() {
       _workspaceIconEnum = iconEnum;
       _colorEnum = colorEnum;
-      _isEdit = true;
     });
   }
 
@@ -145,7 +158,6 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
       _members = _members
           .where((member) => member.item2.id != workspaceMemberId)
           .toList();
-      _isEdit = true;
     });
   }
 
@@ -188,7 +200,9 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(
-          onPressed: () => Navigator.pop(context, _isEdit),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
         title: Text("Workspace Setting"),
       ),
@@ -196,7 +210,7 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
         child: Padding(
           padding: EdgeInsets.all(20.0),
           child: Column(
-            spacing: 16.0,
+            spacing: 8.0,
             children: [
               SizedBox(
                 height: 150,
@@ -243,10 +257,10 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
               ),
               WorkspaceNameAndDescriptionTextField(
                 nameTextEditingController: _nameTextEditingController,
+                nameFocusNode: _nameFocusNode,
                 descriptionTextEditingController:
                     _descriptionTextEditingController,
-                updateName: _updateWorkspaceName,
-                updateDescription: _updateWorkspaceDescription,
+                descriptionFocusNode: _descriptionFocusNode,
                 reload: () {
                   setState(() {});
                 },
@@ -280,33 +294,79 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
                           icon: Icon(Icons.add))
                     ],
                   ),
-                  SizedBox(
-                    height: 300,
-                    child: ListView.separated(
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: _members.length,
-                        itemBuilder: (context, index) {
-                          final User? user = _members[index].item1;
-                          final WorkspaceMember workspaceMember =
-                              _members[index].item2;
-                          return workspaceMember.status ==
-                                  WorkspaceMemberStatus.accepted
-                              ? ListTile(
-                                  leading: ProfileImage(),
-                                  title: Text(user!.name),
-                                  subtitle: Container(
-                                    alignment: Alignment.centerLeft,
-                                    child: GestureDetector(
-                                      onTapDown: (TapDownDetails details) =>
-                                          _updatePermission(
-                                              workspaceMember.id,
-                                              workspaceMember.permission ==
-                                                      WorkspacePermission.viewer
-                                                  ? WorkspacePermission.editor
-                                                  : WorkspacePermission.viewer),
-                                      child: Chip(
-                                        padding: EdgeInsets.all(4.0),
-                                        label: Row(
+                  ListView.separated(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: _members.length,
+                      itemBuilder: (context, index) {
+                        final User? user = _members[index].item1;
+                        final WorkspaceMember workspaceMember =
+                            _members[index].item2;
+                        return ListTile(
+                          titleAlignment: ListTileTitleAlignment.top,
+                          leading: Padding(
+                            padding: const EdgeInsets.only(top: 10.0),
+                            child: ProfileImage(size: 45),
+                          ),
+                          title: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: 4.0,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10.0),
+                                child: Text(
+                                  workspaceMember.status ==
+                                          WorkspaceMemberStatus.accepted
+                                      ? user!.name
+                                      : workspaceMember.email,
+                                ),
+                              ),
+                              workspaceMember.status ==
+                                      WorkspaceMemberStatus.pending
+                                  ? Text(
+                                      "Pending",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelLarge!
+                                          .copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .tertiary),
+                                    )
+                                  : Text(
+                                      workspaceMember.permission ==
+                                              WorkspacePermission.owner
+                                          ? "Owner"
+                                          : "Member",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelLarge!
+                                          .copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .tertiary),
+                                    ),
+                            ],
+                          ),
+                          subtitle: workspaceMember.permission !=
+                                  WorkspacePermission.owner
+                              ? Container(
+                                  alignment: Alignment.centerLeft,
+                                  child: GestureDetector(
+                                    onTapDown: (TapDownDetails details) =>
+                                        _updatePermission(
+                                            workspaceMember.id,
+                                            workspaceMember.permission ==
+                                                    WorkspacePermission.viewer
+                                                ? WorkspacePermission.editor
+                                                : WorkspacePermission.viewer),
+                                    child: Chip(
+                                      padding: EdgeInsets.all(4.0),
+                                      label: SizedBox(
+                                        width: 70,
+                                        child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
                                               Text(
@@ -320,61 +380,48 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
                                                 Icon(
                                                   Icons
                                                       .arrow_drop_down_outlined,
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onPrimary,
                                                   size: 18,
                                                 )
                                             ]),
                                       ),
+                                      labelStyle: Theme.of(context)
+                                          .textTheme
+                                          .labelSmall!
+                                          .copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onPrimary),
                                     ),
                                   ),
-                                  trailing: workspaceMember.permission !=
-                                          WorkspacePermission.owner
-                                      ? IconButton(
-                                          onPressed: () {
-                                            _removeMember(workspaceMember.id);
-                                          },
-                                          icon: Icon(
-                                            Icons.remove_circle,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .error,
-                                          ),
-                                        )
-                                      : null,
                                 )
-                              : ListTile(
-                                  leading: ProfileImage(),
-                                  title: Text(workspaceMember.email),
-                                  subtitle: Container(
-                                    alignment: Alignment.centerLeft,
-                                    child: Chip(
-                                      backgroundColor: Theme.of(context)
-                                          .colorScheme
-                                          .tertiary,
-                                      padding: EdgeInsets.all(4.0),
-                                      label: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              WorkspaceMemberStatus
-                                                  .toStringWorkspaceMemberPermission(
-                                                      workspaceMember.status),
-                                            ),
-                                          ]),
+                              : null,
+                          trailing: workspaceMember.permission !=
+                                  WorkspacePermission.owner
+                              ? Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      onPressed: () {
+                                        _removeMember(workspaceMember.id);
+                                      },
+                                      icon: Icon(
+                                        Icons.person_remove,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .tertiary,
+                                        size: 24,
+                                      ),
                                     ),
-                                  ),
-                                  trailing: IconButton(
-                                    onPressed: () {
-                                      _removeMember(workspaceMember.id);
-                                    },
-                                    icon: Icon(
-                                      Icons.remove_circle,
-                                      color:
-                                          Theme.of(context).colorScheme.error,
-                                    ),
-                                  ));
-                        },
-                        separatorBuilder: (context, index) => const Divider()),
-                  ),
+                                  ],
+                                )
+                              : null,
+                          contentPadding: EdgeInsets.only(right: 0, bottom: 10),
+                        );
+                      },
+                      separatorBuilder: (context, index) => const Divider()),
                 ],
               ),
               Container(
@@ -383,6 +430,7 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
                 height: 60,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.error,
                     alignment: Alignment.centerLeft,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0),
@@ -393,7 +441,8 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
                   },
                   child: Text(
                     "Delete Workspace",
-                    style: TextStyle(color: Colors.red),
+                    style:
+                        TextStyle(color: Theme.of(context).colorScheme.onError),
                   ),
                 ),
               ),

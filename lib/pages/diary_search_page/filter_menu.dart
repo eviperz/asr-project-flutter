@@ -1,3 +1,4 @@
+import 'package:asr_project/models/tag.dart';
 import 'package:asr_project/pages/diary_search_page/sort_filter_widget.dart';
 import 'package:asr_project/pages/diary_search_page/tags_filter.dart';
 import 'package:flutter/material.dart';
@@ -5,9 +6,9 @@ import 'package:flutter/material.dart';
 class FilterMenu extends StatelessWidget {
   final VoidCallback onSort;
   final bool isAscending;
-  final Function(String) onSelectTags;
+  final Function(Tag) onSelectTags;
   final Function() clearActiveTags;
-  final Set<String> activeTags;
+  final Set<Tag> activeTags;
 
   const FilterMenu({
     super.key,
