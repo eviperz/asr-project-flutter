@@ -9,7 +9,7 @@ class AsrSocketService {
     print("Initializing socket...");
 
     _socket = IO.io(
-        'https://ws-faster-minnesota-coordinates.trycloudflare.com/',
+        'https://scenic-pending-associates-href.trycloudflare.com/',
         <String, dynamic>{
           'transports': ['websocket'],
           'autoConnect': false,

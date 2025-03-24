@@ -57,7 +57,12 @@ class WorkspaceList extends StatelessWidget {
             },
           )
         else
-          Center(child: Text("No Workspace"))
+          Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 20.0), // Optional spacing
+              child: Text("No Workspace"),
+            ),
+          ),
       ],
     );
   }

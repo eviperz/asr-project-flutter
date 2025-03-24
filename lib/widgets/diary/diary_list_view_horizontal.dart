@@ -20,7 +20,13 @@ class DiaryListViewHorizontal extends StatelessWidget {
       children: [
         Container(
           padding: EdgeInsets.symmetric(horizontal: 20.0),
-          child: Text(title, style: Theme.of(context).textTheme.headlineMedium),
+          child: Text(
+            title,
+            style: Theme.of(context).textTheme.headlineMedium,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            softWrap: false,
+          ),
         ),
         SizedBox(
           height: 170,
