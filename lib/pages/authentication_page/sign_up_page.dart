@@ -1,15 +1,16 @@
-import 'package:asr_project/services/auth_service.dart';
+import 'package:asr_project/providers/auth_state_provider.dart';
 import 'package:asr_project/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SignUpPage extends StatefulWidget {
+class SignUpPage extends ConsumerStatefulWidget {
   const SignUpPage({super.key});
 
   @override
-  State<SignUpPage> createState() => _SignUpPageState();
+  ConsumerState<SignUpPage> createState() => _SignUpPageState();
 }
 
-class _SignUpPageState extends State<SignUpPage> {
+class _SignUpPageState extends ConsumerState<SignUpPage> {
   final TextEditingController _nameTextEditingController =
       TextEditingController();
   final TextEditingController _emailTextEditController =
@@ -19,7 +20,6 @@ class _SignUpPageState extends State<SignUpPage> {
   final FocusNode _nameFocusNode = FocusNode();
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
-  final AuthService _authService = AuthService();
   bool _isLoading = false; // Track the loading state
 
   late int _stepIndex;
@@ -107,7 +107,8 @@ class _SignUpPageState extends State<SignUpPage> {
     });
 
     try {
-      final result = await _authService.signUp(name, email, password);
+      final result =
+          await ref.read(authState.notifier).signUp(name, email, password);
       setState(() {
         _isLoading = false;
       });

@@ -19,8 +19,6 @@ class WorkspaceList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -39,25 +37,33 @@ class WorkspaceList extends StatelessWidget {
             ),
           ],
         ),
-        if (workspaces.isNotEmpty)
-          ListView.separated(
-            itemCount: workspaces.length,
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemBuilder: (context, index) {
-              final Workspace workspace = workspaces[index];
-              return WorkspaceTile(
-                workspace: workspace,
-                // isStarred: starredWorkspace.contains(workspace.id),
-                // toggleStarred: toggleStarred,
-              );
-            },
-            separatorBuilder: (context, index) {
-              return Divider();
-            },
-          )
-        else
-          Center(child: Text("No Workspace"))
+        Expanded(
+          child: workspaces.isNotEmpty
+              ? ListView.separated(
+                  itemCount: workspaces.length,
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    final Workspace workspace = workspaces[index];
+                    return WorkspaceTile(
+                      workspace: workspace,
+                      // isStarred: starredWorkspace.contains(workspace.id),
+                      // toggleStarred: toggleStarred,
+                    );
+                  },
+                  separatorBuilder: (context, index) {
+                    return Divider();
+                  },
+                )
+              : Center(
+                  child: Text(
+                  'No Workspace',
+                  style: TextTheme.of(context).labelLarge?.copyWith(
+                        fontStyle: FontStyle.italic,
+                        color: ColorScheme.of(context).tertiary,
+                      ),
+                )),
+        )
       ],
     );
   }

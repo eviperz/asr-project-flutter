@@ -1,19 +1,17 @@
-import 'package:asr_project/main.dart';
 import 'package:asr_project/pages/authentication_page/sign_up_page.dart';
-import 'package:asr_project/services/auth_service.dart';
+import 'package:asr_project/providers/auth_state_provider.dart';
 import 'package:asr_project/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SignInPage extends StatefulWidget {
+class SignInPage extends ConsumerStatefulWidget {
   const SignInPage({super.key});
 
   @override
-  State<SignInPage> createState() => _SignInPageState();
+  ConsumerState<SignInPage> createState() => _SignInPageState();
 }
 
-class _SignInPageState extends State<SignInPage> {
-  final AuthService _authService = AuthService();
-
+class _SignInPageState extends ConsumerState<SignInPage> {
   final TextEditingController _emailTextEditController =
       TextEditingController();
   final TextEditingController _passwordTextEditController =
@@ -22,9 +20,13 @@ class _SignInPageState extends State<SignInPage> {
   final FocusNode _passwordFocusNode = FocusNode();
   late bool _isSubmit = false;
 
+  late final AuthNotifier _authService;
+
   @override
   void initState() {
     super.initState();
+
+    _authService = ref.read(authState.notifier);
 
     _emailTextEditController.addListener(() => setState(() {}));
     _passwordTextEditController.addListener(() => setState(() {}));
@@ -80,13 +82,7 @@ class _SignInPageState extends State<SignInPage> {
 
       try {
         final user = await _authService.login(email, password);
-
-        if (user != null) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => MainScreen()),
-          );
-        } else {
+        if (user == null) {
           _showErrorDialog("Invalid email or password. Please try again.");
         }
       } catch (e) {

@@ -90,22 +90,10 @@ class _WorkspacePageState extends ConsumerState<WorkspacePage> {
                               WorkspaceMemberStatus.accepted))
                       .toList();
                   return Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          if (starredWorkspace.isNotEmpty)
-                            StarredWorkspaceList(
-                              workspaces: workspaces,
-                              starredWorkspace: starredWorkspace,
-                              toggleStarred: _toggleStarredWorkspace,
-                            ),
-                          WorkspaceList(
-                            workspaces: _filterWorkspace(workspaces),
-                            starredWorkspace: starredWorkspace,
-                            toggleStarred: _toggleStarredWorkspace,
-                          ),
-                        ],
-                      ),
+                    child: WorkspaceList(
+                      workspaces: _filterWorkspace(workspaces),
+                      starredWorkspace: starredWorkspace,
+                      toggleStarred: _toggleStarredWorkspace,
                     ),
                   );
                 },

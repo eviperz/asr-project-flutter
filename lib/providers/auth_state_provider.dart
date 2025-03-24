@@ -1,11 +1,19 @@
 import 'dart:convert';
 import 'dart:developer';
-
 import 'package:asr_project/config.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
-class AuthService {
+final authState = StateNotifierProvider<AuthNotifier, bool>((ref) {
+  return AuthNotifier();
+});
+
+class AuthNotifier extends StateNotifier<bool> {
   final String baseUrl = "${AppConfig.baseUrl}/auth";
+  AuthNotifier() : super(false) {
+    _checkAuth();
+  }
+
   Future<Map<String, String>> _getHeaders() async {
     String? token = await AppConfig.getToken();
 
@@ -16,14 +24,20 @@ class AuthService {
     };
   }
 
+  Future<void> _checkAuth() async {
+    if (await AppConfig.isAuthenticated()) {
+      state = true;
+      return;
+    }
+    state = false;
+  }
+
   Future<String?> login(String email, String password) async {
     try {
       final headers = {
         'Content-Type': 'application/json',
         'Accept-Charset': 'utf-8',
       };
-      log(email);
-      log(password);
       final response = await http.post(
         Uri.parse("$baseUrl/login"),
         headers: headers,
@@ -37,6 +51,7 @@ class AuthService {
         if (userId != null) {
           await AppConfig.setUserId(userId);
         }
+        _checkAuth();
         return userId;
       }
       throw Exception("Failed to login: ${response.statusCode}");
@@ -48,9 +63,6 @@ class AuthService {
 
   Future<String?> signUp(String name, String email, String password) async {
     try {
-      log(name);
-      log(email);
-      log(password);
       final headers = {
         'Content-Type': 'application/json',
         'Accept-Charset': 'utf-8',
@@ -60,8 +72,8 @@ class AuthService {
         headers: headers,
         body: jsonEncode({'name': name, 'email': email, 'password': password}),
       );
-
       if (response.statusCode == 200) {
+        _checkAuth();
         return "success";
       }
       throw Exception("Failed to sign up: ${response.statusCode}");
@@ -69,6 +81,11 @@ class AuthService {
       log("Error during sign up: $e");
       return null;
     }
+  }
+
+  Future<void> signOut() async {
+    await AppConfig.removeToken();
+    await _checkAuth();
   }
 
   Future<String?> me() async {
@@ -79,6 +96,7 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        _checkAuth();
         return data['id'];
       }
       throw Exception("Failed to fetch user: ${response.statusCode}");

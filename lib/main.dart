@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/user.dart';
 import 'package:asr_project/models/workspace.dart';
@@ -11,6 +13,7 @@ import 'package:asr_project/pages/workspace_page/workspace_detail_page/workspace
 import 'package:asr_project/pages/workspace_page/workspace_detail_page/workspace_setting/workspace_setting_page.dart';
 import 'package:asr_project/pages/workspace_page/workspace_invitation_page/workspace_invitation.dart';
 import 'package:asr_project/pages/workspace_page/workspace_page/workspace_page.dart';
+import 'package:asr_project/providers/auth_state_provider.dart';
 import 'package:asr_project/providers/theme_provider.dart';
 import 'package:asr_project/providers/user_provider.dart';
 import 'package:asr_project/providers/workspace_provider.dart';
@@ -31,10 +34,12 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = ref.watch(themeProvider);
+    final isAuthenticate = ref.watch(authState);
+
     return MaterialApp(
       title: "ASR App",
       theme: theme,
-      home: SignInPage(),
+      home: isAuthenticate ? MainScreen() : SignInPage(),
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case "/signin":

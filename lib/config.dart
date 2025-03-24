@@ -1,4 +1,6 @@
+import 'dart:developer';
 
+import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 // import 'package:shared_preferences/shared_preferences.dart';
@@ -28,8 +30,30 @@ class AppConfig {
     token = newToken;
   }
 
+  static Future<void> removeToken() async {
+    await _storage.delete(key: "token");
+  }
+
   // Get token securely
   static Future<String?> getToken() async {
     return await _storage.read(key: "token");
+  }
+
+  static Future<bool> isAuthenticated() async {
+    final token = await getToken();
+
+    if (token == null) return false;
+
+    try {
+      final jwt = JWT.decode(token);
+      final exp = jwt.payload['exp']; // Expiration timestamp (UNIX time)
+
+      if (exp == null) return false; // No expiration time in token
+
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      return exp > now; // Token is valid if expiration time is in the future
+    } catch (e) {
+      return false; // Token is invalid
+    }
   }
 }
