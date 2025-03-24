@@ -40,7 +40,7 @@ PODS:
   - Flutter (1.0.0)
   - flutter_keyboard_visibility_temp_fork (0.0.1):
     - Flutter
-  - flutter_secure_storage (3.3.1):
+  - flutter_secure_storage (6.0.0):
     - Flutter
   - flutter_sound (9.26.0):
     - Flutter
@@ -130,7 +130,7 @@ SPEC CHECKSUMS:
   file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_keyboard_visibility_temp_fork: 95b2d534bacf6ac62e7fcbe5c2a9e2c2a17ce06f
-  flutter_secure_storage: 50035aef357c5a8bdd67fd6bc81370d46efc4d16
+  flutter_secure_storage: 1ed9476fba7e7a782b22888f956cce43e2c62f13
   flutter_sound: 52bc351d9035fede9085cbf99c296c62897ceadd
   flutter_sound_core: 938c91404747d79bf14a0c85b90a5d95ed7ed5c4
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
