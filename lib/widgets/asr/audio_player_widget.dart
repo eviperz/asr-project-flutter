@@ -4,7 +4,6 @@ import 'package:asr_project/widgets/asr/edit_audio_widget.dart';
 import 'package:audioplayers/audioplayers.dart' as audioplayers;
 import 'package:flutter/material.dart';
 import 'package:asr_project/services/asr_service.dart';
-import 'package:flutter/services.dart';
 
 class AudioPlayerWidget extends StatefulWidget {
   final String audioName;
@@ -35,12 +34,13 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   Duration _position = Duration.zero;
   String? _audioUrl;
   String _transcribeResult = "";
-  late String _currentAudioName;
+  String _currentAudioName = "";
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
+    _currentAudioName = widget.audioName;
     _audioPlayer = audioplayers.AudioPlayer();
 
     _playerStateSubscription =
@@ -231,8 +231,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => EditAudioWidget(
-                                      audioName:
-                                          _currentAudioName, // Use local state
+                                      audioName: _currentAudioName,
                                       initialTranscribe: _transcribeResult,
                                     ),
                                   ),
