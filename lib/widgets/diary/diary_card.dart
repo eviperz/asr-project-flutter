@@ -88,6 +88,9 @@ class _DiaryCardState extends State<DiaryCard> {
                   Text(
                     widget.diary.title,
                     style: Theme.of(context).textTheme.headlineMedium,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    softWrap: false,
                   ),
                 ],
               ),

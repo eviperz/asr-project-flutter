@@ -1,10 +1,11 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:developer';
+import 'package:asr_project/services/asr_socket_service.dart';
 import 'package:asr_project/widgets/asr/edit_audio_widget.dart';
 import 'package:audioplayers/audioplayers.dart' as audioplayers;
 import 'package:flutter/material.dart';
 import 'package:asr_project/services/asr_service.dart';
-import 'package:flutter/services.dart';
 
 class AudioPlayerWidget extends StatefulWidget {
   final String audioName;
@@ -25,7 +26,10 @@ class AudioPlayerWidget extends StatefulWidget {
 }
 
 class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
+  late StreamController<String> _transcriptionStreamController =
+      StreamController.broadcast();
   final AsrService _asrService = AsrService();
+  final AsrSocketService _asrSocketService = AsrSocketService();
   late audioplayers.AudioPlayer _audioPlayer;
   late StreamSubscription _playerStateSubscription;
   late StreamSubscription _durationSubscription;
@@ -63,8 +67,10 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     });
 
     _transcribeResult = widget.initialTranscribe;
+    _currentAudioName = widget.audioName;
 
-    _fetchAudioUrl(); // Get URL on init
+    _fetchAudioUrl();
+    _asrSocketService.initSocket();
   }
 
   @override
@@ -73,10 +79,10 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     _durationSubscription.cancel();
     _positionSubscription.cancel();
     _audioPlayer.dispose();
+    _asrSocketService.disconnect(); // Disconnect Socket.IO
     super.dispose();
   }
 
-  /// **Fetch audio URL only once**
   Future<void> _fetchAudioUrl() async {
     try {
       log("Fetching audio URL...");
@@ -94,7 +100,6 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     }
   }
 
-  /// **Play or Resume Audio**
   Future<void> _play() async {
     if (_audioUrl == null) {
       log("No URL available, waiting...");
@@ -112,7 +117,6 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     }
   }
 
-  /// **Pause Audio**
   Future<void> _pause() async {
     await _audioPlayer.pause();
     setState(() {
@@ -120,30 +124,59 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     });
   }
 
-  /// **Seek in Audio**
   void _seek(double value) {
     final position =
         Duration(milliseconds: (value * _duration.inMilliseconds).toInt());
     _audioPlayer.seek(position);
   }
 
-  Future<void> _transcribeAudio() async {
+  final Queue<String> _chunkQueue = Queue<String>();
+  Completer<void>? _processingCompleter;
+
+  Future<void> eachChunk(String chunk) async {
+    _chunkQueue.add(chunk);
+
+    if (_processingCompleter != null && !_processingCompleter!.isCompleted) {
+      await _processingCompleter!.future;
+    }
+
+    _processingCompleter = Completer<void>();
+
+    while (_chunkQueue.isNotEmpty) {
+      String currentChunk = _chunkQueue.removeFirst();
+
+      if (!mounted) break;
+
+      setState(() {
+        _transcribeResult += "$currentChunk ";
+      });
+
+      if (!_transcriptionStreamController.isClosed) {
+        _transcriptionStreamController.add(_transcribeResult);
+      }
+
+      widget.onTranscribe(_transcribeResult);
+      await Future.delayed(Duration(seconds: 3));
+    }
+
+    _processingCompleter?.complete();
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  void _transcribeAudio() {
     setState(() {
       _isLoading = true;
+      _transcribeResult = "";
     });
 
     try {
-      final String result = await _asrService.transcribeText(widget.audioName);
-      setState(() {
-        _transcribeResult = result;
-        _isLoading = false;
-      });
-      widget.onTranscribe(result);
+      _transcriptionStreamController.close();
+      _transcriptionStreamController = StreamController.broadcast();
+      _asrSocketService.sendAudioForTranscription(_audioUrl!, eachChunk);
     } catch (e) {
-      setState(() {
-        _transcribeResult = "Error: $e";
-        _isLoading = false;
-      });
+      log("Error during transcription: $e");
     }
   }
 
@@ -183,8 +216,9 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                                   _isPlaying ? Icons.pause : Icons.play_arrow),
                               onPressed: _isPlaying ? _pause : _play,
                               style: ButtonStyle(
-                                backgroundColor: WidgetStateProperty.all<Color>(
-                                    Colors.deepPurpleAccent),
+                                backgroundColor:
+                                    MaterialStateProperty.all<Color>(
+                                        Colors.deepPurpleAccent),
                               ),
                             ),
                           ),
@@ -217,59 +251,85 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Audio: "),
-                        Expanded(
-                          child: Text(_currentAudioName),
+                        Text("Audio:"),
+                        Text(
+                          _currentAudioName,
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        IconButton(
-                            icon: Icon(Icons.arrow_forward),
-                            onPressed: () async {
-                              if (_audioUrl != null) {
-                                final result = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => EditAudioWidget(
-                                      audioName:
-                                          _currentAudioName, // Use local state
-                                      initialTranscribe: _transcribeResult,
-                                    ),
-                                  ),
-                                );
-
-                                if (result != null &&
-                                    result is Map<String, String>) {
-                                  setState(() {
-                                    _currentAudioName = result["audioName"] ??
-                                        _currentAudioName;
-                                    _transcribeResult =
-                                        result["transcription"] ??
-                                            _transcribeResult;
-                                  });
-                                  widget.onAudioNameChange(_currentAudioName);
-                                  widget.onTranscribe(_transcribeResult);
-                                }
-                              }
-                            }),
                       ],
                     ),
                     SizedBox(height: 10),
-                    ElevatedButton(
-                      onPressed: _transcribeAudio,
-                      child: Text("Transcribe Audio"),
-                    ),
-                    // Display the transcription result as a Text widget
-                    SizedBox(height: 20),
-                    _isLoading
-                        ? Center(child: CircularProgressIndicator())
-                        : Text(
-                            _transcribeResult.isNotEmpty
-                                ? "Transcription: ${_truncateText(_transcribeResult, 150)}"
-                                : "No transcription available",
-                            style: TextStyle(
-                                fontSize: 16, fontStyle: FontStyle.italic),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        ElevatedButton(
+                          onPressed: _isLoading ? null : _transcribeAudio,
+                          child: Text("Transcribe Audio"),
+                        ),
+                        Visibility(
+                          visible: _isLoading,
+                          child: SizedBox.square(
+                            dimension: 20,
+                            child: CircularProgressIndicator(),
                           ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.arrow_forward),
+                          onPressed: () async {
+                            if (_audioUrl != null) {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => EditAudioWidget(
+                                    audioName: _currentAudioName,
+                                    initialTranscribe: _transcribeResult,
+                                  ),
+                                ),
+                              );
+
+                              if (result != null &&
+                                  result is Map<String, String>) {
+                                setState(() {
+                                  _currentAudioName =
+                                      result["audioName"] ?? _currentAudioName;
+                                  _transcribeResult = result["transcription"] ??
+                                      _transcribeResult;
+                                });
+                                widget.onAudioNameChange(_currentAudioName);
+                                widget.onTranscribe(_transcribeResult);
+                              }
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    if (_isLoading)
+                      StreamBuilder<String>(
+                        stream: _transcriptionStreamController.stream,
+                        builder: (context, snapshot) {
+                          return Text(
+                            snapshot.data ?? "กำลังแปลงเสียง...",
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .copyWith(
+                                    fontStyle: FontStyle.italic,
+                                    color:
+                                        Theme.of(context).colorScheme.tertiary),
+                          );
+                        },
+                      )
+                    else
+                      Text(
+                        _truncateText(_transcribeResult, 150),
+                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                            fontStyle: FontStyle.italic,
+                            color: Theme.of(context).colorScheme.tertiary),
+                      ),
                   ],
                 ),
               ),

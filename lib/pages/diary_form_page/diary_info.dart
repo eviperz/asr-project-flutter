@@ -78,29 +78,32 @@ class DiaryInfo extends StatelessWidget {
     required String label,
     required Widget child,
   }) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: SizedBox(
-        width: 120,
-        height: 40,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: Theme.of(context).colorScheme.tertiary,
-            ),
-            SizedBox(width: 8),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                    color: Theme.of(context).colorScheme.tertiary,
-                  ),
-            ),
-          ],
-        ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 16,
+                color: Theme.of(context).colorScheme.tertiary,
+              ),
+              SizedBox(width: 4), // Less space between icon & text
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.tertiary,
+                    ),
+              ),
+            ],
+          ),
+          SizedBox(width: 60),
+          Expanded(child: child),
+        ],
       ),
-      title: child,
     );
 
     // return Padding(
