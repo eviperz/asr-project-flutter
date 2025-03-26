@@ -97,7 +97,7 @@ class AuthNotifier extends StateNotifier<bool> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         _checkAuth();
-        return data['id'];
+        return data['user']['id'];
       }
       throw Exception("Failed to fetch user: ${response.statusCode}");
     } catch (e) {
