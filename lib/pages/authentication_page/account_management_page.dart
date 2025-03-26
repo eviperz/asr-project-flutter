@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:asr_project/models/user.dart';
 import 'package:asr_project/providers/user_provider.dart';
 import 'package:asr_project/widgets/custom_textfield.dart';
 import 'package:asr_project/widgets/profile_image.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,6 +20,18 @@ class _AccountManagementPageState extends ConsumerState<AccountManagementPage> {
       TextEditingController();
   final TextEditingController _emailTextEditingController =
       TextEditingController();
+
+  Future<File?> _pickImage() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      File file = File(result.files.single.path ?? '');
+      return file;
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +51,8 @@ class _AccountManagementPageState extends ConsumerState<AccountManagementPage> {
               String email = user.email;
               _emailTextEditingController.text = email;
 
-              final Image image = user.profile;
+              final Image image = user.getProfile();
+
               return Column(
                 children: [
                   Padding(
@@ -54,7 +70,15 @@ class _AccountManagementPageState extends ConsumerState<AccountManagementPage> {
                             bottom: 0,
                             right: 0,
                             child: IconButton.filled(
-                                onPressed: () {}, icon: Icon(Icons.edit)))
+                                onPressed: () async {
+                                  File? file = await _pickImage();
+                                  if (file != null) {
+                                    ref
+                                        .read(userProvider.notifier)
+                                        .updateUser(image: file);
+                                  }
+                                },
+                                icon: Icon(Icons.edit)))
                       ],
                     ),
                   ),
@@ -67,12 +91,15 @@ class _AccountManagementPageState extends ConsumerState<AccountManagementPage> {
                     height: 32,
                   ),
                   Divider(),
-                  SecondCustomTextField(
+                  AccountTextfield(
                       label: "Name",
                       hintText: "Enter Name",
-                      controller: _nameTextEditingController),
+                      controller: _nameTextEditingController,
+                      onSubmit: (value) {
+                        ref.read(userProvider.notifier).updateUser(name: value);
+                      }),
                   Divider(),
-                  SecondCustomTextField(
+                  AccountTextfield(
                       label: "Email",
                       hintText: "Enter Email",
                       controller: _emailTextEditingController),
@@ -88,23 +115,25 @@ class _AccountManagementPageState extends ConsumerState<AccountManagementPage> {
   }
 }
 
-class SecondCustomTextField extends StatefulWidget {
-  const SecondCustomTextField({
+class AccountTextfield extends StatefulWidget {
+  const AccountTextfield({
     super.key,
     required this.label,
     required this.hintText,
     required this.controller,
+    this.onSubmit,
   });
 
   final TextEditingController controller;
   final String label;
   final String hintText;
+  final Function(String)? onSubmit;
 
   @override
-  State<SecondCustomTextField> createState() => _SecondCustomTextFieldState();
+  State<AccountTextfield> createState() => _AccountTextfieldState();
 }
 
-class _SecondCustomTextFieldState extends State<SecondCustomTextField> {
+class _AccountTextfieldState extends State<AccountTextfield> {
   late bool _isEdit = false;
 
   @override
@@ -129,13 +158,15 @@ class _SecondCustomTextFieldState extends State<SecondCustomTextField> {
                       widget.controller.text,
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
-                    TextButton(
+                    if (widget.onSubmit != null)
+                      TextButton(
                         onPressed: () {
                           setState(() {
                             _isEdit = true;
                           });
                         },
-                        child: Text("edit"))
+                        child: Text("edit"),
+                      )
                   ],
                 ),
               )
@@ -162,6 +193,10 @@ class _SecondCustomTextFieldState extends State<SecondCustomTextField> {
                             setState(() {
                               _isEdit = false;
                             });
+
+                            if (widget.onSubmit != null) {
+                              widget.onSubmit!(widget.controller.text.trim());
+                            }
                           },
                           child: Text("Confirm")),
                     ],

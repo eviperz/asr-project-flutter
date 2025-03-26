@@ -47,13 +47,13 @@ class UserNotifier extends AsyncNotifier<User?> {
     }
   }
 
-  // Future<User?> updateUser({
-  //   String? name,
-  //   File? image,
-  // }) async {
-  //   await _userService.updateUser(
-  //     name: name,
-  //     image: image,
-  //   );
-  // }
+  Future<User?> updateUser({
+    String? name,
+    File? image,
+  }) async {
+    await _userService.updateUser(
+      name: name,
+      image: image,
+    );
+  }
 }

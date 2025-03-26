@@ -39,12 +39,13 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   Duration _position = Duration.zero;
   String? _audioUrl;
   String _transcribeResult = "";
-  late String _currentAudioName;
+  String _currentAudioName = "";
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
+    _currentAudioName = widget.audioName;
     _audioPlayer = audioplayers.AudioPlayer();
 
     _playerStateSubscription =
@@ -284,7 +285,8 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => EditAudioWidget(
-                                    audioName: _currentAudioName,
+                                    audioName:
+                                        _currentAudioName, // Use local state
                                     initialTranscribe: _transcribeResult,
                                   ),
                                 ),

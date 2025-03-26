@@ -28,7 +28,7 @@ class WorkspaceMemberDisplay extends StatelessWidget {
                       color: Theme.of(context).scaffoldBackgroundColor,
                       borderRadius: BorderRadius.circular(24.0)),
                   child: ProfileImage(
-                    profile: memberWithoutOwner[1].profile,
+                    profile: memberWithoutOwner[1].getProfile(),
                   ),
                 ),
               ),
@@ -41,7 +41,7 @@ class WorkspaceMemberDisplay extends StatelessWidget {
                       color: Theme.of(context).scaffoldBackgroundColor,
                       borderRadius: BorderRadius.circular(24.0)),
                   child: ProfileImage(
-                    profile: memberWithoutOwner[0].profile,
+                    profile: memberWithoutOwner[0].getProfile(),
                   ),
                 ),
               ),
@@ -51,7 +51,7 @@ class WorkspaceMemberDisplay extends StatelessWidget {
                   color: Theme.of(context).scaffoldBackgroundColor,
                   borderRadius: BorderRadius.circular(24.0)),
               child: ProfileImage(
-                profile: owner.profile,
+                profile: owner.getProfile(),
               ),
             ),
           ],
