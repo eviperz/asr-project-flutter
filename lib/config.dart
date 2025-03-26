@@ -46,14 +46,14 @@ class AppConfig {
 
     try {
       final jwt = JWT.decode(token);
-      final exp = jwt.payload['exp']; // Expiration timestamp (UNIX time)
+      final exp = jwt.payload['exp'];
 
-      if (exp == null) return false; // No expiration time in token
+      if (exp == null) return false;
 
       final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-      return exp > now; // Token is valid if expiration time is in the future
+      return exp > now;
     } catch (e) {
-      return false; // Token is invalid
+      return false;
     }
   }
 }

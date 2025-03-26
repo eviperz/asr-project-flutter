@@ -21,6 +21,9 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
   bool _isLoading = false; // Track the loading state
+  bool _hasInteractedWithName = false;
+  bool _hasInteractedWithEmail = false;
+  bool _hasInteractedWithPassword = false;
 
   late int _stepIndex;
 
@@ -29,9 +32,15 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     super.initState();
     _stepIndex = 0;
 
-    _nameTextEditingController.addListener(() => setState(() {}));
-    _emailTextEditController.addListener(() => setState(() {}));
-    _passwordTextEditController.addListener(() => setState(() {}));
+    _nameTextEditingController.addListener(() => setState(() {
+          _hasInteractedWithName = true;
+        }));
+    _emailTextEditController.addListener(() => setState(() {
+          _hasInteractedWithEmail = true;
+        }));
+    _passwordTextEditController.addListener(() => setState(() {
+          _hasInteractedWithPassword = true;
+        }));
 
     _nameFocusNode.addListener(() => setState(() {}));
     _emailFocusNode.addListener(() => setState(() {}));
@@ -88,11 +97,11 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
 
   bool _isStepValid() {
     if (_stepIndex == 0) {
-      return _validateName() == null;
+      return _hasInteractedWithName && _validateName() == null;
     } else if (_stepIndex == 1) {
-      return _validateEmail() == null;
+      return _hasInteractedWithEmail && _validateEmail() == null;
     } else if (_stepIndex == 2) {
-      return _validatePassword() == null;
+      return _hasInteractedWithPassword && _validatePassword() == null;
     }
     return false;
   }
@@ -165,6 +174,13 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                 setState(() {
                   _stepIndex += 1;
                 });
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content:
+                        Text('Please fill in the required fields correctly!'),
+                  ),
+                );
               }
             },
             controlsBuilder: (context, details) {
@@ -203,7 +219,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                   hintText: "Enter name",
                   iconData: Icons.person,
                   keyboardType: TextInputType.text,
-                  errorText: _validateName(),
+                  errorText: _hasInteractedWithName ? _validateName() : null,
                   textEditController: _nameTextEditingController,
                   focusNode: _nameFocusNode,
                 ),
@@ -216,7 +232,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                   hintText: "Enter email",
                   iconData: Icons.email,
                   keyboardType: TextInputType.emailAddress,
-                  errorText: _validateEmail(),
+                  errorText: _hasInteractedWithEmail ? _validateEmail() : null,
                   textEditController: _emailTextEditController,
                   focusNode: _emailFocusNode,
                 ),
@@ -229,7 +245,8 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                   hintText: "Enter password",
                   iconData: Icons.password,
                   keyboardType: TextInputType.visiblePassword,
-                  errorText: _validatePassword(),
+                  errorText:
+                      _hasInteractedWithPassword ? _validatePassword() : null,
                   textEditController: _passwordTextEditController,
                   focusNode: _passwordFocusNode,
                 ),
