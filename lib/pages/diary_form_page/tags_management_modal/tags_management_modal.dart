@@ -67,11 +67,35 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
     }
   }
 
-  void _showTagEditModal(Tag tag) {
-    showCupertinoModalPopup(
+  void _showTagEditModal(Tag tag) async {
+    Tag? updatedTag = await showCupertinoModalPopup<Tag>(
       context: context,
       builder: (context) => TagEditModal(tag: tag),
     );
+
+    if (updatedTag != null) {
+      TagDetail updatedTagDetail = TagDetail(
+        name: updatedTag.name,
+        colorEnum: updatedTag.colorEnum,
+      );
+
+      Tag? newTag = await ref
+          .read(tagsProvider.notifier)
+          .updateTag(tag.id, updatedTagDetail);
+
+      if (newTag != null) {
+        setState(() {
+          int index = widget.tags.indexWhere((t) => t.id == newTag.id);
+          if (index != -1) {
+            widget.tags[index] = newTag;
+          }
+
+          ref.invalidate(tagsProvider);
+        });
+
+        widget.onChanged?.call();
+      }
+    }
   }
 
   @override
@@ -80,6 +104,7 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
     final List<Tag> filteredTags = tags
         .where((tag) => !widget.tags.any((t) => t.name == tag.name))
         .toList();
+    final List<Tag> allTags = [...widget.tags, ...filteredTags];
 
     return SafeArea(
       bottom: false,
@@ -100,7 +125,6 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 8,
                   children: [
                     Text(
                       "Tags",
@@ -134,11 +158,11 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
                               Flexible(
                                 child: _buildFilteredTagList(
                                   _controller.text.isNotEmpty
-                                      ? filteredTags
+                                      ? allTags
                                           .where((tag) => tag.name
                                               .contains(_controller.text))
                                           .toList()
-                                      : filteredTags,
+                                      : allTags,
                                 ),
                               ),
                             ],
@@ -157,6 +181,10 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
   }
 
   Widget _buildTagInputField() {
+    final List<Tag> tags = ref.watch(tagsProvider).value ?? [];
+    final List<Tag> filteredTags = tags
+        .where((tag) => widget.tags.any((t) => t.name == tag.name))
+        .toList();
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -171,7 +199,6 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
           color: Theme.of(context).colorScheme.secondary,
         ),
         child: SizedBox(
-          height: 130,
           child: SingleChildScrollView(
             child: Wrap(spacing: 8.0, children: [
               DiaryTagList(
