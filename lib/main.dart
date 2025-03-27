@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/user.dart';
 import 'package:asr_project/models/workspace.dart';
@@ -132,7 +130,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     ];
 
     return Scaffold(
-      drawer: CustomDrawer(name: user?.name ?? "Guest"),
+      drawer: CustomDrawer(user: user),
       appBar: AppBar(
         actions: [
           Padding(

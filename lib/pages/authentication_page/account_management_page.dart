@@ -16,6 +16,7 @@ class AccountManagementPage extends ConsumerStatefulWidget {
 }
 
 class _AccountManagementPageState extends ConsumerState<AccountManagementPage> {
+  bool _isImageLoading = false;
   final TextEditingController _nameTextEditingController =
       TextEditingController();
   final TextEditingController _emailTextEditingController =
@@ -63,6 +64,7 @@ class _AccountManagementPageState extends ConsumerState<AccountManagementPage> {
                           padding: const EdgeInsets.all(16.0),
                           child: ProfileImage(
                             profile: image,
+                            isLoading: _isImageLoading,
                             size: 100,
                           ),
                         ),
@@ -73,9 +75,15 @@ class _AccountManagementPageState extends ConsumerState<AccountManagementPage> {
                                 onPressed: () async {
                                   File? file = await _pickImage();
                                   if (file != null) {
-                                    ref
+                                    setState(() {
+                                      _isImageLoading = true;
+                                    });
+                                    await ref
                                         .read(userProvider.notifier)
                                         .updateUser(image: file);
+                                    setState(() {
+                                      _isImageLoading = false;
+                                    });
                                   }
                                 },
                                 icon: Icon(Icons.edit)))
