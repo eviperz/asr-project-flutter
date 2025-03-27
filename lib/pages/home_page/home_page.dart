@@ -231,6 +231,8 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Widget _buildHomeWelcomeContainer(BuildContext context, String name) {
+    String truncatedName =
+        name.length > 20 ? '${name.substring(0, 20)}...' : name;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Row(
@@ -245,7 +247,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 style: Theme.of(context).textTheme.labelLarge,
               ),
               Text(
-                name,
+                truncatedName,
                 style: Theme.of(context).textTheme.headlineLarge,
               ),
             ],
