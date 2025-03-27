@@ -23,8 +23,9 @@ class Workspace {
   factory Workspace.fromJson(Map<String, dynamic> json) {
     List<Tuple2<User?, WorkspaceMember>> members = [];
     for (final member in json['members']) {
-      User? user =
-          member['user'] != null ? User.fromJson(member['user']) : null;
+      User? user = member['userWithImageUrl'] != null
+          ? User.fromJson(member['userWithImageUrl'])
+          : null;
       WorkspaceMember workspaceMember =
           WorkspaceMember.fromJson(member['workspaceMember']);
 

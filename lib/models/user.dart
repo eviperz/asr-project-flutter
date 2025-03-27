@@ -45,7 +45,7 @@ class User {
   Image getProfile() {
     final Image image = imageUrl != null
         ? Image.network(imageUrl!, fit: BoxFit.cover)
-        : Image.asset("assets/images/default_profile.png", fit: BoxFit.cover);
+        : Image.asset("assets/images/default-profile.png", fit: BoxFit.cover);
     return image;
   }
 
