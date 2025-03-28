@@ -1,5 +1,6 @@
 import 'package:asr_project/pages/authentication_page/sign_up_page.dart';
 import 'package:asr_project/providers/auth_state_provider.dart';
+import 'package:asr_project/providers/user_provider.dart';
 import 'package:asr_project/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -84,6 +85,8 @@ class _SignInPageState extends ConsumerState<SignInPage> {
         final user = await _authService.login(email, password);
         if (user == null) {
           _showErrorDialog("Invalid email or password. Please try again.");
+        } else {
+          ref.read(userProvider.notifier).fetchData();
         }
       } catch (e) {
         _showErrorDialog("An error occurred. Please try again.");

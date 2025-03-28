@@ -30,7 +30,11 @@ class UserNotifier extends AsyncNotifier<User?> {
   final UserService _userService = UserService();
 
   @override
-  Future<User?> build() async {
+  Future<User?> build() {
+    return fetchData();
+  }
+
+  Future<User?> fetchData() async {
     try {
       final headers = await _getHeaders();
       final response =
@@ -38,13 +42,14 @@ class UserNotifier extends AsyncNotifier<User?> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return User.fromJson(data);
+        state = AsyncValue.data(User.fromJson(data));
+        return state.value;
       }
       throw Exception("Failed to fetch user: ${response.statusCode}");
     } catch (e) {
       log("Error fetching user: $e");
-      return null;
     }
+    return null;
   }
 
   Future<void> updateUser({
