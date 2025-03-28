@@ -306,7 +306,8 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
                           titleAlignment: ListTileTitleAlignment.top,
                           leading: Padding(
                             padding: const EdgeInsets.only(top: 10.0),
-                            child: ProfileImage(size: 45),
+                            child: ProfileImage(
+                                profile: user?.getProfile(), size: 45),
                           ),
                           title: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,5 +1,6 @@
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/diary_folder.dart';
+import 'package:asr_project/models/user.dart';
 import 'package:asr_project/providers/diary_folder_provider.dart';
 import 'package:asr_project/providers/tag_provider.dart';
 import 'package:asr_project/providers/user_provider.dart';
@@ -125,7 +126,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final String name = ref.watch(userProvider).value?.name ?? "Guest";
+    final AsyncValue<User?> user = ref.watch(userProvider);
     final AsyncValue<List<DiaryFolderModel>> diaryFoldersAsync =
         ref.watch(diaryFoldersProvider);
 
@@ -134,7 +135,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         data: (diaryFolders) {
           final List<Diary> diaries =
               ref.watch(diaryFoldersProvider.notifier).allDiariesInFolders;
-          return _buildBody(context, diaryFolders, diaries, name);
+          return _buildBody(context, diaryFolders, diaries, user.value);
         },
         loading: () =>
             const Center(child: CircularProgressIndicator.adaptive()),
@@ -166,7 +167,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Widget _buildBody(BuildContext context, List<DiaryFolderModel> diaryFolders,
-      List<Diary> diaries, String name) {
+      List<Diary> diaries, User? user) {
     final DateTime now = DateTime.now();
     final DateTime sevenDaysAgo = now.subtract(const Duration(days: 7));
 
@@ -185,7 +186,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHomeWelcomeContainer(context, name),
+            _buildHomeWelcomeContainer(context, user),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: CustomTextfield(
@@ -230,7 +231,8 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  Widget _buildHomeWelcomeContainer(BuildContext context, String name) {
+  Widget _buildHomeWelcomeContainer(BuildContext context, User? user) {
+    String name = user?.name ?? "Guest";
     String truncatedName =
         name.length > 20 ? '${name.substring(0, 20)}...' : name;
     return Container(
@@ -252,7 +254,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               ),
             ],
           ),
-          const ProfileImage(size: 50)
+          ProfileImage(profile: user?.getProfile(), size: 50)
         ],
       ),
     );

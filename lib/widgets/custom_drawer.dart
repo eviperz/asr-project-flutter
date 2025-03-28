@@ -1,3 +1,4 @@
+import 'package:asr_project/models/user.dart';
 import 'package:asr_project/providers/auth_state_provider.dart';
 import 'package:asr_project/providers/theme_provider.dart';
 import 'package:asr_project/widgets/profile_image.dart';
@@ -5,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class CustomDrawer extends ConsumerWidget {
-  final String name;
+  final User? user;
 
-  const CustomDrawer({super.key, required this.name});
+  const CustomDrawer({super.key, required this.user});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,11 +25,12 @@ class CustomDrawer extends ConsumerWidget {
             child: Center(
               child: ListTile(
                 leading: ProfileImage(
+                  profile: user?.getProfile(),
                   size: 50,
                 ),
                 title: FittedBox(
                   child: Text(
-                    name,
+                    user?.name ?? "Guest",
                     style: Theme.of(context)
                         .textTheme
                         .headlineMedium!
