@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:asr_project/editor/embeds/audio_block_embed.dart';
@@ -12,8 +13,10 @@ import 'package:record/record.dart';
 
 class AsrDialog extends StatefulWidget {
   final quill.QuillController controller;
+  final bool isHasAudio;
 
-  const AsrDialog({super.key, required this.controller});
+  const AsrDialog(
+      {super.key, required this.controller, required this.isHasAudio});
 
   @override
   State<AsrDialog> createState() => _ASRDialogState();
@@ -21,6 +24,7 @@ class AsrDialog extends StatefulWidget {
 
 class _ASRDialogState extends State<AsrDialog> {
   final AsrService _asrService = AsrService();
+  bool _isAfterFirstRecord = false;
   bool _isRecording = false;
   late Record audioRecord;
   String? audioPath;
@@ -54,10 +58,108 @@ class _ASRDialogState extends State<AsrDialog> {
 
   Future<void> _insertAudio(String audioUrl) async {
     final index = widget.controller.selection.baseOffset;
-    widget.controller.document.insert(
-      index,
-      quill.BlockEmbed.custom(AudioBlockEmbed(audioUrl, "")),
+
+    // Only proceed if isHasAudio is true
+    if (widget.isHasAudio) {
+      bool replaceAudio = await _showReplaceDialog();
+      if (!replaceAudio) {
+        return;
+      }
+    }
+    if (widget.isHasAudio) {
+      final document = widget.controller.document;
+      final delta = document.toDelta();
+
+      for (var i = 0; i < delta.length; i++) {
+        final operation = delta[i];
+
+        if (operation.isInsert) {
+          final insertedValue = operation.data;
+
+          // Check if it's a BlockEmbed and contains audio data
+          if (insertedValue is Map && insertedValue.containsKey('audio')) {
+            document.replace(
+                i, 1, quill.BlockEmbed.custom(AudioBlockEmbed(audioUrl, "")));
+            break;
+          }
+        }
+      }
+    } else {
+      _isAfterFirstRecord = true;
+      widget.controller.document.insert(
+        index,
+        quill.BlockEmbed.custom(AudioBlockEmbed(audioUrl, "")),
+      );
+    }
+  }
+
+  Future<void> _handleReplaceAudio() async {
+    bool replaceAudio = await _showReplaceDialog();
+    if (replaceAudio) {
+      _replaceAudioOptions();
+    }
+  }
+
+  Future<bool> _showReplaceDialog() async {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Replace Audio"),
+          content: const Text(
+              "You already have an audio. Do you want to replace it?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text("Replace"),
+            ),
+          ],
+        );
+      },
+    ).then((value) => value ?? false);
+  }
+
+  Future<void> _replaceAudioOptions() async {
+    bool? choice = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Choose Audio Action"),
+          content:
+              const Text("Do you want to record new audio or pick a file?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text("Record New Audio"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: const Text("Pick Audio File"),
+            ),
+          ],
+        );
+      },
     );
+
+    if (choice == true) {
+      _startRecording();
+    } else if (choice == false) {
+      _pickAudioFile();
+    }
   }
 
   Future<void> _startRecording() async {
@@ -86,7 +188,8 @@ class _ASRDialogState extends State<AsrDialog> {
           _isRecording = false;
           audioPath = path;
         });
-
+        _isAfterFirstRecord = true;
+        log("check bool $_isAfterFirstRecord");
         _uploadFile(File(path));
       }
     } catch (e) {
@@ -127,6 +230,7 @@ class _ASRDialogState extends State<AsrDialog> {
 
     if (result != null && result.files.isNotEmpty) {
       File file = File(result.files.single.path ?? '');
+      _isAfterFirstRecord = true;
       _uploadFile(file);
     }
   }
@@ -153,6 +257,17 @@ class _ASRDialogState extends State<AsrDialog> {
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
+            SizedBox(
+              width: double.infinity,
+              child: const Text(
+                "Note: The audio file will be used only for one record audio for one diary.",
+                style: TextStyle(color: Colors.grey),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
             if (_isRecording)
               AudioWaveforms(
                 enableGesture: false,
@@ -165,38 +280,57 @@ class _ASRDialogState extends State<AsrDialog> {
                 ),
               ),
             const SizedBox(height: 10),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _isRecording ? _stopRecording : _startRecording,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _isRecording ? Colors.red : Colors.blue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+            if (widget.isHasAudio || _isAfterFirstRecord) ...[
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    await _handleReplaceAudio();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                ),
-                icon: Icon(
-                  _isRecording ? Icons.stop : Icons.mic,
-                  color: Colors.white,
-                ),
-                label: Text(
-                  _isRecording ? "Stop Recording" : "Record Audio",
-                  style: const TextStyle(color: Colors.white),
+                  child: const Text("Replace Audio"),
                 ),
               ),
-            ),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _pickAudioFile,
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+            ] else ...[
+              // Show the Record Audio or Insert Audio File buttons if no audio exists
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _isRecording ? _stopRecording : _startRecording,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _isRecording ? Colors.red : Colors.blue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  icon: Icon(
+                    _isRecording ? Icons.stop : Icons.mic,
+                    color: Colors.white,
+                  ),
+                  label: Text(
+                    _isRecording ? "Stop Recording" : "Record Audio",
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
-                child: const Text("Insert Audio File"),
               ),
-            ),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _pickAudioFile,
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text("Insert Audio File"),
+                ),
+              ),
+            ],
           ],
         ),
       ),

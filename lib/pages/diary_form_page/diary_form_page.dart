@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:asr_project/config.dart';
@@ -37,6 +38,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
   bool _isToolbarVisible = false;
 
   late List<Tag> _tags;
+  bool _isHasAudio = false;
   String? _userId;
   late DateTime _updatedAt;
   bool _isEdited = false;
@@ -51,7 +53,14 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
   @override
   void initState() {
     super.initState();
-    _controller.addListener(() => setState(() => _isEdited = true));
+    _controller.addListener(() {
+      setState(() {
+        _isEdited = true;
+        String contentJson =
+            jsonEncode(_controller.document.toDelta().toJson());
+        _isHasAudio = _checkForInsertAndCustom(contentJson);
+      });
+    });
     _focusNode.addListener(
       () {
         _onFocusChange();
@@ -63,8 +72,15 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
         .map((id) => ref.read(tagsProvider.notifier).getTag(id))
         .whereType<Tag>()
         .toList();
+    String contentJson = jsonEncode(_controller.document.toDelta().toJson());
+    _isHasAudio = _checkForInsertAndCustom(contentJson);
+    log(_isHasAudio.toString());
     _updatedAt = widget.diary.updatedAt;
     _isEdited = false;
+  }
+
+  bool _checkForInsertAndCustom(String contentJson) {
+    return contentJson.contains('"insert"') && contentJson.contains('"custom"');
   }
 
   void _onFocusChange() {
@@ -78,6 +94,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
       context: context,
       builder: (context) => AsrDialog(
         controller: _controller,
+        isHasAudio: _isHasAudio,
       ),
     );
   }
