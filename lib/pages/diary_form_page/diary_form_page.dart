@@ -59,6 +59,10 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
         String contentJson =
             jsonEncode(_controller.document.toDelta().toJson());
         _isHasAudio = _checkForInsertAndCustom(contentJson);
+        _tags = (widget.diary.tagIds)
+            .map((id) => ref.read(tagsProvider.notifier).getTag(id))
+            .whereType<Tag>()
+            .toList();
       });
     });
     _focusNode.addListener(
@@ -68,10 +72,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
     );
     _titleController.text = widget.diary.title;
     _controller.document = quill.Document.fromDelta(widget.diary.content);
-    _tags = (widget.diary.tagIds)
-        .map((id) => ref.read(tagsProvider.notifier).getTag(id))
-        .whereType<Tag>()
-        .toList();
+
     String contentJson = jsonEncode(_controller.document.toDelta().toJson());
     _isHasAudio = _checkForInsertAndCustom(contentJson);
     log(_isHasAudio.toString());

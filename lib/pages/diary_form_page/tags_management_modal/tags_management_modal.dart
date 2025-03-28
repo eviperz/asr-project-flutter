@@ -1,7 +1,10 @@
+import 'dart:developer';
+
 import 'package:asr_project/models/tag.dart';
 import 'package:asr_project/pages/diary_form_page/tags_management_modal/tag_edit_form.dart';
 import 'package:asr_project/providers/tag_provider.dart';
 import 'package:asr_project/widgets/diary/diary_tag_list.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -55,6 +58,10 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
   void _deleteTag(String id) {
     try {
       ref.read(tagsProvider.notifier).removeTag(id);
+      setState(() {
+        widget.tags.removeWhere((tag) => tag.id == id);
+      });
+      widget.onChanged?.call();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Delete tag")),
@@ -84,16 +91,20 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
           .updateTag(tag.id, updatedTagDetail);
 
       if (newTag != null) {
+        ref.invalidate(tagsProvider);
         setState(() {
-          int index = widget.tags.indexWhere((t) => t.id == newTag.id);
-          if (index != -1) {
-            widget.tags[index] = newTag;
-          }
-
-          ref.invalidate(tagsProvider);
+          widget.tags.removeWhere((t) => t.id == tag.id);
+          widget.tags.add(newTag);
         });
 
         widget.onChanged?.call();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Tag updated successfully")),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Error updating tag")),
+        );
       }
     }
   }
@@ -104,7 +115,6 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
     final List<Tag> filteredTags = tags
         .where((tag) => !widget.tags.any((t) => t.name == tag.name))
         .toList();
-    final List<Tag> allTags = [...widget.tags, ...filteredTags];
 
     return SafeArea(
       bottom: false,
@@ -157,13 +167,13 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
                                 _buildCreateTagButton(filteredTags),
                               Flexible(
                                 child: _buildFilteredTagList(
-                                  _controller.text.isNotEmpty
-                                      ? allTags
-                                          .where((tag) => tag.name
-                                              .contains(_controller.text))
-                                          .toList()
-                                      : allTags,
-                                ),
+                                    // _controller.text.isNotEmpty
+                                    //     ? allTags
+                                    //         .where((tag) => tag.name
+                                    //             .contains(_controller.text))
+                                    //         .toList()
+                                    //     : allTags,
+                                    ),
                               ),
                             ],
                           ),
@@ -181,10 +191,17 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
   }
 
   Widget _buildTagInputField() {
-    final List<Tag> tags = ref.watch(tagsProvider).value ?? [];
-    final List<Tag> filteredTags = tags
+    List<Tag> tags = ref.watch(tagsProvider).value ?? [];
+    List<Tag> filteredTags = tags
         .where((tag) => widget.tags.any((t) => t.name == tag.name))
         .toList();
+
+    // if it have a update on a filtered tags, update the tags
+    if (!IterableEquality().equals(filteredTags, widget.tags)) {
+      widget.tags.clear();
+      widget.tags.addAll(filteredTags);
+    }
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -198,19 +215,21 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
           borderRadius: BorderRadius.circular(8.0),
           color: Theme.of(context).colorScheme.secondary,
         ),
-        child: SizedBox(
-          child: SingleChildScrollView(
-            child: Wrap(spacing: 8.0, children: [
-              DiaryTagList(
-                tags: widget.tags,
-                textField: _buildTextField(),
-                onChanged: widget.onChanged,
-                reload: () {
-                  setState(() {});
-                },
-              ),
-            ]),
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            DiaryTagList(
+              tags: widget.tags,
+              textField: _buildTextField(),
+              onChanged: () {
+                setState(() {});
+              },
+              reload: () {
+                ref.watch(tagsProvider.notifier).fetchData();
+                setState(() {});
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -220,6 +239,8 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
     return IntrinsicWidth(
       child: TextField(
         focusNode: _focusNode,
+        controller: _controller,
+        maxLength: 20,
         decoration: InputDecoration(
           border: InputBorder.none,
           hintText: "Enter Tag",
@@ -228,8 +249,9 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
           ),
           counterText: "",
         ),
-        maxLength: 20,
-        controller: _controller,
+        onChanged: (value) {
+          setState(() {});
+        },
         onTapOutside: (event) {
           _focusNode.unfocus();
         },
@@ -295,12 +317,17 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
     );
   }
 
-  Widget _buildFilteredTagList(List<Tag> filteredTags) {
+  Widget _buildFilteredTagList() {
+    List<Tag> tags = ref.watch(tagsProvider).value ?? [];
+    List<Tag> filteredTags = tags
+        .where((tag) => !widget.tags.any((t) => t.name == tag.name))
+        .toList();
+    List<Tag> allTags = [...widget.tags, ...filteredTags];
     return ListView.separated(
         shrinkWrap: true,
-        itemCount: filteredTags.length,
+        itemCount: allTags.length,
         itemBuilder: (context, index) {
-          final Tag tag = filteredTags[index];
+          final Tag tag = allTags[index];
           return ListTile(
             title: Align(
               alignment: Alignment.centerLeft,

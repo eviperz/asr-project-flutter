@@ -20,6 +20,18 @@ class Tag {
       colorEnum: ColorPalette.fromHex(json['colorCode']),
     );
   }
+
+  Tag copyWith({
+    String? id,
+    String? name,
+    ColorPalette? colorEnum,
+  }) {
+    return Tag(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      colorEnum: colorEnum ?? this.colorEnum,
+    );
+  }
 }
 
 class TagDetail {

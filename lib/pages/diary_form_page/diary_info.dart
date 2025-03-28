@@ -91,7 +91,7 @@ class DiaryInfo extends StatelessWidget {
                 size: 16,
                 color: Theme.of(context).colorScheme.tertiary,
               ),
-              SizedBox(width: 4), // Less space between icon & text
+              SizedBox(width: 4),
               Text(
                 label,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
