@@ -27,7 +27,7 @@ class DiaryInfo extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    AsyncValue<List<Tag>> tagsAsync = ref.read(tagsProvider);
+    AsyncValue<List<Tag>> tagsAsync = ref.watch(tagsProvider);
     List<Tag> tags = [];
     if (tagsAsync.hasValue && tagsAsync.value != null) {
       for (String id in tagIds) {

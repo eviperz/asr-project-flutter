@@ -207,19 +207,17 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
           borderRadius: BorderRadius.circular(8.0),
           color: Theme.of(context).colorScheme.secondary,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            DiaryTagList(
-              tagIds: widget.tags.map((tag) => tag.id).toSet(),
-              textField: _buildTextField(),
-              onRemoveTag: widget.onRemoveTag,
-              reload: () {
-                ref.watch(tagsProvider.notifier).fetchData();
-                setState(() {});
-              },
-            ),
-          ],
+        child: DiaryTagList(
+          tagIds: widget.tags.map((tag) => tag.id).toSet(),
+          textField: _buildTextField(),
+          onRemoveTag: (id) {
+            widget.onRemoveTag?.call(id);
+            widget.tags.removeWhere((item) => item.id == id);
+          },
+          reload: () {
+            ref.watch(tagsProvider.notifier).fetchData();
+            setState(() {});
+          },
         ),
       ),
     );
