@@ -1,28 +1,43 @@
 import 'package:asr_project/models/tag.dart';
 import 'package:asr_project/models/user.dart';
+import 'package:asr_project/providers/tag_provider.dart';
 import 'package:asr_project/widgets/profile_image.dart';
 import 'package:asr_project/widgets/diary/diary_tag_list.dart';
 import 'package:asr_project/pages/diary_form_page/tags_management_modal/tags_management_modal.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-class DiaryInfo extends StatelessWidget {
+class DiaryInfo extends ConsumerWidget {
   final User? owner;
   final DateTime updatedAt;
-  final List<Tag> tags;
-  final VoidCallback? onChange;
+  final Set<String> tagIds;
+  final Function(String)? onAddTag;
+  final Function(String)? onRemoveTag;
 
   const DiaryInfo({
     super.key,
     this.owner,
-    required this.tags,
+    required this.tagIds,
     required this.updatedAt,
-    this.onChange,
+    this.onAddTag,
+    this.onRemoveTag,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    AsyncValue<List<Tag>> tagsAsync = ref.read(tagsProvider);
+    List<Tag> tags = [];
+    if (tagsAsync.hasValue && tagsAsync.value != null) {
+      for (String id in tagIds) {
+        Tag? foundTag =
+            tagsAsync.value?.firstWhere((tag) => tag.id == id, orElse: null);
+        if (foundTag != null) {
+          tags.add(foundTag);
+        }
+      }
+    }
     final textStyle = Theme.of(context).textTheme.labelLarge;
     return Column(
       children: [
@@ -54,9 +69,12 @@ class DiaryInfo extends StatelessWidget {
           child: Wrap(
             spacing: 8.0,
             children: [
-              DiaryTagList(tags: tags, onChanged: onChange),
-              if (onChange != null)
-                _buildAddTagButton(context)
+              DiaryTagList(
+                tagIds: tagIds,
+                onRemoveTag: onRemoveTag,
+              ),
+              if (onAddTag != null && onRemoveTag != null)
+                _buildAddTagButton(context, tags)
               else
                 Text(
                   "No Tags",
@@ -105,37 +123,18 @@ class DiaryInfo extends StatelessWidget {
         ],
       ),
     );
-
-    // return Padding(
-    //   padding: const EdgeInsets.symmetric(vertical: 5.0),
-    //   child: Row(
-    //     crossAxisAlignment: CrossAxisAlignment.start,
-    //     children: [
-    //       Flexible(
-    //         flex: 1,
-    //         child: SizedBox(
-    //           height: 20,
-    //           child: Row(
-    //             children: [
-    //               Icon(icon, color: Colors.grey, size: 16),
-    //               const SizedBox(width: 8.0),
-    //               Text(label, style: labelStyle),
-    //             ],
-    //           ),
-    //         ),
-    //       ),
-    //       Expanded(flex: 2, child: child),
-    //     ],
-    //   ),
-    // );
   }
 
-  Widget _buildAddTagButton(BuildContext context) {
+  Widget _buildAddTagButton(BuildContext context, List<Tag> tags) {
     return OutlinedButton(
       onPressed: () => showCupertinoModalPopup(
         context: context,
         barrierDismissible: true,
-        builder: (_) => TagsManagementModal(tags: tags, onChanged: onChange),
+        builder: (_) => TagsManagementModal(
+          tags: tags,
+          onAddTag: onAddTag,
+          onRemoveTag: onRemoveTag,
+        ),
       ),
       style: OutlinedButton.styleFrom(
         minimumSize: const Size(100, 35),

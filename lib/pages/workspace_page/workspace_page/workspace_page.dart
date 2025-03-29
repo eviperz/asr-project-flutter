@@ -1,7 +1,6 @@
 import 'package:asr_project/config.dart';
 import 'package:asr_project/models/enum/workspace_member_status.dart';
 import 'package:asr_project/models/workspace.dart';
-import 'package:asr_project/pages/workspace_page/starred_workspace_list.dart';
 import 'package:asr_project/pages/workspace_page/workspace_page/workspace_search_bar.dart';
 import 'package:asr_project/widgets/workspace/workspace_list.dart';
 import 'package:asr_project/providers/workspace_provider.dart';
