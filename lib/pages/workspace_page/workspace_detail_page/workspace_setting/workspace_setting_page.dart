@@ -6,6 +6,7 @@ import 'package:asr_project/models/user.dart';
 import 'package:asr_project/models/workspace.dart';
 import 'package:asr_project/models/workspace_icon_model.dart';
 import 'package:asr_project/models/workspace_member.dart';
+import 'package:asr_project/widgets/custom_dialog.dart';
 import 'package:asr_project/widgets/workspace/workspace_icon_selector.dart';
 import 'package:asr_project/widgets/workspace/workspace_invite_members_by_email_box.dart';
 import 'package:asr_project/providers/workspace_provider.dart';
@@ -128,6 +129,7 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
         .inviteMembers(widget.workspace.id, _invitedMemberEmails);
 
     if (!mounted) return;
+
     if (workspace != null) {
       setState(() {
         _members = workspace.members;
@@ -154,21 +156,18 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
     bool? confirmDelete = await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Remove Member"),
-          content: Text(
-              "Are you sure you want to remove this member from the workspace?"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: Text("Remove",
-                  style: TextStyle(color: Theme.of(context).colorScheme.error)),
-            ),
-          ],
+        return CustomDialog(
+          title: "Remove Member",
+          content:
+              "Are you sure you want to remove this member from the workspace?",
+          confirmLabel: "Remove",
+          cancelLabel: "Cancel",
+          onConfirm: () {
+            Navigator.pop(context, true);
+          },
+          onCancel: () {
+            Navigator.pop(context, false);
+          },
         );
       },
     );
@@ -212,20 +211,18 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
     bool? confirmDelete = await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Delete Workspace"),
-          content: Text(
-              "Are you sure you want to delete this workspace? This action cannot be undone."),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: Text("Delete", style: TextStyle(color: Colors.red)),
-            ),
-          ],
+        return CustomDialog(
+          title: "Delete Workspace",
+          content:
+              "Are you sure you want to delete this workspace? This action cannot be undone.",
+          confirmLabel: "Delete",
+          cancelLabel: "Cancel",
+          onConfirm: () {
+            Navigator.pop(context, true);
+          },
+          onCancel: () {
+            Navigator.pop(context, false);
+          },
         );
       },
     );
@@ -328,22 +325,23 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
                         style: Theme.of(context).textTheme.headlineSmall,
                       ),
                       IconButton(
-                          onPressed: () {
-                            showCupertinoModalPopup(
-                                context: context,
-                                builder: (context) {
-                                  return DefaultModal(
-                                    title: "Invite Member Emails",
-                                    child: WorkspaceInviteMembersByEmailBox(
-                                      invitedMemberEmails: _invitedMemberEmails,
-                                      addEmail: _addInvitedMemberEmails,
-                                      removeEmail: _removeInvitedMemberEmails,
-                                      inviteByEmails: _inviteByEmails,
-                                    ),
-                                  );
-                                });
-                          },
-                          icon: Icon(Icons.add))
+                        onPressed: () {
+                          showCupertinoModalPopup(
+                              context: context,
+                              builder: (context) {
+                                return DefaultModal(
+                                  title: "Invite Member Emails",
+                                  child: WorkspaceInviteMembersByEmailBox(
+                                    invitedMemberEmails: _invitedMemberEmails,
+                                    addEmail: _addInvitedMemberEmails,
+                                    removeEmail: _removeInvitedMemberEmails,
+                                    inviteByEmails: _inviteByEmails,
+                                  ),
+                                );
+                              });
+                        },
+                        icon: Icon(Icons.add),
+                      )
                     ],
                   ),
                   ListView.separated(
