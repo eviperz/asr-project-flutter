@@ -312,39 +312,55 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
             !widget.tags.any((item) => item.name == tag.name) ||
             tag.name.contains(_controller.text))
         .toList();
+
     return ListView.separated(
-        shrinkWrap: true,
-        itemCount: filteredTags.length,
-        itemBuilder: (context, index) {
-          final Tag tag = filteredTags[index];
-          return ListTile(
-            title: Align(
-              alignment: Alignment.centerLeft,
-              child: Chip(
-                label: Text(tag.name),
-                backgroundColor: tag.colorEnum.color,
-              ),
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
+      shrinkWrap: true,
+      itemCount: filteredTags.length,
+      itemBuilder: (context, index) {
+        final Tag tag = filteredTags[index];
+        final bool isSelected = widget.tags.any((item) => item.id == tag.id);
+
+        return ListTile(
+          title: Align(
+            alignment: Alignment.centerLeft,
+            child: Row(
               children: [
-                IconButton(
-                  onPressed: () => _showTagEditModal(tag),
-                  icon: const Icon(Icons.edit),
+                Chip(
+                  label: Text(tag.name),
+                  backgroundColor: tag.colorEnum.color,
                 ),
-                IconButton(
-                  onPressed: () => _deleteTag(tag.id),
-                  icon: const Icon(Icons.delete),
-                )
+                const SizedBox(width: 10.0),
+                if (isSelected)
+                  Icon(
+                    Icons.check_circle,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
               ],
             ),
-            onTap: () {
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                onPressed: () => _showTagEditModal(tag),
+                icon: const Icon(Icons.edit),
+              ),
+              IconButton(
+                onPressed: () => _deleteTag(tag.id),
+                icon: const Icon(Icons.delete),
+              ),
+            ],
+          ),
+          onTap: () {
+            if (!isSelected) {
               _addTag(tag);
-            },
-          );
-        },
-        separatorBuilder: (context, index) {
-          return Divider();
-        });
+            }
+          },
+        );
+      },
+      separatorBuilder: (context, index) {
+        return Divider();
+      },
+    );
   }
 }
