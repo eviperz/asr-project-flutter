@@ -53,7 +53,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
         _isEdited = true;
         String contentJson =
             jsonEncode(_controller.document.toDelta().toJson());
-        _isHasAudio = _checkForInsertAndCustom(contentJson);
+        // _isHasAudio = _checkForInsertAndCustom(contentJson);
         _tagIds = widget.diary.tagIds.toSet();
       });
     });
@@ -67,16 +67,16 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
     _titleController.text = widget.diary.title;
     _controller.document = quill.Document.fromDelta(widget.diary.content);
 
-    String contentJson = jsonEncode(_controller.document.toDelta().toJson());
-    _isHasAudio = _checkForInsertAndCustom(contentJson);
+    // String contentJson = jsonEncode(_controller.document.toDelta().toJson());
+    // _isHasAudio = _checkForInsertAndCustom(contentJson);
     log(_isHasAudio.toString());
     _updatedAt = widget.diary.updatedAt;
     _isEdited = false;
   }
 
-  bool _checkForInsertAndCustom(String contentJson) {
-    return contentJson.contains('"insert"') && contentJson.contains('"custom"');
-  }
+  // bool _checkForInsertAndCustom(String contentJson) {
+  //   return contentJson.contains('"insert"') && contentJson.contains('"custom"');
+  // }
 
   void _onFocusChange() {
     setState(() {
@@ -89,15 +89,15 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
       context: context,
       builder: (context) => AsrDialog(
         controller: _controller,
-        isHasAudio: _isHasAudio,
+        // isHasAudio: _isHasAudio,
       ),
     );
 
     if (updated == true) {
       setState(() {
-        String contentJson =
-            jsonEncode(_controller.document.toDelta().toJson());
-        _isHasAudio = _checkForInsertAndCustom(contentJson);
+        // String contentJson =
+        //     jsonEncode(_controller.document.toDelta().toJson());
+        // _isHasAudio = _checkForInsertAndCustom(contentJson);
       });
     }
   }
@@ -171,8 +171,9 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
                   showDialog(
                     context: context,
                     builder: (context) => CustomDialog(
-                      title: "Delete Diary",
-                      content: "Are you sure you want to delete this diary?",
+                      title: "Delete Meeting Note",
+                      content:
+                          "Are you sure you want to delete this Meeting Note?",
                       onConfirm: () async {
                         await ref
                             .read(diaryFoldersProvider.notifier)

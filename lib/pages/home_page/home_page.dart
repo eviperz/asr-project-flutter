@@ -86,7 +86,8 @@ class _HomePageState extends ConsumerState<HomePage> {
       if (!mounted) return;
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to update name of diary folder")),
+        const SnackBar(
+            content: Text("Failed to update name of Meeting Note folder")),
       );
     }
   }
@@ -102,7 +103,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to delete diary folder")),
+        const SnackBar(content: Text("Failed to delete Meeting Note folder")),
       );
     }
   }
@@ -119,7 +120,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           arguments: {'diary': diary, 'canEdit': true});
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to create diary")),
+        const SnackBar(content: Text("Failed to create Meeting Note")),
       );
     }
   }
@@ -159,7 +160,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             backgroundColor: Theme.of(context).colorScheme.inversePrimary,
             icon: const Icon(Icons.add),
             label: const Text(
-              "Diary",
+              "Meeting Note",
               style: TextStyle(color: Colors.white),
             ),
           );

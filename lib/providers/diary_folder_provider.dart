@@ -44,13 +44,13 @@ class DiaryFoldersNotifier extends AsyncNotifier<List<DiaryFolderModel>> {
 
       if (diaryFolderModel != null) {
         state = AsyncData([...state.value ?? [], diaryFolderModel]);
-        return "Success to create Diary Folder";
+        return "Success to create Meeting Note Folder";
       } else {
-        return "Failed to create Diary Folder";
+        return "Failed to create Meeting Note Folder";
       }
     } catch (e) {
       state = AsyncError(e, StackTrace.current);
-      return "Failed to create Diary Folder";
+      return "Failed to create Meeting Note Folder";
     }
   }
 
@@ -67,13 +67,13 @@ class DiaryFoldersNotifier extends AsyncNotifier<List<DiaryFolderModel>> {
           }
           return item;
         }).toList());
-        return "Success to update Diary Folder";
+        return "Success to update Meeting Note Folder";
       } else {
-        return "Fail to update Diary Folder";
+        return "Fail to update Meeting Note Folder";
       }
     } catch (e) {
       state = AsyncError(e, StackTrace.current);
-      return "Fail to update Diary Folder";
+      return "Fail to update Meeting Note Folder";
     }
   }
 
@@ -84,13 +84,13 @@ class DiaryFoldersNotifier extends AsyncNotifier<List<DiaryFolderModel>> {
       if (status) {
         state = AsyncData(
             state.value!.where((item) => item.id != folderId).toList());
-        return "Success to delete Diary Folder";
+        return "Success to delete Meeting Note Folder";
       } else {
-        return "Failed to delete Diary Folder";
+        return "Failed to delete Meeting Note Folder";
       }
     } catch (e) {
       state = AsyncError(e, StackTrace.current);
-      return "Failed to delete Diary Folder";
+      return "Failed to delete Meeting Note Folder";
     }
   }
 
@@ -141,13 +141,13 @@ class DiaryFoldersNotifier extends AsyncNotifier<List<DiaryFolderModel>> {
           return folder;
         }).toList());
 
-        return "Success to update diary";
+        return "Success to update Meeting Note";
       } else {
-        return "Fail to update diary";
+        return "Fail to update Meeting Note";
       }
     } catch (e) {
       state = AsyncError(e, StackTrace.current);
-      return "Fail to update diary";
+      return "Fail to update Meeting Note";
     }
   }
 
@@ -166,13 +166,13 @@ class DiaryFoldersNotifier extends AsyncNotifier<List<DiaryFolderModel>> {
           }
           return folder;
         }).toList());
-        return "Success to delete diary";
+        return "Success to delete Meeting Note";
       } else {
-        return "Fail to delete diary";
+        return "Fail to delete Meeting Note";
       }
     } catch (e) {
       state = AsyncError(e, StackTrace.current);
-      return "Fail to delete diary";
+      return "Fail to delete Meeting Note";
     }
   }
 

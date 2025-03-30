@@ -186,7 +186,7 @@ class _DiaryFolderState extends State<DiaryFolder> {
                       value: 'add',
                       child: ListTile(
                         leading: Icon(Icons.note_add),
-                        title: Text('Diary'),
+                        title: Text('Meeting Note'),
                       ),
                     ),
                     if (widget.folder.name != "Default")

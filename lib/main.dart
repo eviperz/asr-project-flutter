@@ -35,7 +35,7 @@ class MyApp extends ConsumerWidget {
     final isAuthenticate = ref.watch(authState);
 
     return MaterialApp(
-      title: "ASR App",
+      title: "NoteMate App",
       theme: theme,
       debugShowCheckedModeBanner: false,
       home: isAuthenticate ? MainScreen() : SignInPage(),

@@ -34,7 +34,7 @@ class DiaryFolderBlocks extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "All Diaries",
+              "All Meeting Note",
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             if (canEdit)

@@ -97,32 +97,29 @@ class DiaryInfo extends ConsumerWidget {
     required String label,
     required Widget child,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                size: 16,
-                color: Theme.of(context).colorScheme.tertiary,
-              ),
-              SizedBox(width: 4),
-              Text(
-                label,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.tertiary,
-                    ),
-              ),
-            ],
-          ),
-          SizedBox(width: 60),
-          Expanded(child: child),
-        ],
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: SizedBox(
+        width: 120,
+        height: 40,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: Theme.of(context).colorScheme.tertiary,
+            ),
+            SizedBox(width: 8),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                    color: Theme.of(context).colorScheme.tertiary,
+                  ),
+            ),
+          ],
+        ),
       ),
+      title: child,
     );
   }
 
