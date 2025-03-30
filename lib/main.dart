@@ -37,6 +37,7 @@ class MyApp extends ConsumerWidget {
     return MaterialApp(
       title: "ASR App",
       theme: theme,
+      debugShowCheckedModeBanner: false,
       home: isAuthenticate ? MainScreen() : SignInPage(),
       onGenerateRoute: (settings) {
         switch (settings.name) {
