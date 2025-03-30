@@ -3,13 +3,11 @@ import 'dart:developer';
 
 import 'package:asr_project/config.dart';
 import 'package:asr_project/providers/diary_folder_provider.dart';
-import 'package:asr_project/providers/tag_provider.dart';
 import 'package:asr_project/widgets/asr/asr_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:asr_project/models/diary.dart';
-import 'package:asr_project/models/tag.dart';
 import 'package:asr_project/widgets/custom_dialog.dart';
 import 'package:asr_project/editor/diary_editor.dart';
 import 'package:asr_project/editor/diary_toolbar.dart';
@@ -37,7 +35,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
 
   bool _isToolbarVisible = false;
 
-  late List<Tag> _tags;
+  Set<String> _tagIds = {};
   bool _isHasAudio = false;
   String? _userId;
   late DateTime _updatedAt;
@@ -59,10 +57,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
         String contentJson =
             jsonEncode(_controller.document.toDelta().toJson());
         _isHasAudio = _checkForInsertAndCustom(contentJson);
-        _tags = (widget.diary.tagIds)
-            .map((id) => ref.read(tagsProvider.notifier).getTag(id))
-            .whereType<Tag>()
-            .toList();
+        _tagIds = widget.diary.tagIds.toSet();
       });
     });
     _focusNode.addListener(
@@ -114,7 +109,7 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
           ? 'Untitled'
           : _titleController.text.trim(),
       content: _controller.document.toDelta(),
-      tagIds: _tags.map((tag) => tag.id).toList(),
+      tagIds: _tagIds.toList(),
       userId: _userId,
     );
 
@@ -212,10 +207,23 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
                 _buildTitleTextField(context, widget.canEdit),
                 DiaryInfo(
                   owner: widget.diary.owner,
-                  tags: _tags,
+                  tagIds: _tagIds,
                   updatedAt: _updatedAt,
-                  onChange: widget.canEdit
-                      ? () => setState(() => _isEdited = true)
+                  onAddTag: widget.canEdit
+                      ? (newId) {
+                          setState(() {
+                            _isEdited = true;
+                            _tagIds.add(newId);
+                          });
+                        }
+                      : null,
+                  onRemoveTag: widget.canEdit
+                      ? (removedId) {
+                          setState(() {
+                            _isEdited = true;
+                            _tagIds.removeWhere((id) => id == removedId);
+                          });
+                        }
                       : null,
                 ),
                 IntrinsicHeight(

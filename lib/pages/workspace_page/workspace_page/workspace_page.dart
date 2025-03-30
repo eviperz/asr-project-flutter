@@ -1,7 +1,6 @@
 import 'package:asr_project/config.dart';
 import 'package:asr_project/models/enum/workspace_member_status.dart';
 import 'package:asr_project/models/workspace.dart';
-import 'package:asr_project/pages/workspace_page/starred_workspace_list.dart';
 import 'package:asr_project/pages/workspace_page/workspace_page/workspace_search_bar.dart';
 import 'package:asr_project/widgets/workspace/workspace_list.dart';
 import 'package:asr_project/providers/workspace_provider.dart';
@@ -83,18 +82,31 @@ class _WorkspacePageState extends ConsumerState<WorkspacePage> {
               ),
               workspacesAsync.when(
                 data: (workspaces) {
-                  workspaces = workspaces
-                      .where((workspace) => workspace.members.any((member) =>
-                          member.item1?.id == AppConfig.userId &&
-                          member.item2.status ==
-                              WorkspaceMemberStatus.accepted))
-                      .toList();
-                  return Expanded(
-                    child: WorkspaceList(
-                      workspaces: _filterWorkspace(workspaces),
-                      starredWorkspace: starredWorkspace,
-                      toggleStarred: _toggleStarredWorkspace,
-                    ),
+                  return FutureBuilder<String?>(
+                    future: AppConfig.getUserId(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return CircularProgressIndicator();
+                      }
+                      String? userId = snapshot.data;
+                      if (userId != null) {
+                        workspaces = workspaces
+                            .where((workspace) => workspace.members.any(
+                                (member) =>
+                                    member.item1?.id == userId &&
+                                    member.item2.status ==
+                                        WorkspaceMemberStatus.accepted))
+                            .toList();
+                      }
+
+                      return Expanded(
+                        child: WorkspaceList(
+                          workspaces: _filterWorkspace(workspaces),
+                          starredWorkspace: starredWorkspace,
+                          toggleStarred: _toggleStarredWorkspace,
+                        ),
+                      );
+                    },
                   );
                 },
                 loading: () =>
