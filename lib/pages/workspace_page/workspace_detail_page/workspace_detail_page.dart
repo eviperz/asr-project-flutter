@@ -230,24 +230,11 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
                         ],
                       ),
                     ),
-                    FutureBuilder<String?>(
-                      future: AppConfig.getUserId(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return SizedBox();
-                        }
-
-                        if (snapshot.hasData && owner.id == snapshot.data) {
-                          return IconButton(
-                            onPressed: _navigatorSetting,
-                            icon: Icon(Icons.edit),
-                          );
-                        }
-
-                        return SizedBox();
-                      },
-                    )
+                    if (owner.id == user?.id)
+                      IconButton(
+                        onPressed: _navigatorSetting,
+                        icon: Icon(Icons.edit),
+                      )
                   ],
                 ),
                 Padding(
