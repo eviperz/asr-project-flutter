@@ -13,7 +13,7 @@ class CustomDrawer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeNotifier = ref.read(themeProvider.notifier);
-    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark;
+    final isDarkMode = ref.watch(themeProvider).brightness == Brightness.dark;
 
     return Drawer(
       child: ListView(
