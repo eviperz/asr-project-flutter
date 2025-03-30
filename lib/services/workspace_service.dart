@@ -30,9 +30,10 @@ class WorkspaceService {
   Future<List<Workspace>> getAllWorkspaces() async {
     try {
       final headers = await _getHeaders();
+      final String? userId = await AppConfig.getUserId();
 
       final response =
-          await http.get(Uri.parse("$baseUrl/user/$_userId"), headers: headers);
+          await http.get(Uri.parse("$baseUrl/user/$userId"), headers: headers);
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = jsonDecode(response.body);
         return jsonData.map((data) => Workspace.fromJson(data)).toList();
@@ -47,9 +48,9 @@ class WorkspaceService {
   Future<Workspace?> createWorkspace(WorkspaceDetail workspaceDetail) async {
     try {
       final headers = await _getHeaders();
-
+      final String? userId = await AppConfig.getUserId();
       final response = await http.post(
-        Uri.parse("$baseUrl/user/$_userId"),
+        Uri.parse("$baseUrl/user/$userId"),
         headers: headers,
         body: jsonEncode(
           workspaceDetail.toJson(),

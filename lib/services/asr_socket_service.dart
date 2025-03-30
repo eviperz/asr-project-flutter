@@ -9,12 +9,11 @@ class AsrSocketService {
     print("Initializing socket...");
 
     _socket = IO.io(
-        'https://scenic-pending-associates-href.trycloudflare.com/',
-        <String, dynamic>{
-          'transports': ['websocket'],
-          'autoConnect': false,
-          'forceNew': true,
-        });
+        'https://boot-rail-poll-indices.trycloudflare.com/', <String, dynamic>{
+      'transports': ['websocket'],
+      'autoConnect': false,
+      'forceNew': true,
+    });
 
     _socket.onConnect((_) {
       print('✅ Connected to Model Asr server');

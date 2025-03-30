@@ -67,8 +67,10 @@ class TagService {
   Future<Tag?> createPersonalTag(TagDetail tagDetail) async {
     try {
       final headers = await _getHeaders();
+      final String? userId = await AppConfig.getUserId();
+
       final response = await http.post(
-        Uri.parse("$baseUrl/personal/$_userId"),
+        Uri.parse("$baseUrl/personal/$userId"),
         headers: headers,
         body: jsonEncode(tagDetail.toJson()),
       );

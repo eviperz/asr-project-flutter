@@ -20,9 +20,6 @@ class DiaryFolderService {
     };
   }
 
-  DiaryFolderService() {
-    _initializeUserId();
-  }
   Future<void> _initializeUserId() async {
     _userId = await AppConfig.getUserId();
     log("User ID Loaded DiaryFolderService: $_userId");
@@ -31,7 +28,10 @@ class DiaryFolderService {
   Future<List<DiaryFolderModel>> getAllPersonalDiaryFoldersWithDiaries() async {
     try {
       final headers = await _getHeaders();
-      final response = await http.get(Uri.parse("$baseUrl/personal/$_userId"),
+      final String? userId = await AppConfig.getUserId();
+
+      // print("$_userId in a diary folder service");
+      final response = await http.get(Uri.parse("$baseUrl/personal/$userId"),
           headers: headers);
 
       if (response.statusCode == 200) {
@@ -49,7 +49,8 @@ class DiaryFolderService {
       DiaryFolderDetail diaryFolderDetail) async {
     try {
       final headers = await _getHeaders();
-      final response = await http.post(Uri.parse("$baseUrl/personal/$_userId"),
+      final String? userId = await AppConfig.getUserId();
+      final response = await http.post(Uri.parse("$baseUrl/personal/$userId"),
           headers: headers, body: jsonEncode(diaryFolderDetail.toJson()));
 
       if (response.statusCode == 200) {
