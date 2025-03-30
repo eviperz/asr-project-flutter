@@ -156,8 +156,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                 );
               }
             },
+            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
             icon: const Icon(Icons.add),
-            label: const Text("Diary"),
+            label: const Text(
+              "Diary",
+              style: TextStyle(color: Colors.white),
+            ),
           );
         },
         loading: () => const SizedBox(),
@@ -234,7 +238,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget _buildHomeWelcomeContainer(BuildContext context, User? user) {
     String name = user?.name ?? "Guest";
     String truncatedName =
-        name.length > 20 ? '${name.substring(0, 20)}...' : name;
+        name.length > 20 ? '${name.substring(0, 16)}...' : name;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Row(
