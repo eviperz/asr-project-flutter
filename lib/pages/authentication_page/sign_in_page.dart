@@ -126,7 +126,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "NoteMate App",
+                        "NoteMate",
                         style:
                             Theme.of(context).textTheme.headlineLarge!.copyWith(
                                   color: Theme.of(context).colorScheme.primary,

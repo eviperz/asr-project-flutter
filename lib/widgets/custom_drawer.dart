@@ -31,10 +31,8 @@ class CustomDrawer extends ConsumerWidget {
                 title: FittedBox(
                   child: Text(
                     user?.name ?? "Guest",
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineMedium!
-                        .copyWith(color: Colors.white),
+                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                        color: Theme.of(context).colorScheme.secondary),
                     overflow: TextOverflow.fade,
                     softWrap: false,
                   ),

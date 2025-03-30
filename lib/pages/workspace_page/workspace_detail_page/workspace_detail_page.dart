@@ -95,7 +95,8 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
       if (!mounted) return;
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to update name of diary folder")),
+        const SnackBar(
+            content: Text("Failed to update name of MeetingNote folder")),
       );
     }
   }
@@ -111,7 +112,7 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to delete diary folder")),
+        const SnackBar(content: Text("Failed to delete MeetingNote folder")),
       );
     }
   }
@@ -136,7 +137,7 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
           arguments: {'diary': diary, 'canEdit': canEdit});
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to create diary")),
+        const SnackBar(content: Text("Failed to create MeetingNote")),
       );
     }
   }
@@ -205,7 +206,7 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
                           ),
                           Expanded(
                             child: SizedBox(
-                              height: 85,
+                              height: 100,
                               child: Column(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -221,8 +222,9 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
                                     ),
                                   ),
                                   WorkspaceMemberDisplay(
-                                      memberWithoutOwner: memberWithoutOwner,
-                                      owner: owner),
+                                    memberWithoutOwner: memberWithoutOwner,
+                                    owner: owner,
+                                  ),
                                 ],
                               ),
                             ),

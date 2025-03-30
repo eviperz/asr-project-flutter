@@ -195,6 +195,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Card(
+        color: Theme.of(context).colorScheme.secondary,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
@@ -205,7 +206,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                     shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(30)),
                     ),
-                    color: Colors.white24,
+                    color: Theme.of(context).colorScheme.secondary,
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Row(
@@ -219,20 +220,24 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                               style: ButtonStyle(
                                 backgroundColor:
                                     MaterialStateProperty.all<Color>(
-                                        Colors.deepPurpleAccent),
+                                        Theme.of(context)
+                                            .colorScheme
+                                            .inversePrimary),
                               ),
                             ),
                           ),
                           SizedBox(
                             width: 150,
                             child: Slider(
-                              onChanged: _seek,
-                              value: _duration.inMilliseconds > 0
-                                  ? (_position.inMilliseconds /
-                                          _duration.inMilliseconds)
-                                      .clamp(0.0, 1.0)
-                                  : 0.0,
-                            ),
+                                onChanged: _seek,
+                                value: _duration.inMilliseconds > 0
+                                    ? (_position.inMilliseconds /
+                                            _duration.inMilliseconds)
+                                        .clamp(0.0, 1.0)
+                                    : 0.0,
+                                activeColor: Theme.of(context)
+                                    .colorScheme
+                                    .inversePrimary),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(right: 8.0),
@@ -285,8 +290,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => EditAudioWidget(
-                                    audioName:
-                                        _currentAudioName, // Use local state
+                                    audioName: _currentAudioName,
                                     initialTranscribe: _transcribeResult,
                                   ),
                                 ),

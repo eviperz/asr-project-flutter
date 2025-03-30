@@ -170,7 +170,9 @@ class _ASRDialogState extends State<AsrDialog> {
               child: ElevatedButton.icon(
                 onPressed: _isRecording ? _stopRecording : _startRecording,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _isRecording ? Colors.red : Colors.blue,
+                  backgroundColor: _isRecording
+                      ? Theme.of(context).colorScheme.error
+                      : Theme.of(context).colorScheme.primary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),

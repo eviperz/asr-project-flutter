@@ -151,14 +151,43 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
   }
 
   void _removeMember(String workspaceMemberId) async {
-    await ref
-        .read(workspaceProvider.notifier)
-        .removeMember(widget.workspace.id, workspaceMemberId);
-    setState(() {
-      _members = _members
-          .where((member) => member.item2.id != workspaceMemberId)
-          .toList();
-    });
+    bool? confirmDelete = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Remove Member"),
+          content: Text(
+              "Are you sure you want to remove this member from the workspace?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text("Remove",
+                  style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmDelete == true) {
+      await ref
+          .read(workspaceProvider.notifier)
+          .removeMember(widget.workspace.id, workspaceMemberId);
+
+      setState(() {
+        _members = _members
+            .where((member) => member.item2.id != workspaceMemberId)
+            .toList();
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Member removed successfully")),
+      );
+    }
   }
 
   void _updatePermission(
@@ -180,18 +209,41 @@ class _WorkspaceSettingPageState extends ConsumerState<WorkspaceSettingPage> {
   }
 
   void _deleteWorkspace() async {
-    final bool response = await ref
-        .read(workspaceProvider.notifier)
-        .deleteWorkspace(widget.workspace.id);
+    bool? confirmDelete = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Delete Workspace"),
+          content: Text(
+              "Are you sure you want to delete this workspace? This action cannot be undone."),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text("Delete", style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
 
-    if (!mounted) return;
-    if (response) {
-      Navigator.pop(context);
-      Navigator.pop(context);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to delete workspace")),
-      );
+    if (confirmDelete == true) {
+      final bool response = await ref
+          .read(workspaceProvider.notifier)
+          .deleteWorkspace(widget.workspace.id);
+
+      if (!mounted) return;
+      if (response) {
+        Navigator.pop(context);
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Failed to delete workspace")),
+        );
+      }
     }
   }
 

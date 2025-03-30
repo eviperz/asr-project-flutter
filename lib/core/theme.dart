@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 final ThemeData darkTheme = ThemeData(
   brightness: Brightness.dark,
+  colorScheme: darkThemeColorSchema,
   textTheme: textTheme,
   elevatedButtonTheme: elevatedButtonThemeData,
 );
@@ -31,15 +32,16 @@ final ThemeData lightTheme = ThemeData(
 
 final ColorScheme darkThemeColorSchema = ColorScheme(
   brightness: Brightness.dark,
-  primary: Colors.indigoAccent,
-  onPrimary: Colors.black,
-  secondary: Color(0xFFF8F8F8),
-  onSecondary: Colors.black38,
-  tertiary: Colors.black38,
+  primary: Color(0xFFF2B5D4),
+  onPrimary: Colors.white,
+  secondary: Color(0xFF202124),
+  onSecondary: Colors.white70,
+  tertiary: Color(0xFF64B5F6),
   error: Colors.red,
-  onError: Colors.white,
-  surface: Colors.white,
-  onSurface: Colors.black,
+  onError: Colors.black45,
+  surface: Color(0xFF121212),
+  onSurface: Colors.white,
+  inversePrimary: Color(0xFF7BBFF2),
 );
 
 final ColorScheme lightThemeColorScheme = ColorScheme(

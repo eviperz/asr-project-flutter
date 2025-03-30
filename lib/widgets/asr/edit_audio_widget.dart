@@ -228,7 +228,7 @@ class _EditAudioWidgetState extends State<EditAudioWidget> {
                         onPressed: _isPlaying ? _pause : _play,
                         style: ButtonStyle(
                           backgroundColor: WidgetStateProperty.all<Color>(
-                              Colors.deepPurpleAccent),
+                              Theme.of(context).colorScheme.inversePrimary),
                         ),
                       ),
                     ),
@@ -241,6 +241,8 @@ class _EditAudioWidgetState extends State<EditAudioWidget> {
                                     _duration.inMilliseconds)
                                 .clamp(0.0, 1.0)
                             : 0.0,
+                        activeColor:
+                            Theme.of(context).colorScheme.inversePrimary,
                       ),
                     ),
                     Padding(
@@ -248,6 +250,8 @@ class _EditAudioWidgetState extends State<EditAudioWidget> {
                       child: Text(
                         _position.toString().split('.').first,
                         style: Theme.of(context).textTheme.labelMedium,
+                        selectionColor:
+                            Theme.of(context).colorScheme.inversePrimary,
                       ),
                     ),
                   ],
@@ -265,7 +269,7 @@ class _EditAudioWidgetState extends State<EditAudioWidget> {
             const SizedBox(height: 20),
             Text(
               "Transcription",
-              style: Theme.of(context).textTheme.headlineMedium,
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 10),
             Expanded(
@@ -275,7 +279,7 @@ class _EditAudioWidgetState extends State<EditAudioWidget> {
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: Colors.grey[300]!),
                 ),
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(16),
                 child: SingleChildScrollView(
                   child: QuillEditor.basic(
                     controller: _quillController,
