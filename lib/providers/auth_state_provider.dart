@@ -85,6 +85,7 @@ class AuthNotifier extends StateNotifier<bool> {
 
   Future<void> signOut() async {
     await AppConfig.removeToken();
+    await AppConfig.setUserId("");
     await _checkAuth();
   }
 
