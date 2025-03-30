@@ -28,6 +28,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   void initState() {
     super.initState();
     Future.microtask(() {
+      ref.read(userProvider.notifier).fetchData();
       ref.read(workspaceIdProvider.notifier).state = null;
       ref.read(diaryFoldersProvider.notifier).fetchData();
       ref.read(tagsProvider.notifier).fetchData();

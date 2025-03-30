@@ -248,10 +248,12 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
       ),
       bottomSheet:
           _isToolbarVisible ? DiaryToolbar(controller: _controller) : null,
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAsrDialog,
-        child: const Icon(Icons.mic),
-      ),
+      floatingActionButton: widget.canEdit
+          ? FloatingActionButton(
+              onPressed: _showAsrDialog,
+              child: const Icon(Icons.mic),
+            )
+          : null,
     );
   }
 

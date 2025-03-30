@@ -1,7 +1,9 @@
 import 'package:asr_project/config.dart';
 import 'package:asr_project/models/enum/workspace_member_status.dart';
+import 'package:asr_project/models/user.dart';
 import 'package:asr_project/models/workspace.dart';
 import 'package:asr_project/pages/workspace_page/workspace_page/workspace_search_bar.dart';
+import 'package:asr_project/providers/user_provider.dart';
 import 'package:asr_project/widgets/workspace/workspace_list.dart';
 import 'package:asr_project/providers/workspace_provider.dart';
 import 'package:flutter/material.dart';
@@ -62,6 +64,7 @@ class _WorkspacePageState extends ConsumerState<WorkspacePage> {
 
   @override
   Widget build(BuildContext context) {
+    final User? user = ref.watch(userProvider).value;
     final workspacesAsync = ref.watch(workspaceProvider);
 
     return Scaffold(
@@ -82,35 +85,24 @@ class _WorkspacePageState extends ConsumerState<WorkspacePage> {
               ),
               workspacesAsync.when(
                 data: (workspaces) {
-                  return FutureBuilder<String?>(
-                    future: AppConfig.getUserId(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return CircularProgressIndicator();
-                      }
-                      String? userId = snapshot.data;
-                      if (userId != null) {
-                        workspaces = workspaces
-                            .where((workspace) => workspace.members.any(
-                                (member) =>
-                                    member.item1?.id == userId &&
-                                    member.item2.status ==
-                                        WorkspaceMemberStatus.accepted))
-                            .toList();
-                      }
+                  workspaces = workspaces
+                      .where((workspace) => workspace.members.any((member) =>
+                          member.item1?.id == user?.id &&
+                          member.item2.status ==
+                              WorkspaceMemberStatus.accepted))
+                      .toList();
 
-                      return Expanded(
-                        child: WorkspaceList(
-                          workspaces: _filterWorkspace(workspaces),
-                          starredWorkspace: starredWorkspace,
-                          toggleStarred: _toggleStarredWorkspace,
-                        ),
-                      );
-                    },
+                  return Expanded(
+                    child: WorkspaceList(
+                      workspaces: _filterWorkspace(workspaces),
+                      starredWorkspace: starredWorkspace,
+                      toggleStarred: _toggleStarredWorkspace,
+                    ),
                   );
                 },
-                loading: () =>
-                    const Center(child: CircularProgressIndicator.adaptive()),
+                loading: () => Expanded(
+                    child: const Center(
+                        child: CircularProgressIndicator.adaptive())),
                 error: (error, stack) => Center(child: Text('Error: $error')),
               ),
             ],
