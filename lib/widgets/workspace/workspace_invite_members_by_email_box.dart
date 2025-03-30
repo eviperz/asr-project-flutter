@@ -29,6 +29,7 @@ class _WorkspaceAddModalState
   final List<WorkspaceMemberInviting> _invitedMemberEmails = [];
   final FocusNode _focusNode = FocusNode();
   late bool _checkError = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -75,131 +76,209 @@ class _WorkspaceAddModalState
       isExistEmails = false;
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      spacing: 8.0,
+    return Stack(
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardTheme.color,
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          child: GestureDetector(
-            onTap: () {
-              setState(() {
-                _focusNode.requestFocus();
-              });
-            },
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Invite Emails",
-                  style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                        color:
-                            (_checkError || isCurrentUserEmail || isExistEmails)
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          spacing: 8.0,
+          children: [
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardTheme.color,
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _focusNode.requestFocus();
+                  });
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Invite Emails",
+                      style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                            color: (_checkError ||
+                                    isCurrentUserEmail ||
+                                    isExistEmails)
                                 ? Theme.of(context).colorScheme.error
                                 : _focusNode.hasFocus
                                     ? Theme.of(context).colorScheme.primary
                                     : Theme.of(context).colorScheme.onSecondary,
-                      ),
-                ),
-                Container(
-                  width: double.maxFinite,
-                  height: 100,
-                  decoration: BoxDecoration(),
-                  child: Wrap(spacing: 8.0, children: [
-                    ..._invitedMemberEmails.map((workspaceMemberInviting) {
-                      return Chip(
-                        label: Text(workspaceMemberInviting.email),
-                        onDeleted: () {
-                          widget.removeEmail(workspaceMemberInviting);
-                          setState(() {
-                            _invitedMemberEmails
-                                .remove(workspaceMemberInviting);
-                          });
-                        },
-                      );
-                    }),
-                    IntrinsicWidth(
-                      child: TextField(
-                        controller: _textEditingController,
-                        focusNode: _focusNode,
-                        autocorrect: false,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: "Enter Email",
-                          hintStyle: TextStyle(
-                            color: Theme.of(context).colorScheme.tertiary,
                           ),
-                          labelStyle: Theme.of(context).textTheme.labelMedium,
-                        ),
-                        onSubmitted: (value) {
-                          if (_textEditingController.text.isNotEmpty &&
-                              !_checkError &&
-                              !isCurrentUserEmail &&
-                              !isExistEmails) {
-                            WorkspaceMemberInviting workspaceMemberInviting =
-                                WorkspaceMemberInviting(
-                              email: value,
-                              permission: WorkspacePermission.viewer,
-                            );
-                            widget.addEmail(workspaceMemberInviting);
-
-                            setState(() {
-                              _invitedMemberEmails.add(workspaceMemberInviting);
-                            });
-
-                            _focusNode.requestFocus();
-                            _textEditingController.clear();
-                          }
-                        },
-                        onChanged: (value) {
-                          if (value.isEmpty) {
-                            setState(() {
-                              _checkError = false;
-                            });
-                          } else {
-                            _validateEmail(value);
-                          }
-                        },
-                        onTapOutside: (event) {
-                          _focusNode.unfocus();
-                        },
-                      ),
                     ),
-                  ]),
+                    Container(
+                      width: double.maxFinite,
+                      height: 100,
+                      decoration: BoxDecoration(),
+                      child: Wrap(spacing: 8.0, children: [
+                        ..._invitedMemberEmails.map((workspaceMemberInviting) {
+                          return Chip(
+                            label: Text(workspaceMemberInviting.email),
+                            onDeleted: () {
+                              widget.removeEmail(workspaceMemberInviting);
+                              setState(() {
+                                _invitedMemberEmails
+                                    .remove(workspaceMemberInviting);
+                              });
+                            },
+                          );
+                        }),
+                        IntrinsicWidth(
+                          child: TextField(
+                            controller: _textEditingController,
+                            focusNode: _focusNode,
+                            autocorrect: false,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: "Enter Email",
+                              hintStyle: TextStyle(
+                                color: Theme.of(context).colorScheme.tertiary,
+                              ),
+                              labelStyle:
+                                  Theme.of(context).textTheme.labelMedium,
+                            ),
+                            onSubmitted: (value) {
+                              if (_textEditingController.text.isNotEmpty &&
+                                  !_checkError &&
+                                  !isCurrentUserEmail &&
+                                  !isExistEmails) {
+                                WorkspaceMemberInviting
+                                    workspaceMemberInviting =
+                                    WorkspaceMemberInviting(
+                                  email: value,
+                                  permission: WorkspacePermission.viewer,
+                                );
+                                widget.addEmail(workspaceMemberInviting);
+
+                                setState(() {
+                                  _invitedMemberEmails
+                                      .add(workspaceMemberInviting);
+                                });
+
+                                _focusNode.requestFocus();
+                                _textEditingController.clear();
+                              }
+                            },
+                            onChanged: (value) {
+                              if (value.isEmpty) {
+                                setState(() {
+                                  _checkError = false;
+                                });
+                              } else {
+                                _validateEmail(value);
+                              }
+                            },
+                            onTapOutside: (event) {
+                              _focusNode.unfocus();
+                            },
+                          ),
+                        ),
+                      ]),
+                    ),
+                  ],
                 ),
-              ],
+              ),
+            ),
+            SizedBox(
+              height: 20,
+              child: (_checkError || isCurrentUserEmail || isExistEmails)
+                  ? Text(
+                      _checkError
+                          ? "Please enter Email format"
+                          : isCurrentUserEmail
+                              ? "Please don't enter your email"
+                              : "Already has this email",
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelMedium!
+                          .copyWith(color: Theme.of(context).colorScheme.error),
+                    )
+                  : null,
+            ),
+            if (widget.inviteByEmails != null)
+              ElevatedButton(
+                onPressed: () async {
+                  setState(() {
+                    _isLoading = true;
+                  });
+
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return const UploadingDialog();
+                    },
+                  );
+
+                  await widget.inviteByEmails!();
+
+                  Navigator.pop(context);
+
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return const UploadSuccessDialog();
+                    },
+                  );
+                },
+                child: Text("Invite member"),
+              ),
+          ],
+        ),
+
+        // Centered Loading Indicator (if needed)
+        if (_isLoading)
+          Positioned.fill(
+            child: Align(
+              alignment: Alignment.center,
+              child: CircularProgressIndicator(
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
             ),
           ),
-        ),
-        SizedBox(
-          height: 20,
-          child: (_checkError || isCurrentUserEmail || isExistEmails)
-              ? Text(
-                  _checkError
-                      ? "Please enter Email format"
-                      : isCurrentUserEmail
-                          ? "Please don't enter your email"
-                          : "Already has this email",
-                  style: Theme.of(context)
-                      .textTheme
-                      .labelMedium!
-                      .copyWith(color: Theme.of(context).colorScheme.error),
-                )
-              : null,
-        ),
-        if (widget.inviteByEmails != null)
-          ElevatedButton(
-              onPressed: () {
-                widget.inviteByEmails!();
-              },
-              child: Text("Invite member"))
       ],
+    );
+  }
+}
+
+class UploadingDialog extends StatelessWidget {
+  const UploadingDialog({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: const [
+          CircularProgressIndicator(),
+          SizedBox(height: 10),
+          Text("Uploading..."),
+        ],
+      ),
+    );
+  }
+}
+
+//  Upload Success Dialog
+class UploadSuccessDialog extends StatelessWidget {
+  const UploadSuccessDialog({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: const [
+          Icon(Icons.check_circle, color: Colors.green, size: 50),
+          SizedBox(height: 10),
+          Text("Invite Complete!"),
+        ],
+      ),
     );
   }
 }
