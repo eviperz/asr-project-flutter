@@ -142,7 +142,14 @@ class AccountTextfield extends StatefulWidget {
 }
 
 class _AccountTextfieldState extends State<AccountTextfield> {
+  late String _data;
   late bool _isEdit = false;
+
+  @override
+  void initState() {
+    _data = widget.controller.text.trim();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -163,7 +170,7 @@ class _AccountTextfieldState extends State<AccountTextfield> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      widget.controller.text,
+                      _data,
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                     if (widget.onSubmit != null)
@@ -190,16 +197,19 @@ class _AccountTextfieldState extends State<AccountTextfield> {
                     spacing: 8,
                     children: [
                       OutlinedButton(
-                          onPressed: () {
-                            setState(() {
-                              _isEdit = false;
-                            });
-                          },
-                          child: Text("Cancel")),
+                        onPressed: () {
+                          setState(() {
+                            _isEdit = false;
+                          });
+                          widget.controller.text = _data;
+                        },
+                        child: Text("Cancel"),
+                      ),
                       ElevatedButton(
                           onPressed: () {
                             setState(() {
                               _isEdit = false;
+                              _data = widget.controller.text;
                             });
 
                             if (widget.onSubmit != null) {

@@ -23,7 +23,7 @@ class UserService {
     File? image,
   }) async {
     try {
-      final userId = AppConfig.userId;
+      final String? userId = await AppConfig.getUserId();
       final headers = await _getHeaders();
 
       var request = http.MultipartRequest("PUT", Uri.parse("$baseUrl/$userId"))
@@ -47,7 +47,6 @@ class UserService {
       final response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 200) {
-        log(response.body);
         return User.fromJson(jsonDecode(response.body));
       }
 
