@@ -20,11 +20,16 @@ class TagsNotifier extends AsyncNotifier<List<Tag>> {
   Future<List<Tag>> fetchData() async {
     state = AsyncLoading();
     final String? workspaceId = ref.read(workspaceIdProvider);
+    List<Tag> tags;
+
     if (workspaceId == null) {
-      return await _tagService.getAllPersonalTags();
+      tags = await _tagService.getAllPersonalTags();
     } else {
-      return await _tagService.getAllWorkspaceTags(workspaceId);
+      tags = await _tagService.getAllWorkspaceTags(workspaceId);
     }
+
+    state = AsyncData(tags);
+    return tags;
   }
 
   Future<Tag?> createTag(TagDetail tagDetail) async {

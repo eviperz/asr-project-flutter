@@ -37,82 +37,109 @@ class _WorkspaceInvitationState extends ConsumerState<WorkspaceInvitation> {
               SizedBox(
                 height: 8.0,
               ),
-              Expanded(
-                child: asyncWorkspaces.when(
-                  data: (workspaces) {
-                    final List<Workspace> pendingWorkspaces = workspaces
-                        .where((workspace) => workspace.members.any((member) =>
-                            member.item1?.id == AppConfig.userId &&
-                            member.item2.status ==
-                                WorkspaceMemberStatus.pending))
-                        .toList();
+              FutureBuilder<String?>(
+                future: AppConfig.getUserId(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  final String? userId = snapshot.data;
 
-                    if (pendingWorkspaces.isEmpty) {
-                      return Center(child: Text("No Notification"));
-                    }
+                  return asyncWorkspaces.when(
+                    data: (workspaces) {
+                      final List<Workspace> pendingWorkspaces = workspaces
+                          .where((workspace) => workspace.members.any(
+                              (member) =>
+                                  member.item1?.id == userId &&
+                                  member.item2.status ==
+                                      WorkspaceMemberStatus.pending))
+                          .toList();
 
-                    return ListView.separated(
-                      itemCount: pendingWorkspaces.length,
-                      itemBuilder: (context, index) {
-                        final Workspace workspace = pendingWorkspaces[index];
-                        final WorkspaceMember workspaceMember =
-                            workspace.members
-                                .firstWhere(
-                                  (member) =>
-                                      member.item1?.id == AppConfig.userId,
-                                )
-                                .item2;
-                        final String ownerName = workspace.members
-                            .firstWhere((member) =>
-                                member.item2.permission ==
-                                WorkspacePermission.owner)
-                            .item1!
-                            .name;
-
-                        return ListTile(
-                          leading: WorkspaceIcon(
-                            workspaceIconEnum: workspace.icon.iconEnum,
-                            colorEnum: workspace.icon.colorEnum,
-                          ),
-                          title: Text(workspace.name),
-                          subtitle: Text(
-                              "$ownerName invited you to join this workspace"),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                onPressed: () async {
-                                  await ref
-                                      .read(workspaceProvider.notifier)
-                                      .acceptMember(
-                                          workspace.id, workspaceMember.id);
-                                },
-                                icon: Icon(Icons.done),
+                      if (pendingWorkspaces.isEmpty) {
+                        return Expanded(
+                            child: Center(
+                                child: Text(
+                          "No Notification",
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelLarge!
+                              .copyWith(
+                                color: Theme.of(context).colorScheme.tertiary,
+                                fontStyle: FontStyle.italic,
                               ),
-                              IconButton(
-                                onPressed: () async {
-                                  await ref
-                                      .read(workspaceProvider.notifier)
-                                      .rejectMember(
-                                          workspace.id, workspaceMember.id);
-                                },
-                                icon: Icon(Icons.close),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                      separatorBuilder: (context, index) => Divider(),
-                    );
-                  },
-                  loading: () => Center(child: CircularProgressIndicator()),
-                  error: (error, stackTrace) =>
-                      Center(child: Text("Error loading workspaces")),
-                ),
-              ),
-              // : Center(
-              //     child: Text("No Notification"),
-              //   ),
+                        )));
+                      }
+
+                      return ListView.separated(
+                        itemCount: pendingWorkspaces.length,
+                        itemBuilder: (context, index) {
+                          final Workspace workspace = pendingWorkspaces[index];
+                          final WorkspaceMember workspaceMember =
+                              workspace.members
+                                  .firstWhere(
+                                    (member) => member.item1?.id == userId,
+                                  )
+                                  .item2;
+
+                          final String ownerName = workspace.members
+                              .firstWhere((member) =>
+                                  member.item2.permission ==
+                                  WorkspacePermission.owner)
+                              .item1!
+                              .name;
+
+                          return ListTile(
+                            leading: WorkspaceIcon(
+                              workspaceIconEnum: workspace.icon.iconEnum,
+                              colorEnum: workspace.icon.colorEnum,
+                            ),
+                            title: Text(workspace.name),
+                            subtitle: Text(
+                                "$ownerName invited you to join this workspace"),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  onPressed: () async {
+                                    await ref
+                                        .read(workspaceProvider.notifier)
+                                        .acceptMember(
+                                            workspace.id, workspaceMember.id);
+                                  },
+                                  icon: Icon(Icons.done),
+                                ),
+                                IconButton(
+                                  onPressed: () async {
+                                    await ref
+                                        .read(workspaceProvider.notifier)
+                                        .rejectMember(
+                                            workspace.id, workspaceMember.id);
+                                  },
+                                  icon: Icon(Icons.close),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        separatorBuilder: (context, index) => Divider(),
+                      );
+                    },
+                    loading: () => Center(child: CircularProgressIndicator()),
+                    error: (error, stackTrace) => Center(
+                        child: Center(
+                            child: Text("Error loading workspaces",
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelLarge!
+                                    .copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .tertiary,
+                                      fontStyle: FontStyle.italic,
+                                    )))),
+                  );
+                },
+              )
             ],
           ),
         ));

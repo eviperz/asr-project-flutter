@@ -55,15 +55,6 @@ class WorkspaceTile extends ConsumerWidget {
           title: Text(workspace.name),
           subtitle: WorkspaceMemberDisplay(
               memberWithoutOwner: memberWithoutOwner, owner: owner),
-          // trailing: IconButton(
-          //   onPressed: () {
-          //     toggleStarred(workspace.id);
-          //   },
-          //   icon: Icon(
-          //     isStarred ? Icons.star : Icons.star_border,
-          //     color: isStarred ? Colors.amber : null,
-          //   ),
-          // ),
         ),
       ],
     );

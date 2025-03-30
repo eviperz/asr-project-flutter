@@ -6,6 +6,7 @@ import 'package:asr_project/models/enum/workspace_permission.dart';
 import 'package:asr_project/models/user.dart';
 import 'package:asr_project/models/workspace.dart';
 import 'package:asr_project/providers/diary_folder_provider.dart';
+import 'package:asr_project/providers/tag_provider.dart';
 import 'package:asr_project/providers/user_provider.dart';
 import 'package:asr_project/providers/workspace_provider.dart';
 import 'package:asr_project/widgets/custom_textfield.dart';
@@ -37,6 +38,7 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
     super.initState();
     Future.microtask(() {
       ref.read(diaryFoldersProvider.notifier).fetchData();
+      ref.read(tagsProvider.notifier).fetchData();
     });
 
     // workspace = widget.workspace;
@@ -228,11 +230,24 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
                         ],
                       ),
                     ),
-                    if (owner.id == AppConfig.userId)
-                      IconButton(
-                        onPressed: _navigatorSetting,
-                        icon: Icon(Icons.edit),
-                      )
+                    FutureBuilder<String?>(
+                      future: AppConfig.getUserId(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return SizedBox();
+                        }
+
+                        if (snapshot.hasData && owner.id == snapshot.data) {
+                          return IconButton(
+                            onPressed: _navigatorSetting,
+                            icon: Icon(Icons.edit),
+                          );
+                        }
+
+                        return SizedBox();
+                      },
+                    )
                   ],
                 ),
                 Padding(

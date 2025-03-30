@@ -30,7 +30,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     Future.microtask(() {
       ref.read(workspaceIdProvider.notifier).state = null;
       ref.read(diaryFoldersProvider.notifier).fetchData();
-      ref.read(tagsProvider);
+      ref.read(tagsProvider.notifier).fetchData();
     });
     _searchFocusNode.addListener(() => setState(() {}));
   }
