@@ -5,7 +5,6 @@ import 'package:asr_project/models/tag.dart';
 import 'package:http/http.dart' as http;
 
 class TagService {
-  String? _userId;
   final String baseUrl = "${AppConfig.baseUrl}/tags";
   Future<Map<String, String>> _getHeaders() async {
     String? token = await AppConfig.getToken();
@@ -17,18 +16,11 @@ class TagService {
     };
   }
 
-  TagService() {
-    _initializeUserId();
-  }
-  Future<void> _initializeUserId() async {
-    _userId = await AppConfig.getUserId();
-    log("User ID Loaded TagService: $_userId");
-  }
-
   Future<List<Tag>> getAllPersonalTags() async {
     try {
       final headers = await _getHeaders();
       final String? userId = await AppConfig.getUserId();
+      log("userId: $userId");
       final response = await http.get(
         Uri.parse("$baseUrl/personal/$userId"),
         headers: headers,

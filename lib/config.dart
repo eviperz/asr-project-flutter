@@ -7,11 +7,11 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 final FlutterSecureStorage _storage = FlutterSecureStorage();
 
 class AppConfig {
-  static const String baseUrl = "http://192.168.1.195:8080";
+  static const String baseUrl = "http://192.168.1.35:8080";
   // static const String baseUrl = "http://localhost:8080";
 
-  static String? userId;
-  static String? token;
+  static String? userId = "";
+  static String? token = "";
 
   // Set user ID securely
   static Future<void> setUserId(String newUserId) async {

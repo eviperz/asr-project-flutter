@@ -39,6 +39,7 @@ class DiaryInfo extends ConsumerWidget {
       }
     }
     final textStyle = Theme.of(context).textTheme.labelLarge;
+
     return Column(
       children: [
         _buildInfoRow(

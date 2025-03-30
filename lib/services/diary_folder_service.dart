@@ -8,7 +8,6 @@ import 'package:asr_project/models/diary_folder.dart';
 import 'package:http/http.dart' as http;
 
 class DiaryFolderService {
-  String? _userId;
   final String baseUrl = "${AppConfig.baseUrl}/folders";
   Future<Map<String, String>> _getHeaders() async {
     String? token = await AppConfig.getToken();
@@ -18,11 +17,6 @@ class DiaryFolderService {
       'Content-Type': 'application/json',
       'Accept-Charset': 'utf-8',
     };
-  }
-
-  Future<void> _initializeUserId() async {
-    _userId = await AppConfig.getUserId();
-    log("User ID Loaded DiaryFolderService: $_userId");
   }
 
   Future<List<DiaryFolderModel>> getAllPersonalDiaryFoldersWithDiaries() async {

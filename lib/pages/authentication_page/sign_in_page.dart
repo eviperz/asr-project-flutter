@@ -62,7 +62,6 @@ class _SignInPageState extends ConsumerState<SignInPage> {
   }
 
   String? _validatePassword() {
-    // TODO validate password
     final String password = _passwordTextEditController.text;
 
     if (password.isEmpty) {

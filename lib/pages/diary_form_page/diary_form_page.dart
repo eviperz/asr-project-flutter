@@ -41,9 +41,6 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
   late DateTime _updatedAt;
   bool _isEdited = false;
 
-  _DiaryFormState() {
-    _initializeUserId();
-  }
   Future<void> _initializeUserId() async {
     _userId = await AppConfig.getUserId();
   }
@@ -65,6 +62,8 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
         _onFocusChange();
       },
     );
+    _initializeUserId();
+
     _titleController.text = widget.diary.title;
     _controller.document = quill.Document.fromDelta(widget.diary.content);
 
@@ -85,14 +84,22 @@ class _DiaryFormState extends ConsumerState<DiaryFormPage> {
     });
   }
 
-  void _showAsrDialog() {
-    showDialog(
+  void _showAsrDialog() async {
+    bool? updated = await showDialog<bool>(
       context: context,
       builder: (context) => AsrDialog(
         controller: _controller,
         isHasAudio: _isHasAudio,
       ),
     );
+
+    if (updated == true) {
+      setState(() {
+        String contentJson =
+            jsonEncode(_controller.document.toDelta().toJson());
+        _isHasAudio = _checkForInsertAndCustom(contentJson);
+      });
+    }
   }
 
   @override
