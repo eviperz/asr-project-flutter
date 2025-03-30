@@ -43,17 +43,17 @@ final ColorScheme darkThemeColorSchema = ColorScheme(
 );
 
 final ColorScheme lightThemeColorScheme = ColorScheme(
-  brightness: Brightness.light,
-  primary: Colors.indigoAccent,
-  onPrimary: Colors.white,
-  secondary: Color(0xFFF8F8F8),
-  onSecondary: Colors.black38,
-  tertiary: Colors.black38,
-  error: Colors.red,
-  onError: Colors.white,
-  surface: Colors.white,
-  onSurface: Colors.black,
-);
+    brightness: Brightness.light,
+    primary: Color(0xFF7BBFF2),
+    onPrimary: Colors.white,
+    secondary: Color(0xFFEFF7F6),
+    onSecondary: Colors.black38,
+    tertiary: Colors.black38,
+    error: Colors.red,
+    onError: Colors.white,
+    surface: Colors.white,
+    onSurface: Colors.black,
+    inversePrimary: Color(0xFFF2B5D4));
 
 final TextTheme textTheme = TextTheme(
   headlineLarge: TextStyle(
