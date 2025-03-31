@@ -229,21 +229,31 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                           SizedBox(
                             width: 150,
                             child: Slider(
-                                onChanged: _seek,
-                                value: _duration.inMilliseconds > 0
-                                    ? (_position.inMilliseconds /
-                                            _duration.inMilliseconds)
-                                        .clamp(0.0, 1.0)
-                                    : 0.0,
-                                activeColor: Theme.of(context)
-                                    .colorScheme
-                                    .inversePrimary),
+                              onChanged: _seek,
+                              value: _duration.inMilliseconds > 0
+                                  ? (_position.inMilliseconds /
+                                          _duration.inMilliseconds)
+                                      .clamp(0.0, 1.0)
+                                  : 0.0,
+                              activeColor:
+                                  Theme.of(context).colorScheme.inversePrimary,
+                              inactiveColor: Theme.of(context)
+                                  .colorScheme
+                                  .onInverseSurface,
+                            ),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(right: 8.0),
                             child: Text(
                               _position.toString().split('.').first,
-                              style: Theme.of(context).textTheme.labelMedium,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium!
+                                  .copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onInverseSurface,
+                                  ),
                             ),
                           ),
                         ],
@@ -253,19 +263,27 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                 ],
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 20.0),
+                padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("Audio:"),
-                        Text(
-                          _currentAudioName,
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ],
+                    Text(
+                      "Audio File",
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall!
+                          .copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onInverseSurface,
+                          ),
+                    ),
+                    Text(
+                      _currentAudioName,
+                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onInverseSurface,
+                          ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(height: 10),
                     Row(
@@ -283,7 +301,11 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                           ),
                         ),
                         IconButton(
-                          icon: Icon(Icons.arrow_forward),
+                          icon: Icon(
+                            Icons.arrow_forward,
+                            color:
+                                Theme.of(context).colorScheme.onInverseSurface,
+                          ),
                           onPressed: () async {
                             if (_audioUrl != null) {
                               final result = await Navigator.push(
@@ -324,8 +346,9 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                                 .bodyMedium!
                                 .copyWith(
                                     fontStyle: FontStyle.italic,
-                                    color:
-                                        Theme.of(context).colorScheme.tertiary),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onInverseSurface),
                           );
                         },
                       )
@@ -334,7 +357,8 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                         _truncateText(_transcribeResult, 150),
                         style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                             fontStyle: FontStyle.italic,
-                            color: Theme.of(context).colorScheme.tertiary),
+                            color:
+                                Theme.of(context).colorScheme.onInverseSurface),
                       ),
                   ],
                 ),

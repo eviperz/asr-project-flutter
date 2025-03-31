@@ -95,11 +95,11 @@ class _DiaryFolderState extends State<DiaryFolder> {
           leading: _isOpen
               ? Icon(
                   Icons.keyboard_arrow_down_rounded,
-                  color: Theme.of(context).primaryColor,
+                  color: Theme.of(context).colorScheme.primary,
                 )
               : Icon(
                   Icons.keyboard_arrow_right_rounded,
-                  color: Theme.of(context).primaryColor,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
           title: Row(
             spacing: 8.0,

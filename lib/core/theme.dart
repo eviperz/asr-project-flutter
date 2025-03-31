@@ -3,13 +3,27 @@ import 'package:flutter/material.dart';
 final ThemeData darkTheme = ThemeData(
   brightness: Brightness.dark,
   colorScheme: darkThemeColorSchema,
-  textTheme: textTheme,
+  bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      selectedItemColor: darkThemeColorSchema.primary,
+      unselectedItemColor: Colors.white24),
+  dividerTheme: DividerThemeData(
+    color: darkThemeColorSchema.tertiary.withAlpha((0.05 * 255).toInt()),
+    space: 0,
+  ),
+  cardTheme: CardTheme(
+      color: const Color(0xFF373737), shadowColor: Colors.transparent),
   elevatedButtonTheme: elevatedButtonThemeData,
+  outlinedButtonTheme: outlinedButtonThemeData,
+  chipTheme: chipThemeData,
+  textTheme: textTheme,
 );
 
 final ThemeData lightTheme = ThemeData(
   brightness: Brightness.light,
   colorScheme: lightThemeColorScheme,
+  bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      selectedItemColor: darkThemeColorSchema.primary,
+      unselectedItemColor: Colors.black26),
   dividerTheme: DividerThemeData(
     color: lightThemeColorScheme.tertiary.withAlpha((0.05 * 255).toInt()),
     space: 0,
@@ -20,42 +34,38 @@ final ThemeData lightTheme = ThemeData(
   elevatedButtonTheme: elevatedButtonThemeData,
   outlinedButtonTheme: outlinedButtonThemeData,
   chipTheme: chipThemeData,
-
-  // primaryColor: Colors.black,
-
-  // colorScheme: ColorScheme.dark(
-  //   secondary: Colors.white,
-  //   tertiary: Colors.white70,
-  // ),
   textTheme: textTheme,
 );
 
 final ColorScheme darkThemeColorSchema = ColorScheme(
   brightness: Brightness.dark,
-  primary: Color(0xFFF2B5D4),
+  primary: Color.fromARGB(255, 131, 201, 255),
   onPrimary: Colors.white,
-  secondary: Color(0xFF202124),
-  onSecondary: Colors.white70,
-  tertiary: Color(0xFF64B5F6),
+  secondary: Color.fromARGB(255, 238, 248, 255),
+  onSecondary: Colors.black38,
+  tertiary: Colors.white38,
   error: Colors.red,
-  onError: Colors.black45,
-  surface: Color(0xFF121212),
+  onError: Colors.white,
+  surface: Color(0xFF262626),
   onSurface: Colors.white,
-  inversePrimary: Color(0xFF7BBFF2),
+  inversePrimary: Color.fromARGB(255, 249, 156, 189),
+  onInverseSurface: Color(0xFF171717),
 );
 
 final ColorScheme lightThemeColorScheme = ColorScheme(
-    brightness: Brightness.light,
-    primary: Color(0xFF7BBFF2),
-    onPrimary: Colors.white,
-    secondary: Color(0xFFEFF7F6),
-    onSecondary: Colors.black38,
-    tertiary: Colors.black38,
-    error: Colors.red,
-    onError: Colors.white,
-    surface: Colors.white,
-    onSurface: Colors.black,
-    inversePrimary: Color(0xFFF2B5D4));
+  brightness: Brightness.light,
+  primary: Color.fromARGB(255, 131, 201, 255),
+  onPrimary: Colors.white,
+  secondary: Color.fromARGB(255, 238, 248, 255),
+  onSecondary: Colors.black38,
+  tertiary: Colors.black38,
+  error: Colors.red,
+  onError: Colors.white,
+  surface: Colors.white,
+  onSurface: Colors.black,
+  inversePrimary: Color.fromARGB(255, 249, 156, 189),
+  onInverseSurface: Color(0xFF171717),
+);
 
 final TextTheme textTheme = TextTheme(
   headlineLarge: TextStyle(
@@ -94,9 +104,11 @@ final ElevatedButtonThemeData elevatedButtonThemeData = ElevatedButtonThemeData(
 final OutlinedButtonThemeData outlinedButtonThemeData = OutlinedButtonThemeData(
   style: OutlinedButton.styleFrom(
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(16.0),
+      borderRadius: BorderRadius.circular(8.0),
     ),
-    side: BorderSide(color: lightThemeColorScheme.tertiary),
+    side: BorderSide(
+      color: lightThemeColorScheme.primary,
+    ),
   ),
 );
 

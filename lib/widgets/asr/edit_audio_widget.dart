@@ -23,6 +23,7 @@ class EditAudioWidget extends StatefulWidget {
 }
 
 class _EditAudioWidgetState extends State<EditAudioWidget> {
+  final FocusNode _focusNode = FocusNode();
   late QuillController _quillController;
   late audioplayers.AudioPlayer _audioPlayer;
   late StreamSubscription _playerStateSubscription;
@@ -101,6 +102,7 @@ class _EditAudioWidgetState extends State<EditAudioWidget> {
     _positionSubscription.cancel();
     _audioPlayer.dispose();
     _audioNameController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -195,11 +197,7 @@ class _EditAudioWidgetState extends State<EditAudioWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // leading: BackButton(
-        //   onPressed: () =>
-        //       _isEdited ? _confirmSave(context) : Navigator.pop(context),
-        // ),
-        title: const Text("Editing Transcription"),
+        title: const Text("Edit Transcription"),
         actions: [
           IconButton(
             icon: const Icon(Icons.save),
@@ -208,17 +206,18 @@ class _EditAudioWidgetState extends State<EditAudioWidget> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Card(
               shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(30)),
+                borderRadius: BorderRadius.all(Radius.circular(16)),
               ),
-              color: Colors.white24,
+              color: Colors.transparent,
               child: Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -243,6 +242,7 @@ class _EditAudioWidgetState extends State<EditAudioWidget> {
                             : 0.0,
                         activeColor:
                             Theme.of(context).colorScheme.inversePrimary,
+                        inactiveColor: Theme.of(context).colorScheme.tertiary,
                       ),
                     ),
                     Padding(
@@ -273,16 +273,31 @@ class _EditAudioWidgetState extends State<EditAudioWidget> {
             ),
             const SizedBox(height: 10),
             Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.grey[300]!),
-                ),
-                padding: const EdgeInsets.all(16),
-                child: SingleChildScrollView(
-                  child: QuillEditor.basic(
-                    controller: _quillController,
+              child: GestureDetector(
+                onTap: () {
+                  if (_focusNode.hasFocus) {
+                    _focusNode.unfocus();
+                  } else {
+                    _focusNode.requestFocus();
+                  }
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.grey[300]!),
+                  ),
+                  padding: const EdgeInsets.all(16),
+                  child: SingleChildScrollView(
+                    child: DefaultTextStyle(
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onInverseSurface,
+                      ),
+                      child: QuillEditor.basic(
+                        focusNode: _focusNode,
+                        controller: _quillController,
+                      ),
+                    ),
                   ),
                 ),
               ),

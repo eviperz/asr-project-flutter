@@ -68,11 +68,14 @@ class _WorkspaceNameAndDescriptionTextFieldState
                     autocorrect: false,
                     controller: widget.nameTextEditingController,
                     focusNode: widget.nameFocusNode,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onInverseSurface,
+                    ),
                     decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: "Enter name",
                         hintStyle: TextStyle(
-                          color: Theme.of(context).colorScheme.tertiary,
+                          color: Theme.of(context).colorScheme.onSecondary,
                         ),
                         labelStyle: Theme.of(context).textTheme.labelMedium,
                         counterText: "",
@@ -99,7 +102,12 @@ class _WorkspaceNameAndDescriptionTextFieldState
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 12.0),
-                child: Divider(),
+                child: Divider(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSecondary
+                      .withAlpha((0.05 * 255).toInt()),
+                ),
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,11 +129,14 @@ class _WorkspaceNameAndDescriptionTextFieldState
                       expands: true,
                       textAlignVertical: TextAlignVertical.top,
                       focusNode: widget.descriptionFocusNode,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onInverseSurface,
+                      ),
                       decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: "Enter Description",
                         hintStyle: TextStyle(
-                          color: Theme.of(context).colorScheme.tertiary,
+                          color: Theme.of(context).colorScheme.onSecondary,
                         ),
                         labelStyle: Theme.of(context).textTheme.labelMedium,
                       ),

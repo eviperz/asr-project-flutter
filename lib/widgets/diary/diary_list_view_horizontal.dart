@@ -29,7 +29,7 @@ class DiaryListViewHorizontal extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: 170,
+          height: 160,
           child: ListView.builder(
             padding: EdgeInsets.symmetric(horizontal: 20.0),
             scrollDirection: Axis.horizontal,

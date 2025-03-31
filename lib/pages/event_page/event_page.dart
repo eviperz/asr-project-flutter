@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/providers/diary_folder_provider.dart';
+import 'package:asr_project/providers/workspace_provider.dart';
 import 'package:asr_project/widgets/diary/diary_list_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,6 +22,7 @@ class _EventPageState extends ConsumerState<EventPage> {
   void initState() {
     super.initState();
     Future.microtask(() {
+      ref.read(workspaceIdProvider.notifier).state = null;
       ref.read(diaryFoldersProvider.notifier).fetchData();
     });
   }
@@ -150,9 +152,7 @@ class _EventPageState extends ConsumerState<EventPage> {
                   separatorBuilder: (context, index) {
                     return Padding(
                       padding: const EdgeInsets.only(right: 32.0),
-                      child: Divider(
-                        color: Theme.of(context).colorScheme.secondary,
-                      ),
+                      child: Divider(),
                     );
                   },
                 ),

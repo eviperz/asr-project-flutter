@@ -87,7 +87,7 @@ class _WorkspaceAddModalState
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
               decoration: BoxDecoration(
-                color: Theme.of(context).cardTheme.color,
+                color: Theme.of(context).colorScheme.secondary,
                 borderRadius: BorderRadius.circular(8.0),
               ),
               child: GestureDetector(
@@ -134,11 +134,16 @@ class _WorkspaceAddModalState
                             focusNode: _focusNode,
                             autocorrect: false,
                             keyboardType: TextInputType.emailAddress,
+                            style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onInverseSurface),
                             decoration: InputDecoration(
                               border: InputBorder.none,
                               hintText: "Enter Email",
                               hintStyle: TextStyle(
-                                color: Theme.of(context).colorScheme.tertiary,
+                                color:
+                                    Theme.of(context).colorScheme.onSecondary,
                               ),
                               labelStyle:
                                   Theme.of(context).textTheme.labelMedium,

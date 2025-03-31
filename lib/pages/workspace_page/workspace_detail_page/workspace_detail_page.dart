@@ -1,4 +1,3 @@
-import 'package:asr_project/config.dart';
 import 'package:asr_project/models/diary.dart';
 import 'package:asr_project/models/diary_folder.dart';
 import 'package:asr_project/models/enum/workspace_member_status.dart';
@@ -206,7 +205,7 @@ class _WorkspaceDetailPageState extends ConsumerState<WorkspaceDetailPage> {
                           ),
                           Expanded(
                             child: SizedBox(
-                              height: 100,
+                              height: 90,
                               child: Column(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,

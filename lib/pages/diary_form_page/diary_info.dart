@@ -75,8 +75,8 @@ class DiaryInfo extends ConsumerWidget {
                 onRemoveTag: onRemoveTag,
               ),
               if (onAddTag != null && onRemoveTag != null)
-                _buildAddTagButton(context, tags)
-              else
+                _buildAddTagButton(context, tags),
+              if (onAddTag != null && onRemoveTag != null && tagIds.isEmpty)
                 Text(
                   "No Tags",
                   style: Theme.of(context).textTheme.labelLarge!.copyWith(
@@ -112,7 +112,7 @@ class DiaryInfo extends ConsumerWidget {
             SizedBox(width: 8),
             Text(
               label,
-              style: Theme.of(context).textTheme.labelLarge!.copyWith(
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                     color: Theme.of(context).colorScheme.tertiary,
                   ),
             ),
@@ -120,6 +120,7 @@ class DiaryInfo extends ConsumerWidget {
         ),
       ),
       title: child,
+      titleAlignment: ListTileTitleAlignment.top,
     );
   }
 
@@ -137,7 +138,9 @@ class DiaryInfo extends ConsumerWidget {
       style: OutlinedButton.styleFrom(
         minimumSize: const Size(100, 35),
         padding: const EdgeInsets.all(8.0),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
       ),
       child: const Row(
         mainAxisSize: MainAxisSize.min,

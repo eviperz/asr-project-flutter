@@ -32,7 +32,7 @@ class CustomDrawer extends ConsumerWidget {
                   child: Text(
                     user?.name ?? "Guest",
                     style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                        color: Theme.of(context).colorScheme.secondary),
+                        color: Theme.of(context).colorScheme.onInverseSurface),
                     overflow: TextOverflow.fade,
                     softWrap: false,
                   ),
@@ -43,7 +43,7 @@ class CustomDrawer extends ConsumerWidget {
                   },
                   icon: Icon(
                     Icons.edit,
-                    color: Theme.of(context).colorScheme.onPrimary,
+                    color: Theme.of(context).colorScheme.onInverseSurface,
                   ),
                 ),
               ),

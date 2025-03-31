@@ -59,6 +59,8 @@ class _CustomTextfieldState extends State<CustomTextfield> {
           keyboardType: widget.keyboardType,
           obscureText: isPasswordField ? _isObscured : false,
           maxLength: widget.maxLength,
+          style:
+              TextStyle(color: Theme.of(context).colorScheme.onInverseSurface),
           decoration: InputDecoration(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.0),

@@ -129,18 +129,14 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
             height: double.maxFinite,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 16,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Tags",
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    _buildTagInputField(),
-                  ],
+                Text(
+                  "Tags",
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
+                SizedBox(height: 8.0),
+                _buildTagInputField(),
+                SizedBox(height: 20.0),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -229,6 +225,7 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
         focusNode: _focusNode,
         controller: _controller,
         maxLength: 20,
+        style: TextStyle(color: Theme.of(context).colorScheme.onInverseSurface),
         decoration: InputDecoration(
           border: InputBorder.none,
           hintText: "Enter Tag",
@@ -300,7 +297,12 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
             }
           },
         ),
-        Divider()
+        Divider(
+          color: Theme.of(context)
+              .colorScheme
+              .onSecondary
+              .withAlpha((0.05 * 255).toInt()),
+        ),
       ],
     );
   }
@@ -343,11 +345,17 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
             children: [
               IconButton(
                 onPressed: () => _showTagEditModal(tag),
-                icon: const Icon(Icons.edit),
+                icon: Icon(
+                  Icons.edit,
+                  color: Theme.of(context).colorScheme.onSecondary,
+                ),
               ),
               IconButton(
                 onPressed: () => _deleteTag(tag.id),
-                icon: const Icon(Icons.delete),
+                icon: Icon(
+                  Icons.delete,
+                  color: Theme.of(context).colorScheme.onSecondary,
+                ),
               ),
             ],
           ),
@@ -356,10 +364,16 @@ class _TagsManagementModalState extends ConsumerState<TagsManagementModal> {
               _addTag(tag);
             }
           },
+          contentPadding: EdgeInsets.only(left: 16.0, right: 8.0),
         );
       },
       separatorBuilder: (context, index) {
-        return Divider();
+        return Divider(
+          color: Theme.of(context)
+              .colorScheme
+              .onSecondary
+              .withAlpha((0.05 * 255).toInt()),
+        );
       },
     );
   }

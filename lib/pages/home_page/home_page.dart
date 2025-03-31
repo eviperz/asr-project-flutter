@@ -159,12 +159,15 @@ class _HomePageState extends ConsumerState<HomePage> {
               }
             },
             backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-            icon: Icon(Icons.add,
-                color: Theme.of(context).colorScheme.inverseSurface),
+            icon: Icon(
+              Icons.add,
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
             label: Text(
-              "Meeting Note",
-              style: TextStyle(
-                  color: Theme.of(context).colorScheme.inverseSurface),
+              "Note",
+              style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
             ),
           );
         },
